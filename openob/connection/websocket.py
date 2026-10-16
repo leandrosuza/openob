@@ -1,0 +1,192 @@
+"""
+WebSocket Manager for PocketOption
+"""
+
+import asyncio
+import json
+import ssl
+from openob.core.constants import WEBSOCKET_ENDPOINTS, CONNECTION_SETTINGS
+
+# Headers necessários
+DEFAULT_HEADERS = {
+    "Origin": "https://pocketoption.com",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+}
+
+
+class WebSocketManager:
+    """Gerenciador de conexão WebSocket"""
+
+    def __init__(self, region: str = "DEMO"):
+        self.region = region
+        self.websocket = None
+        self._event_handlers = {}
+        self._running = False
+        self._receive_task = None
+
+    @property
+    def is_connected(self):
+        """Verificar se está conectado"""
+        return self.websocket is not None
+
+    async def connect(self, ssid: str = None) -> bool:
+        """Conectar ao servidor"""
+        endpoints = [WEBSOCKET_ENDPOINTS.get(self.region)] + [v for k, v in WEBSOCKET_ENDPOINTS.items() if k != self.region]
+
+        for endpoint in endpoints:
+            try:
+                print(f"Tentando conectar a {endpoint}")
+                import websockets.legacy.client
+                import websockets.exceptions
+
+                # Configurar SSL
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+
+                self.websocket = await websockets.legacy.client.connect(
+                    endpoint,
+                    ssl=ssl_context,
+                    extra_headers=DEFAULT_HEADERS,
+                    ping_interval=CONNECTION_SETTINGS["ping_interval"],
+                    ping_timeout=CONNECTION_SETTINGS["ping_timeout"],
+                    close_timeout=CONNECTION_SETTINGS.get("close_timeout", 10),
+                )
+                print("Conectado com sucesso")
+
+                # Handshake Engine.IO/Socket.IO
+                # 1. Aguardar mensagem inicial "0" com "sid"
+                initial_message = await self.websocket.recv()
+                print(f"Mensagem inicial: {initial_message[:100]}...")
+
+                if initial_message.startswith("0") and "sid" in initial_message:
+                    # 2. Enviar "40"
+                    await self.websocket.send("40")
+                    print("Handshake '40' enviado")
+
+                    # 3. Aguardar mensagem "40" com "sid"
+                    conn_message = await self.websocket.recv()
+                    print(f"Mensagem de conexão: {conn_message[:100]}...")
+
+                    if conn_message.startswith("40") and "sid" in conn_message:
+                        # Enviar SSID se fornecido
+                        if ssid:
+                            await self.websocket.send(ssid)
+                            print(f"SSID enviado durante handshake")
+
+                        # Iniciar tarefas de background
+                        self._running = True
+                        self._receive_task = asyncio.create_task(self._receive_messages())
+                        self._ping_task = asyncio.create_task(self._ping_loop())
+
+                        print("Handshake completo")
+                        return True
+                    else:
+                        print(f"Formato de mensagem de conexão inesperado: {conn_message}")
+                else:
+                    print(f"Formato de mensagem inicial inesperado: {initial_message}")
+
+            except Exception as e:
+                print(f"Falha ao conectar a {endpoint}: {e}")
+                if self.websocket:
+                    await self.websocket.close()
+                    self.websocket = None
+                continue
+
+        return False
+
+    async def _ping_loop(self):
+        """Enviar ping periodicamente para manter conexão viva"""
+        while self._running and self.websocket:
+            try:
+                await asyncio.sleep(20)
+                if self._running and self.websocket:
+                    await self.websocket.send('42["ps"]')
+                    print("Ping enviado")
+            except Exception as e:
+                print(f"Erro ao enviar ping: {e}")
+                break
+
+    async def _receive_messages(self):
+        """Receber mensagens do WebSocket"""
+        while self._running and self.websocket:
+            try:
+                message = await self.websocket.recv()
+                await self._process_message(message)
+            except Exception as e:
+                break
+
+    async def _process_message(self, message):
+        """Processar mensagem recebida"""
+        try:
+            if isinstance(message, bytes):
+                message = message.decode("utf-8")
+
+            # Mensagem binária Socket.IO (451-)
+            if message.startswith("451-"):
+                if "[" in message:
+                    parts = message.split("[", 1)
+                    if "]" in parts[1]:
+                        event_part = parts[1].split("]", 1)[0]
+                        event = event_part.strip('"')
+                        await self._emit_event(event, {"_placeholder": True, "num": 0})
+                return
+
+            # Mensagem Socket.IO com dados
+            if message.startswith("42"):
+                data = message[2:]
+                try:
+                    parsed = json.loads(data)
+                    if isinstance(parsed, list) and len(parsed) >= 1:
+                        event = parsed[0]
+                        event_data = parsed[1] if len(parsed) > 1 else {}
+                        await self._emit_event(event, event_data)
+                except json.JSONDecodeError:
+                    pass
+
+            # Mensagem JSON separada
+            try:
+                parsed = json.loads(message)
+                if isinstance(parsed, dict):
+                    await self._emit_event("json_data", parsed)
+            except json.JSONDecodeError:
+                pass
+
+        except Exception as e:
+            pass
+
+    async def _emit_event(self, event: str, data):
+        """Emitir evento para handlers"""
+        if event in self._event_handlers:
+            for handler in self._event_handlers[event]:
+                try:
+                    if asyncio.iscoroutinefunction(handler):
+                        await handler(data)
+                    else:
+                        handler(data)
+                except Exception as e:
+                    print(f"Erro no handler {event}: {e}")
+
+    def add_event_handler(self, event: str, handler):
+        """Adicionar handler de evento"""
+        if event not in self._event_handlers:
+            self._event_handlers[event] = []
+        self._event_handlers[event].append(handler)
+
+    async def send_message(self, message: str):
+        """Enviar mensagem"""
+        if self.websocket:
+            await self.websocket.send(message)
+            print(f"Mensagem enviada: {message[:100]}...")
+
+    async def disconnect(self):
+        """Desconectar"""
+        self._running = False
+        if self._receive_task:
+            self._receive_task.cancel()
+        if hasattr(self, '_ping_task') and self._ping_task:
+            self._ping_task.cancel()
+        if self.websocket:
+            await self.websocket.close()
+            self.websocket = None
+        print("Desconectado")

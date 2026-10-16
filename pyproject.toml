@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openob"
+version = "1.0.0"
+description = "PocketOption API Client - Simplificado"
+authors = [{name = "OpenOB Team"}]
+requires-python = ">=3.8"
+dependencies = [
+    "websockets>=12.0",
+    "pydantic>=2.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["openob*"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]
