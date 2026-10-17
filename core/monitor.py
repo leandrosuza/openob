@@ -338,7 +338,7 @@ class MonitorAPI:
                     # Log dos ativos monitorados
                     monitored = list(self.monitored_assets)
                     if monitored:
-                        logger.info(f"MONITOR DE ATIVOS | {len(monitored)} ATIVOS MONITORADOS: {', '.join(monitored[:5])}")
+                        logger.info(f"MONITOR DE ATIVOS | {len(monitored)} ATIVOS MONITORADOS: {', '.join(monitored)}")
                         recent_ticks = list(self.tick_data.keys())[:5]
                         if recent_ticks:
                             logger.info(f"MONITOR DE ATIVOS | DADOS OBTIDOS DE: {', '.join(recent_ticks)} NOS ÚLTIMOS {update_interval}s")
