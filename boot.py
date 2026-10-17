@@ -60,7 +60,7 @@ async def main():
     try:
         monitor = MonitorAPI()
 
-        await monitor.start(payout_interval=5)
+        await monitor.start(payout_interval=5, update_interval=30)
 
         print("\n" + "="*60)
         print("Sistema Online - Mantendo conexão")
@@ -69,19 +69,25 @@ async def main():
 
         await asyncio.sleep(3)
 
-        await monitor.subscribe_asset("EURUSD_otc", period=1)
-
         while True:
             await asyncio.sleep(10)
 
             payout_data = monitor.get_payout_data()
             if payout_data:
                 print(f"\n--- Payout ---")
-                print(f"Ativos com payout: {len(payout_data)}")
+                print(f"Ativos disponíveis: {len(payout_data)}")
+
+            monitored_assets = monitor.get_monitored_assets()
+            if monitored_assets:
+                print(f"\n--- Ativos Monitorados ---")
+                print(f"Monitorando: {len(monitored_assets)} ativos")
+                for asset in list(monitored_assets)[:5]:
+                    payout = payout_data.get(asset, {}).get("payout", 0)
+                    print(f"  {asset}: {payout}%")
 
             tick_data = monitor.get_tick_data()
             if tick_data:
-                print(f"\n--- Ticks ---")
+                print(f"\n--- Ticks Recentes ---")
                 for asset, price in list(tick_data.items())[:5]:
                     print(f"{asset}: {price}")
 

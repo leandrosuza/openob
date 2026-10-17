@@ -5,13 +5,14 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 1. Monitoramento de payout: Reconecta a cada 5s para obter payout atualizado
 2. Monitoramento de ativos: Fica ativo indefinidamente capturando ticks em tempo real
 3. Monitoramento de saldo: Extrai saldo de eventos json_data
+4. Monitoramento dinâmico: Monitora automaticamente os ativos com melhor payout
 """
 
 import asyncio
 import os
 import json
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Set
 from dotenv import load_dotenv
 from connection.websocket import WebSocketManager
 from core.logger import get_logger
@@ -32,6 +33,9 @@ class MonitorAPI:
         if not self.ssid:
             raise ValueError("POCKETOPTION_MONITOR_SSID não definido no .env")
 
+        # Número de ativos com melhor payout para monitorar
+        self.top_assets_count = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
+
         self.payout_ws = WebSocketManager(region=self.region)
         self.actives_ws = WebSocketManager(region=self.region)
 
@@ -44,6 +48,9 @@ class MonitorAPI:
         self.actives_data: Dict[str, Dict[str, Any]] = {}
         self.tick_data: Dict[str, float] = {}
         self.balance_data: Dict[str, Any] = {}
+
+        # Ativos atualmente monitorados
+        self.monitored_assets: Set[str] = set()
 
         self._setup_handlers()
 
@@ -186,6 +193,62 @@ class MonitorAPI:
 
 
 
+    def get_top_assets_by_payout(self, limit: int = None) -> List[Dict[str, Any]]:
+        """Obter os ativos com os melhores payouts"""
+        if limit is None:
+            limit = self.top_assets_count
+
+        # Filtrar ativos com payout válido e ordenar por payout (maior para menor)
+        valid_assets = [
+            (symbol, data) for symbol, data in self.payout_data.items()
+            if data.get("payout", 0) > 0
+        ]
+
+        sorted_assets = sorted(valid_assets, key=lambda x: x[1]["payout"], reverse=True)
+        top_assets = [data for symbol, data in sorted_assets[:limit]]
+
+        logger.info(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
+        return top_assets
+
+
+
+
+
+    async def update_monitored_assets(self):
+        """Atualizar dinamicamente os ativos monitorados baseado no payout"""
+        if not self.payout_data:
+            logger.warning("Sem dados de payout disponíveis para atualizar monitoramento")
+            return
+
+        top_assets = self.get_top_assets_by_payout()
+        new_monitored = {asset["symbol"] for asset in top_assets}
+
+        # Identificar ativos para adicionar e remover
+        to_add = new_monitored - self.monitored_assets
+        to_remove = self.monitored_assets - new_monitored
+
+        if to_add:
+            logger.info(f"Adicionando ativos ao monitoramento: {to_add}")
+            for i, symbol in enumerate(to_add):
+                await self.subscribe_asset(symbol, period=1)
+                self.monitored_assets.add(symbol)
+                # Delay de 500ms entre cada ativo para evitar flood na API
+                if i < len(to_add) - 1:
+                    await asyncio.sleep(0.5)
+
+        if to_remove:
+            logger.info(f"Removendo ativos do monitoramento: {to_remove}")
+            for symbol in to_remove:
+                self.monitored_assets.discard(symbol)
+                self._log_to_file("monitoring_actives.txt", f"Ativo removido do monitoramento: {symbol}")
+
+        if not to_add and not to_remove:
+            logger.debug("Nenhuma alteração necessária nos ativos monitorados")
+
+
+
+
+
     async def subscribe_asset(self, symbol: str, period: int = 1):
         """Inscrever em um ativo específico para monitoramento"""
         try:
@@ -247,9 +310,9 @@ class MonitorAPI:
 
 
 
-    async def start_actives_monitoring(self):
-        """Iniciar monitoramento de ativos (conexão permanente)"""
-        logger.info("Iniciando monitoramento de ativos (conexão permanente)")
+    async def start_actives_monitoring(self, update_interval: int = 30):
+        """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
+        logger.info(f"Iniciando monitoramento de ativos (conexão permanente, atualização a cada {update_interval}s)")
         self.actives_running = True
 
         while self.actives_running:
@@ -271,7 +334,10 @@ class MonitorAPI:
                     self._log_to_file("monitoring_actives.txt", "Solicitação de ativos enviada")
                     await asyncio.sleep(1)
 
-                await asyncio.sleep(10)
+                    # Atualizar dinamicamente os ativos monitorados
+                    await self.update_monitored_assets()
+
+                await asyncio.sleep(update_interval)
 
             except Exception as e:
                 logger.error(f"Erro no monitoramento de ativos: {e}")
@@ -282,11 +348,12 @@ class MonitorAPI:
 
 
 
-    async def start(self, payout_interval: int = 5):
+    async def start(self, payout_interval: int = 5, update_interval: int = 30):
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
+        logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
-        self.actives_task = asyncio.create_task(self.start_actives_monitoring())
+        self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
         logger.info("Monitoramento iniciado")
 
 
@@ -342,3 +409,11 @@ class MonitorAPI:
     def get_balance_data(self) -> Dict[str, Any]:
         """Obter dados de saldo atual"""
         return self.balance_data
+
+
+
+
+
+    def get_monitored_assets(self) -> Set[str]:
+        """Obter conjunto de ativos atualmente monitorados"""
+        return self.monitored_assets.copy()
