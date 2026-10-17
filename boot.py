@@ -72,25 +72,6 @@ async def main():
         while True:
             await asyncio.sleep(10)
 
-            payout_data = monitor.get_payout_data()
-            if payout_data:
-                print(f"\n--- Payout ---")
-                print(f"Ativos disponíveis: {len(payout_data)}")
-
-            monitored_assets = monitor.get_monitored_assets()
-            if monitored_assets:
-                print(f"\n--- Ativos Monitorados ---")
-                print(f"Monitorando: {len(monitored_assets)} ativos")
-                for asset in list(monitored_assets)[:5]:
-                    payout = payout_data.get(asset, {}).get("payout", 0)
-                    print(f"  {asset}: {payout}%")
-
-            tick_data = monitor.get_tick_data()
-            if tick_data:
-                print(f"\n--- Ticks Recentes ---")
-                for asset, price in list(tick_data.items())[:5]:
-                    print(f"{asset}: {price}")
-
     except KeyboardInterrupt:
         print("\n\nInterrompido pelo usuário")
 

@@ -21,8 +21,9 @@ DEFAULT_HEADERS = {
 class WebSocketManager:
     """Gerenciador de conexão WebSocket"""
 
-    def __init__(self, region: str = "DEMO"):
+    def __init__(self, region: str = "DEMO", name: str = "WebSocket"):
         self.region = region
+        self.name = name
         self.websocket = None
         self._event_handlers = {}
         self._running = False
@@ -51,7 +52,7 @@ class WebSocketManager:
 
         for endpoint in endpoints:
             try:
-                logger.info(f"Tentando conectar a {endpoint}")
+                logger.debug(f"Tentando conectar a {endpoint}")
 
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 ssl_context.check_hostname = False
@@ -65,7 +66,7 @@ class WebSocketManager:
                     ping_timeout=CONNECTION_SETTINGS["ping_timeout"],
                     close_timeout=CONNECTION_SETTINGS.get("close_timeout", 10),
                 )
-                logger.info("Conectado com sucesso")
+                logger.debug("Conectado com sucesso")
 
                 if not await self._handshake(ssid):
                     await self.websocket.close()
@@ -76,7 +77,7 @@ class WebSocketManager:
                 self._receive_task = asyncio.create_task(self._receive_messages())
                 self._ping_task = asyncio.create_task(self._ping_loop())
 
-                logger.info("Handshake completo")
+                logger.debug("Handshake completo")
                 return True
 
             except Exception as e:
@@ -299,7 +300,7 @@ class WebSocketManager:
         if self.websocket:
             await self.websocket.close()
             self.websocket = None
-        logger.info("Desconectado")
+        logger.info(f"Desconectado ({self.name})")
 
 
 

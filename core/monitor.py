@@ -36,8 +36,8 @@ class MonitorAPI:
         # Número de ativos com melhor payout para monitorar
         self.top_assets_count = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
 
-        self.payout_ws = WebSocketManager(region=self.region)
-        self.actives_ws = WebSocketManager(region=self.region)
+        self.payout_ws = WebSocketManager(region=self.region, name="PAYOUT")
+        self.actives_ws = WebSocketManager(region=self.region, name="ATIVOS")
 
         self.payout_running = False
         self.payout_task = None
@@ -207,7 +207,7 @@ class MonitorAPI:
         sorted_assets = sorted(valid_assets, key=lambda x: x[1]["payout"], reverse=True)
         top_assets = [data for symbol, data in sorted_assets[:limit]]
 
-        logger.info(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
+        logger.debug(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
         return top_assets
 
 
@@ -217,7 +217,7 @@ class MonitorAPI:
     async def update_monitored_assets(self):
         """Atualizar dinamicamente os ativos monitorados baseado no payout"""
         if not self.payout_data:
-            logger.warning("Sem dados de payout disponíveis para atualizar monitoramento")
+            logger.debug("Sem dados de payout disponíveis para atualizar monitoramento")
             return
 
         top_assets = self.get_top_assets_by_payout()
@@ -228,7 +228,7 @@ class MonitorAPI:
         to_remove = self.monitored_assets - new_monitored
 
         if to_add:
-            logger.info(f"Adicionando ativos ao monitoramento: {to_add}")
+            logger.debug(f"Adicionando ativos ao monitoramento: {to_add}")
             for i, symbol in enumerate(to_add):
                 await self.subscribe_asset(symbol, period=1)
                 self.monitored_assets.add(symbol)
@@ -237,7 +237,7 @@ class MonitorAPI:
                     await asyncio.sleep(0.5)
 
         if to_remove:
-            logger.info(f"Removendo ativos do monitoramento: {to_remove}")
+            logger.debug(f"Removendo ativos do monitoramento: {to_remove}")
             for symbol in to_remove:
                 self.monitored_assets.discard(symbol)
                 self._log_to_file("monitoring_actives.txt", f"Ativo removido do monitoramento: {symbol}")
@@ -274,24 +274,24 @@ class MonitorAPI:
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
         """Iniciar monitoramento de payout (reconecta periodicamente)"""
-        logger.info(f"Iniciando monitoramento de payout (intervalo: {payout_interval}s)")
+        logger.info(f"MONITOR DE PAYOUT | Iniciando (intervalo: {payout_interval}s)")
         self.payout_running = True
 
         while self.payout_running:
             try:
                 if not self.payout_ws.is_connected:
-                    logger.info("Conectando ao servidor de payout")
                     connected = await self.payout_ws.connect(ssid=self.ssid)
                     if connected:
                         self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
-                        logger.info("Conexão de payout estabelecida")
+                        logger.info("MONITOR DE PAYOUT | CONECTADO!")
                     else:
                         self._log_to_file("connection.txt", "Payout: Falha ao conectar")
-                        logger.error("Falha ao conectar ao servidor de payout")
+                        logger.error("MONITOR DE PAYOUT | FALHA AO CONECTAR")
 
                 if self.payout_ws.is_connected:
                     await self.payout_ws.send_message('42["actives/get"]')
                     self._log_to_file("monitoring_payout.txt", "Solicitação de payout enviada")
+                    logger.info("MONITOR DE PAYOUT | DADOS OBTIDOS!")
                     await asyncio.sleep(1)
 
                 await asyncio.sleep(payout_interval)
@@ -299,10 +299,10 @@ class MonitorAPI:
                 if self.payout_ws.is_connected:
                     await self.payout_ws.disconnect()
                     self._log_to_file("connection.txt", "Payout: Desconectado para reconexão")
-                    logger.debug("Payout: Desconectado para reconexão")
+                    logger.info("MONITOR DE PAYOUT | DESCONECTADO")
 
             except Exception as e:
-                logger.error(f"Erro no monitoramento de payout: {e}")
+                logger.error(f"MONITOR DE PAYOUT | ERRO: {e}")
                 self._log_to_file("connection.txt", f"Payout: Erro - {e}")
                 await asyncio.sleep(payout_interval)
 
@@ -312,20 +312,19 @@ class MonitorAPI:
 
     async def start_actives_monitoring(self, update_interval: int = 30):
         """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
-        logger.info(f"Iniciando monitoramento de ativos (conexão permanente, atualização a cada {update_interval}s)")
+        logger.info(f"MONITOR DE ATIVOS | Iniciando (Conexão Permanente, atualização a cada {update_interval}s)")
         self.actives_running = True
 
         while self.actives_running:
             try:
                 if not self.actives_ws.is_connected:
-                    logger.info("Conectando ao servidor de ativos")
                     connected = await self.actives_ws.connect(ssid=self.ssid)
                     if connected:
                         self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
-                        logger.info("Conexão de ativos estabelecida")
+                        logger.info("MONITOR DE ATIVOS | CONECTADO!")
                     else:
                         self._log_to_file("connection.txt", "Ativos: Falha ao conectar")
-                        logger.error("Falha ao conectar ao servidor de ativos")
+                        logger.error("MONITOR DE ATIVOS | FALHA AO CONECTAR")
                         await asyncio.sleep(5)
                         continue
 
@@ -337,10 +336,18 @@ class MonitorAPI:
                     # Atualizar dinamicamente os ativos monitorados
                     await self.update_monitored_assets()
 
+                    # Log dos ativos monitorados
+                    monitored = list(self.monitored_assets)
+                    if monitored:
+                        logger.info(f"MONITOR DE ATIVOS | {len(monitored)} ATIVOS MONITORADOS: {', '.join(monitored[:5])}")
+                        recent_ticks = list(self.tick_data.keys())[:5]
+                        if recent_ticks:
+                            logger.info(f"MONITOR DE ATIVOS | DADOS OBTIDOS DE: {', '.join(recent_ticks)} NOS ÚLTIMOS {update_interval}s")
+
                 await asyncio.sleep(update_interval)
 
             except Exception as e:
-                logger.error(f"Erro no monitoramento de ativos: {e}")
+                logger.error(f"MONITOR DE ATIVOS | ERRO: {e}")
                 self._log_to_file("connection.txt", f"Ativos: Erro - {e}")
                 await asyncio.sleep(5)
 
