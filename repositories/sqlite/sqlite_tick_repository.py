@@ -29,7 +29,11 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self.db_path = db_path
         self.conn = None
         self._lock = asyncio.Lock()
+        self._pending_ticks = []
+        self._max_pending = 1000
+        self._flush_task = None
         self._initialize_db()
+        self._flush_task = asyncio.create_task(self._flush_loop())
         logger.info(f"SQLite Repository inicializado: {db_path}")
 
 
@@ -44,6 +48,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self.conn.execute("PRAGMA synchronous=NORMAL")
         self.conn.execute("PRAGMA cache_size=-64000")
         self.conn.execute("PRAGMA temp_store=MEMORY")
+        self.conn.execute("PRAGMA busy_timeout=5000")
 
         # Tabela de ticks
         self.conn.execute("""
@@ -90,6 +95,75 @@ class SQLiteTickRepository(TickRepositoryInterface):
         except sqlite3.OperationalError:
             # Coluna já existe
             pass
+
+        # Migrar: adicionar coluna needs_reset se não existir
+        try:
+            self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN needs_reset BOOLEAN DEFAULT 0")
+            logger.info("Migração: coluna needs_reset adicionada")
+        except sqlite3.OperationalError:
+            # Coluna já existe
+            pass
+
+
+    def _ensure_connection(self):
+        """Verificar e restaurar conexão se necessário"""
+        try:
+            self.conn.execute("SELECT 1")
+        except (sqlite3.OperationalError, sqlite3.InterfaceError):
+            logger.warning("Conexão com banco perdida, tentando reconectar...")
+            try:
+                self.conn = sqlite3.connect(self.db_path, isolation_level=None)
+                self.conn.execute("PRAGMA journal_mode=WAL")
+                self.conn.execute("PRAGMA synchronous=NORMAL")
+                self.conn.execute("PRAGMA busy_timeout=5000")
+                logger.info("Conexão com banco restaurada")
+            except Exception as e:
+                logger.error(f"Falha ao reconectar ao banco: {e}")
+                raise
+
+
+    def _add_to_pending(self, asset: str, price: float, payout: Optional[float], timestamp: datetime):
+        """Adicionar tick ao buffer pendente"""
+        if len(self._pending_ticks) < self._max_pending:
+            self._pending_ticks.append({
+                'asset': asset,
+                'price': price,
+                'payout': payout,
+                'timestamp': timestamp
+            })
+            logger.debug(f"Tick adicionado ao buffer pendente: {len(self._pending_ticks)} ticks")
+
+
+    async def _flush_pending(self):
+        """Salvar ticks pendentes do buffer"""
+        if not self._pending_ticks:
+            return
+
+        saved = 0
+        for tick in self._pending_ticks[:]:
+            try:
+                await self.save(
+                    tick['asset'],
+                    tick['price'],
+                    tick['payout'],
+                    tick['timestamp']
+                )
+                saved += 1
+            except Exception as e:
+                logger.error(f"Erro ao salvar tick pendente: {e}")
+                break
+
+        if saved > 0:
+            self._pending_ticks = self._pending_ticks[saved:]
+            logger.info(f"Ticks pendentes salvos: {saved}/{len(self._pending_ticks + saved)}")
+
+
+    async def _flush_loop(self):
+        """Loop periódico para tentar salvar ticks pendentes"""
+        while True:
+            await asyncio.sleep(10)
+            if self._pending_ticks:
+                await self._flush_pending()
 
 
 
@@ -196,41 +270,53 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
-        """Salvar tick - Método principal com verificação de duplicatas"""
+        """Salvar tick - Método principal com verificação de duplicatas e retry"""
         async with self._lock:
-            # Usar timestamp fornecido ou atual (padronizado em UTC)
-            if timestamp is None:
-                timestamp = datetime.now(timezone.utc)
-            elif timestamp.tzinfo is None:
-                timestamp = timestamp.replace(tzinfo=timezone.utc)
+            try:
+                self._ensure_connection()
 
-            # Usar timestamp Unix para precisão (truncar para segundos)
-            timestamp_unix = int(timestamp.timestamp())
-            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+                # Usar timestamp fornecido ou atual (padronizado em UTC)
+                if timestamp is None:
+                    timestamp = datetime.now(timezone.utc)
+                elif timestamp.tzinfo is None:
+                    timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-            # Verificar duplicata usando timestamp Unix
-            if self._check_duplicate_unix(asset, price, timestamp_unix):
-                logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp_normalized}")
+                # Usar timestamp Unix para precisão (truncar para segundos)
+                timestamp_unix = int(timestamp.timestamp())
+                timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+
+                # Verificar duplicata usando timestamp Unix
+                if self._check_duplicate_unix(asset, price, timestamp_unix):
+                    logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp_normalized}")
+                    return -1
+
+                # Reset se >30min sem dados
+                if self._check_reset_needed(asset):
+                    self._reset_asset(asset)
+
+                # Sequência incremental
+                sequence = self._get_next_sequence(asset)
+
+                # Salvar com timestamp Unix normalizado
+                self.conn.execute(
+                    "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                    (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
+                )
+
+                # Atualizar metadata
+                self._update_metadata(asset, timestamp_normalized, sequence)
+
+                logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
+                return sequence
+
+            except (sqlite3.OperationalError, sqlite3.InterfaceError) as e:
+                logger.error(f"Erro ao salvar tick no banco: {e}")
+                self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
                 return -1
-
-            # Reset se >30min sem dados
-            if self._check_reset_needed(asset):
-                self._reset_asset(asset)
-
-            # Sequência incremental
-            sequence = self._get_next_sequence(asset)
-
-            # Salvar com timestamp Unix normalizado
-            self.conn.execute(
-                "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
-                (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
-            )
-
-            # Atualizar metadata
-            self._update_metadata(asset, timestamp_normalized, sequence)
-
-            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
-            return sequence
+            except Exception as e:
+                logger.error(f"Erro inesperado ao salvar tick: {e}")
+                self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
+                return -1
 
 
 
@@ -283,60 +369,85 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+
     def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
         """Obter ticks recentes"""
-        query = f"SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT {limit}"
-        rows = self.conn.execute(query, (asset,)).fetchall()
+        try:
+            self._ensure_connection()
+            query = f"SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT {limit}"
+            rows = self.conn.execute(query, (asset,)).fetchall()
 
-        return [
-            {
-                'timestamp': row[2],
-                'price': row[3],
-                'payout': row[4],
-                'sequence': row[5]
-            }
-            for row in reversed(rows)
-        ]
+            return [
+                {
+                    'timestamp': row[2],
+                    'price': row[3],
+                    'payout': row[4],
+                    'sequence': row[5]
+                }
+                for row in reversed(rows)
+            ]
+        except Exception as e:
+            logger.error(f"Erro ao obter ticks recentes: {e}")
+            return []
 
 
 
 
     def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter range de sequência"""
-        rows = self.conn.execute(
-            "SELECT * FROM ticks WHERE asset = ? AND sequence_number BETWEEN ? AND ? ORDER BY sequence_number",
-            (asset, start, end)
-        ).fetchall()
+        try:
+            self._ensure_connection()
+            rows = self.conn.execute(
+                "SELECT * FROM ticks WHERE asset = ? AND sequence_number BETWEEN ? AND ? ORDER BY sequence_number",
+                (asset, start, end)
+            ).fetchall()
 
-        return [
-            {
-                'timestamp': row[2],
-                'price': row[3],
-                'payout': row[4],
-                'sequence': row[5]
-            }
-            for row in rows
-        ]
+            return [
+                {
+                    'timestamp': row[2],
+                    'price': row[3],
+                    'payout': row[4],
+                    'sequence': row[5]
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Erro ao obter ticks por sequência: {e}")
+            return []
 
 
 
 
     def get_stats(self) -> Dict:
         """Estatísticas do banco"""
-        total = self.conn.execute("SELECT COUNT(*) FROM ticks").fetchone()[0]
-        assets = self.conn.execute("SELECT COUNT(DISTINCT asset) FROM ticks").fetchone()[0]
+        try:
+            self._ensure_connection()
+            total = self.conn.execute("SELECT COUNT(*) FROM ticks").fetchone()[0]
+            assets = self.conn.execute("SELECT COUNT(DISTINCT asset) FROM ticks").fetchone()[0]
 
-        return {
-            'total_ticks': total,
-            'total_assets': assets,
-            'db_size_mb': os.path.getsize(self.db_path) / (1024 * 1024)
-        }
+            return {
+                'total_ticks': total,
+                'total_assets': assets,
+                'db_size_mb': os.path.getsize(self.db_path) / (1024 * 1024),
+                'pending_ticks': len(self._pending_ticks)
+            }
+        except Exception as e:
+            logger.error(f"Erro ao obter estatísticas: {e}")
+            return {
+                'total_ticks': 0,
+                'total_assets': 0,
+                'db_size_mb': 0,
+                'pending_ticks': len(self._pending_ticks)
+            }
 
 
 
 
     def close(self):
         """Fechar conexão"""
+        if self._flush_task:
+            self._flush_task.cancel()
+        
         if self.conn:
             self.conn.close()
             logger.info("SQLite Repository fechado")
