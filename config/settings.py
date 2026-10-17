@@ -37,7 +37,6 @@ class Settings:
             "WARNING": logging.WARNING,
             "ERROR": logging.ERROR,
             "CRITICAL": logging.CRITICAL,
-            "FULL": logging.DEBUG,
         }
         return level_map.get(cls.LOG_LEVEL.upper(), logging.INFO)
 
