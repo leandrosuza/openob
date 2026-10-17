@@ -8,8 +8,8 @@ import shutil
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core.monitor import MonitorAPI
-from core.logger import get_logger, LoggerConfig
+from openob.core.monitor import MonitorAPI
+from openob.core.logger import get_logger, LoggerConfig
 
 LoggerConfig.setup(level="INFO")
 logger = get_logger(__name__)
@@ -56,6 +56,8 @@ async def main():
     reset_logs()
     print("Logs resetados")
 
+    monitor = None
+
     try:
         monitor = MonitorAPI()
 
@@ -75,8 +77,9 @@ async def main():
         print("\n\nInterrompido pelo usuário")
 
     finally:
-        await monitor.stop()
-        print("Sistema parado")
+        if monitor:
+            await monitor.stop()
+            print("Sistema parado")
 
 
 if __name__ == "__main__":
