@@ -273,7 +273,7 @@ class MonitorAPI:
 
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
-        """Iniciar monitoramento de payout (reconecta periodicamente)"""
+        """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
         logger.info(f"MONITOR DE PAYOUT | Iniciando (intervalo: {payout_interval}s)")
         self.payout_running = True
 
@@ -287,6 +287,8 @@ class MonitorAPI:
                     else:
                         self._log_to_file("connection.txt", "Payout: Falha ao conectar")
                         logger.error("MONITOR DE PAYOUT | FALHA AO CONECTAR")
+                        await asyncio.sleep(5)
+                        continue
 
                 if self.payout_ws.is_connected:
                     await self.payout_ws.send_message('42["actives/get"]')
@@ -296,14 +298,11 @@ class MonitorAPI:
 
                 await asyncio.sleep(payout_interval)
 
-                if self.payout_ws.is_connected:
-                    await self.payout_ws.disconnect()
-                    self._log_to_file("connection.txt", "Payout: Desconectado para reconexão")
-                    logger.info("MONITOR DE PAYOUT | DESCONECTADO")
-
             except Exception as e:
                 logger.error(f"MONITOR DE PAYOUT | ERRO: {e}")
                 self._log_to_file("connection.txt", f"Payout: Erro - {e}")
+                if self.payout_ws.is_connected:
+                    await self.payout_ws.disconnect()
                 await asyncio.sleep(payout_interval)
 
 
