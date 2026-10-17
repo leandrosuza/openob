@@ -130,6 +130,7 @@ class MonitorAPI:
                 else:
                     self._log_to_file("monitoring_actives.txt", f"Dados de histórico não é dict: {type(data)}")
 
+            # Processar ticks em formato dict
             if isinstance(data, dict):
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
                 price = data.get("price", data.get("value", data.get("close", data.get("bid", None))))
@@ -164,6 +165,12 @@ class MonitorAPI:
 
                         self.tick_data[asset] = price
                         self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp}")
+
+                        # Salvar automaticamente no repositório se ativo monitorado
+                        if asset in self.monitored_assets:
+                            payout = self.payout_data.get(asset, {}).get("payout")
+                            self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
+                            asyncio.create_task(self.tick_repo.save(asset, price, payout))
 
         except Exception as e:
             logger.error(f"Erro ao processar stream: {e}")
