@@ -16,6 +16,8 @@ from typing import Optional, Dict, Any, List, Set
 from dotenv import load_dotenv
 from connection.websocket import WebSocketManager
 from core.logger import get_logger
+from config.settings import Settings
+from repositories.repository_factory import RepositoryFactory
 
 
 logger = get_logger(__name__)
@@ -51,6 +53,11 @@ class MonitorAPI:
 
         # Ativos atualmente monitorados
         self.monitored_assets: Set[str] = set()
+
+        # Criar repositório via factory
+        config = Settings.to_dict()
+        self.tick_repo = RepositoryFactory.create_tick_repository(config)
+        logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
         self._setup_handlers()
 
@@ -121,6 +128,11 @@ class MonitorAPI:
                 if asset and price:
                     self.tick_data[asset] = price
                     self._log_to_file("monitoring_actives.txt", f"Tick: {asset} = {price}")
+
+                    # Salvar automaticamente no repositório
+                    if asset in self.monitored_assets:
+                        payout = self.payout_data.get(asset, {}).get("payout")
+                        asyncio.create_task(self.tick_repo.save(asset, price, payout))
 
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
