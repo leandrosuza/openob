@@ -122,6 +122,10 @@ class MonitorAPI:
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
 
+            # Processar histórico completo (updateHistoryNewFast)
+            if "updateHistoryNewFast" in event and isinstance(data, dict):
+                self._process_history_data(data)
+
             if isinstance(data, dict):
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
                 price = data.get("price", data.get("value", data.get("close", data.get("bid", None))))
@@ -156,6 +160,44 @@ class MonitorAPI:
 
         except Exception as e:
             logger.error(f"Erro ao processar stream: {e}")
+
+
+
+
+    def _process_history_data(self, data: Dict):
+        """Processar histórico completo do ativo (updateHistoryNewFast)"""
+        try:
+            asset = data.get("asset")
+            history = data.get("history", [])
+
+            if not asset or not history:
+                return
+
+            # Converter histórico para formato do repositório
+            ticks_batch = []
+            for item in history:
+                if isinstance(item, list) and len(item) >= 2:
+                    timestamp_unix = item[0]
+                    price = item[1]
+
+                    # Converter timestamp Unix para datetime
+                    timestamp = datetime.fromtimestamp(timestamp_unix)
+
+                    ticks_batch.append({
+                        'timestamp': timestamp,
+                        'price': price,
+                        'payout': self.payout_data.get(asset, {}).get("payout")
+                    })
+
+            # Salvar batch no repositório se o ativo é monitorado
+            if asset in self.monitored_assets and ticks_batch:
+                asyncio.create_task(self.tick_repo.sync_and_save_batch(asset, ticks_batch, limit=100))
+                logger.info(f"Histórico {asset}: {len(ticks_batch)} ticks processados")
+
+            self._log_to_file("monitoring_actives.txt", f"Histórico {asset}: {len(ticks_batch)} ticks recebidos")
+
+        except Exception as e:
+            logger.error(f"Erro ao processar histórico: {e}")
 
 
 

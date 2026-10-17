@@ -128,12 +128,10 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _check_duplicate(self, asset: str, price: float, timestamp: datetime) -> bool:
-        """Verificar se tick já existe nos últimos 5 segundos (evitar duplicatas)"""
-        # Buscar ticks do mesmo ativo nos últimos 5 segundos com mesmo preço
-        five_seconds_ago = (timestamp - timedelta(seconds=5)).isoformat()
+        """Verificar se tick já existe (timestamp + preço único)"""
         result = self.conn.execute(
-            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp >= ? LIMIT 1",
-            (asset, price, five_seconds_ago)
+            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp = ? LIMIT 1",
+            (asset, price, timestamp.isoformat())
         ).fetchone()
 
         return result is not None
@@ -152,14 +150,16 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
-    async def save(self, asset: str, price: float, payout: Optional[float] = None) -> int:
+    async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
         """Salvar tick - Método principal com verificação de duplicatas"""
         async with self._lock:
-            timestamp = datetime.now()
+            # Usar timestamp fornecido ou atual
+            if timestamp is None:
+                timestamp = datetime.now()
 
             # Verificar duplicata
             if self._check_duplicate(asset, price, timestamp):
-                logger.debug(f"Tick duplicado ignorado: {asset} @ {price}")
+                logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp}")
                 return -1
 
             # Reset se >30min sem dados
@@ -178,7 +178,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
             # Atualizar metadata
             self._update_metadata(asset, timestamp, sequence)
 
-            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price}")
+            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp}")
             return sequence
 
 
@@ -191,26 +191,32 @@ class SQLiteTickRepository(TickRepositoryInterface):
         # Obter últimos N ticks do histórico
         recent_history = self.get_recent(asset, limit=limit)
 
-        # Criar set de preços recentes para verificação rápida
-        recent_prices = {tick['price'] for tick in recent_history}
+        # Criar set de (timestamp, price) para verificação precisa
+        history_set = {(tick['timestamp'], tick['price']) for tick in recent_history}
 
         for tick in new_ticks:
+            timestamp = tick.get('timestamp')
             price = tick.get('price')
             payout = tick.get('payout')
 
-            # Se preço já existe no histórico recente, verificar se é duplicata
-            if price in recent_prices:
-                # Verificar se existe nos últimos 5 segundos
+            # Se não tiver timestamp, usar atual
+            if not timestamp:
                 timestamp = datetime.now()
-                if self._check_duplicate(asset, price, timestamp):
-                    logger.debug(f"Tick duplicado ignorado no batch: {asset} @ {price}")
-                    continue
+            elif isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp)
 
-            # Salvar novo tick
-            sequence = await self.save(asset, price, payout)
+            key = (timestamp.isoformat() if isinstance(timestamp, datetime) else timestamp, price)
+
+            # Verificar se já existe no histórico
+            if key in history_set:
+                logger.debug(f"Tick já existe no histórico: {asset} @ {price} @ {timestamp}")
+                continue
+
+            # Salvar novo tick com timestamp específico
+            sequence = await self.save(asset, price, payout, timestamp)
             if sequence > 0:
                 saved_count += 1
-                recent_prices.add(price)
+                history_set.add(key)
 
         logger.info(f"Sincronização {asset}: {saved_count}/{len(new_ticks)} ticks salvos")
         return saved_count
