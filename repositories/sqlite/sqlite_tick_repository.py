@@ -393,6 +393,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+
     def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter range de sequência"""
         try:
@@ -418,6 +419,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+
     def get_stats(self) -> Dict:
         """Estatísticas do banco"""
         try:
@@ -439,6 +441,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 'db_size_mb': 0,
                 'pending_ticks': len(self._pending_ticks)
             }
+
 
 
 
