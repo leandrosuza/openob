@@ -226,10 +226,8 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
         """Obter ticks recentes"""
-        rows = self.conn.execute(
-            "SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT ?",
-            (asset, limit)
-        ).fetchall()
+        query = f"SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT {limit}"
+        rows = self.conn.execute(query, (asset,)).fetchall()
 
         return [
             {

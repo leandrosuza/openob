@@ -54,6 +54,9 @@ class MonitorAPI:
         # Ativos atualmente monitorados
         self.monitored_assets: Set[str] = set()
 
+        # Buffer para dados binários de histórico
+        self._history_buffer: Dict[str, List] = {}
+
         # Criar repositório via factory
         config = Settings.to_dict()
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
@@ -123,12 +126,21 @@ class MonitorAPI:
                 self._process_stream_data(data)
 
             # Processar histórico completo (updateHistoryNewFast)
-            if "updateHistoryNewFast" in event and "_data" in event and isinstance(data, list):
-                self._log_to_file("monitoring_actives.txt", f"Evento de histórico com dados detectado: {event}")
-                self._process_history_data({"history": data})
-            elif "updateHistoryNewFast" in event and isinstance(data, dict) and not data.get("_placeholder"):
-                self._log_to_file("monitoring_actives.txt", f"Evento de histórico com dict detectado: {event}")
-                self._process_history_data(data)
+            if "updateHistoryNewFast" in event:
+                if isinstance(data, dict) and data.get("_placeholder"):
+                    # Placeholder indica que dados virão no próximo evento
+                    self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados")
+                    # Marcar que estamos esperando dados de histórico
+                    self._history_buffer["waiting"] = True
+                elif isinstance(data, list) and self._history_buffer.get("waiting"):
+                    # Dados do histórico
+                    self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
+                    self._process_history_data({"history": data})
+                    self._history_buffer["waiting"] = False
+                elif isinstance(data, dict) and not data.get("_placeholder"):
+                    # Dados completos em dict
+                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado")
+                    self._process_history_data(data)
 
             # Processar ticks em formato dict
             if isinstance(data, dict):
