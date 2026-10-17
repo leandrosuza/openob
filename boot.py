@@ -10,8 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.monitor import MonitorAPI
 from core.logger import get_logger, LoggerConfig
+from config.settings import Settings
 
-LoggerConfig.setup(level="INFO")
+LoggerConfig.setup(level=Settings.get_log_level())
 logger = get_logger(__name__)
 
 
