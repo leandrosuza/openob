@@ -10,6 +10,11 @@ from repositories.sqlite.sqlite_tick_repository import SQLiteTickRepository
 class RepositoryFactory:
     """Fábrica de repositórios"""
 
+
+
+
+
+
     @staticmethod
     def create_tick_repository(config: Dict) -> TickRepositoryInterface:
         """Criar repositório de ticks baseado em config"""

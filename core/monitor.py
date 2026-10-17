@@ -20,6 +20,11 @@ from config.settings import Settings
 from repositories.repository_factory import RepositoryFactory
 
 
+
+
+
+
+
 logger = get_logger(__name__)
 
 
@@ -172,17 +177,19 @@ class MonitorAPI:
                 for item in data:
                     if isinstance(item, list) and len(item) >= 3:
                         asset = item[0]
-                        timestamp = item[1]
+                        timestamp_unix = item[1]
                         price = item[2]
 
                         self.tick_data[asset] = price
-                        self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp}")
+                        self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
 
                         # Salvar automaticamente no repositório se ativo monitorado
                         if asset in self.monitored_assets:
                             payout = self.payout_data.get(asset, {}).get("payout")
+                            # Converter timestamp Unix para datetime
+                            timestamp = datetime.fromtimestamp(timestamp_unix)
                             self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
-                            asyncio.create_task(self.tick_repo.save(asset, price, payout))
+                            asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
 
         except Exception as e:
             logger.error(f"Erro ao processar stream: {e}")

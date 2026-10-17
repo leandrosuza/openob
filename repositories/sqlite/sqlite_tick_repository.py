@@ -3,7 +3,7 @@
 import sqlite3
 import os
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
 from core.logger import get_logger
@@ -18,6 +18,11 @@ logger = get_logger(__name__)
 
 class SQLiteTickRepository(TickRepositoryInterface):
     """Repositório SQLite - Implementação atual"""
+
+
+
+
+
 
     def __init__(self, db_path: str = "data/openob_ticks.db"):
         self.db_path = db_path
@@ -45,6 +50,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             asset TEXT NOT NULL,
             timestamp DATETIME NOT NULL,
+            timestamp_unix INTEGER NOT NULL,
             price REAL NOT NULL,
             payout REAL,
             sequence_number INTEGER NOT NULL
@@ -52,12 +58,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
         """)
 
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
 
         # Tabela de metadata
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS asset_metadata (
             asset TEXT PRIMARY KEY,
             last_tick_timestamp DATETIME,
+            last_tick_unix INTEGER,
             last_sequence_number INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             needs_reset BOOLEAN DEFAULT 0
@@ -139,13 +147,26 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+    def _check_duplicate_unix(self, asset: str, price: float, timestamp_unix: int) -> bool:
+        """Verificar duplicata usando timestamp Unix (mais preciso)"""
+        result = self.conn.execute(
+            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp_unix = ? LIMIT 1",
+            (asset, price, timestamp_unix)
+        ).fetchone()
+
+        return result is not None
+
+
+
+
     def _update_metadata(self, asset: str, timestamp: datetime, sequence: int):
         """Atualizar metadata"""
+        timestamp_unix = int(timestamp.timestamp())
         self.conn.execute("""
         INSERT OR REPLACE INTO asset_metadata
-        (asset, last_tick_timestamp, last_sequence_number, created_at)
-        VALUES (?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP))
-        """, (asset, timestamp.isoformat(), sequence, asset))
+        (asset, last_tick_timestamp, last_tick_unix, last_sequence_number, created_at)
+        VALUES (?, ?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP))
+        """, (asset, timestamp.isoformat(), timestamp_unix, sequence, asset))
 
 
 
@@ -153,13 +174,19 @@ class SQLiteTickRepository(TickRepositoryInterface):
     async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
         """Salvar tick - Método principal com verificação de duplicatas"""
         async with self._lock:
-            # Usar timestamp fornecido ou atual
+            # Usar timestamp fornecido ou atual (padronizado em UTC)
             if timestamp is None:
-                timestamp = datetime.now()
+                timestamp = datetime.now(timezone.utc)
+            elif timestamp.tzinfo is None:
+                timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-            # Verificar duplicata
-            if self._check_duplicate(asset, price, timestamp):
-                logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp}")
+            # Usar timestamp Unix para precisão (truncar para segundos)
+            timestamp_unix = int(timestamp.timestamp())
+            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+
+            # Verificar duplicata usando timestamp Unix
+            if self._check_duplicate_unix(asset, price, timestamp_unix):
+                logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp_normalized}")
                 return -1
 
             # Reset se >30min sem dados
@@ -169,47 +196,55 @@ class SQLiteTickRepository(TickRepositoryInterface):
             # Sequência incremental
             sequence = self._get_next_sequence(asset)
 
-            # Salvar
+            # Salvar com timestamp Unix normalizado
             self.conn.execute(
                 "INSERT INTO ticks (asset, timestamp, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?)",
-                (asset, timestamp.isoformat(), price, payout, sequence)
+                (asset, timestamp_normalized.isoformat(), price, payout, sequence)
             )
 
             # Atualizar metadata
-            self._update_metadata(asset, timestamp, sequence)
+            self._update_metadata(asset, timestamp_normalized, sequence)
 
-            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp}")
+            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
             return sequence
 
 
 
 
-    async def sync_and_save_batch(self, asset: str, new_ticks: List[Dict], limit: int = 50) -> int:
+    async def sync_and_save_batch(self, asset: str, new_ticks: List[Dict], limit: int = 500) -> int:
         """Sincronizar batch de ticks verificando duplicatas com histórico recente"""
         saved_count = 0
 
         # Obter últimos N ticks do histórico
         recent_history = self.get_recent(asset, limit=limit)
 
-        # Criar set de (timestamp, price) para verificação precisa
+        # Criar set de (timestamp_unix, price) para verificação precisa
         history_set = {(tick['timestamp'], tick['price']) for tick in recent_history}
 
-        for tick in new_ticks:
+        # Ordenar ticks por timestamp para garantir ordem cronológica
+        sorted_ticks = sorted(new_ticks, key=lambda x: x.get('timestamp', datetime.min))
+
+        for tick in sorted_ticks:
             timestamp = tick.get('timestamp')
             price = tick.get('price')
             payout = tick.get('payout')
 
             # Se não tiver timestamp, usar atual
             if not timestamp:
-                timestamp = datetime.now()
+                timestamp = datetime.now(timezone.utc)
             elif isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp)
+            elif timestamp.tzinfo is None:
+                timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-            key = (timestamp.isoformat() if isinstance(timestamp, datetime) else timestamp, price)
+            # Converter para timestamp Unix para precisão
+            timestamp_unix = int(timestamp.timestamp())
+            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+            key = (timestamp_normalized.isoformat(), price)
 
             # Verificar se já existe no histórico
             if key in history_set:
-                logger.debug(f"Tick já existe no histórico: {asset} @ {price} @ {timestamp}")
+                logger.debug(f"Tick já existe no histórico: {asset} @ {price} @ {timestamp_normalized}")
                 continue
 
             # Salvar novo tick com timestamp específico

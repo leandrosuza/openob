@@ -10,6 +10,11 @@ from typing import List, Dict, Optional
 class TickRepositoryInterface(ABC):
     """Interface comum para todos os repositórios de ticks"""
 
+
+
+
+
+
     @abstractmethod
     async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
         """Salvar tick e retornar sequence number"""
