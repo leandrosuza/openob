@@ -1,11 +1,10 @@
-"""
-Boot script - Inicia ambiente e mantém conexão payout + actives
-"""
+"""Boot script - Inicia ambiente e mantém conexão payout + actives"""
 
 import sys
 import asyncio
 import os
 import shutil
+
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

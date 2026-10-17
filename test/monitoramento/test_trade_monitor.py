@@ -1,10 +1,9 @@
-"""
-Teste de monitoramento de trade
-"""
+"""Teste de monitoramento de trade"""
 
 import sys
 import asyncio
 import os
+
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 

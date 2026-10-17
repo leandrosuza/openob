@@ -1,6 +1,4 @@
-"""
-Trading API
-"""
+"""Trading API"""
 
 import uuid
 import asyncio
@@ -8,6 +6,9 @@ from typing import Optional
 from models.trading import OrderDirection, OrderResult, OrderStatus, Order
 from core.constants import ASSETS, API_LIMITS
 from core.logger import get_logger
+
+
+
 
 
 logger = get_logger(__name__)
@@ -97,8 +98,6 @@ class TradingAPI:
 
 
 
-
-
     async def _on_order_won(self, data):
         """Handler para ordem ganha"""
         try:
@@ -109,8 +108,6 @@ class TradingAPI:
                     self._update_order_status(order_id, OrderStatus.WIN, profit, f"Ordem ganha: ${profit}")
         except Exception as e:
             logger.error(f"Erro ao processar ordem ganha: {e}")
-
-
 
 
 
@@ -127,8 +124,6 @@ class TradingAPI:
 
 
 
-
-
     async def _on_buy(self, data):
         """Handler para resposta de compra"""
         try:
@@ -138,8 +133,6 @@ class TradingAPI:
                     self._update_order_status(order_id, OrderStatus.OPEN, 0, "Ordem de compra processada")
         except Exception as e:
             logger.error(f"Erro ao processar compra: {e}")
-
-
 
 
 
@@ -155,8 +148,6 @@ class TradingAPI:
 
 
 
-
-
     async def _on_open_order(self, data):
         """Handler para ordem aberta"""
         try:
@@ -166,8 +157,6 @@ class TradingAPI:
                     self._update_order_status(order_id, OrderStatus.OPEN, 0, "Ordem aberta no mercado")
         except Exception as e:
             logger.error(f"Erro ao processar ordem aberta: {e}")
-
-
 
 
 
@@ -188,8 +177,6 @@ class TradingAPI:
 
 
 
-
-
     async def _on_close_order(self, data):
         """Handler para ordem fechada"""
         try:
@@ -199,8 +186,6 @@ class TradingAPI:
                     self._update_order_status(order_id, OrderStatus.CLOSED, 0, "Ordem fechada")
         except Exception as e:
             logger.error(f"Erro ao processar ordem fechada: {e}")
-
-
 
 
 
@@ -237,8 +222,6 @@ class TradingAPI:
 
         except Exception as e:
             logger.error(f"Erro em handler: {e}")
-
-
 
 
 
@@ -286,8 +269,6 @@ class TradingAPI:
 
 
 
-
-
     async def _on_order_opened(self, data):
         """Handler para ordem aberta"""
         try:
@@ -297,16 +278,12 @@ class TradingAPI:
 
 
 
-
-
     async def _on_order_closed(self, data):
         """Handler para ordem fechada"""
         try:
             logger.debug(f"Ordem fechada (event): {data}")
         except Exception as e:
             logger.error(f"Erro ao processar ordem fechada: {e}")
-
-
 
 
 
@@ -322,8 +299,6 @@ class TradingAPI:
                     logger.debug(f"Preço atualizado {asset}: {price}")
         except Exception as e:
             pass
-
-
 
 
 
@@ -372,8 +347,6 @@ class TradingAPI:
 
 
 
-
-
     def _validate_order_parameters(self, asset: str, amount: float, direction: OrderDirection, duration: int):
         """Validar parâmetros da ordem"""
         if asset not in ASSETS:
@@ -387,8 +360,6 @@ class TradingAPI:
 
 
 
-
-
     def _format_order_message(self, asset: str, amount: float, direction: str, duration: int, request_id: str) -> str:
         """Formatar mensagem de ordem para WebSocket - formato openOrder"""
         message = f'42["openOrder",{{"asset":"{asset}","amount":{amount},"action":"{direction}","isDemo":1,"requestId":"{request_id}","optionType":100,"time":{duration}}}]'
@@ -396,13 +367,9 @@ class TradingAPI:
 
 
 
-
-
     def get_order_result(self, order_id: str) -> Optional[OrderResult]:
         """Obter resultado de uma ordem pelo ID"""
         return self._order_results.get(order_id)
-
-
 
 
 
@@ -422,16 +389,12 @@ class TradingAPI:
 
 
 
-
-
     def get_open_orders(self) -> list:
         """Obter lista de ordens abertas"""
         return [
             result for result in self._order_results.values()
             if result.status in [OrderStatus.PENDING, OrderStatus.OPEN]
         ]
-
-
 
 
 

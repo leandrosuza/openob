@@ -1,10 +1,9 @@
-"""
-Teste de conexão WebSocket
-"""
+"""Teste de conexão WebSocket"""
 
 import sys
 import asyncio
 import os
+
 
 # Adicionar diretório raiz do projeto ao path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

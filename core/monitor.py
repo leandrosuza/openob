@@ -1,5 +1,4 @@
-"""
-Monitor API - Monitoramento de saldo, payout e ativos da corretora
+"""Monitor API - Monitoramento de saldo, payout e ativos da corretora
 
 Este módulo gerencia conexões dedicadas para monitoramento:
 1. Monitoramento de payout: Reconecta a cada 5s para obter payout atualizado
@@ -7,6 +6,11 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 3. Monitoramento de saldo: Extrai saldo de eventos json_data
 4. Monitoramento dinâmico: Monitora automaticamente os ativos com melhor payout
 """
+
+
+
+
+
 
 import asyncio
 import os
@@ -24,8 +28,11 @@ from repositories.repository_factory import RepositoryFactory
 
 
 
-
 logger = get_logger(__name__)
+
+
+
+
 
 
 class MonitorAPI:
@@ -197,6 +204,7 @@ class MonitorAPI:
 
 
 
+
     def _process_history_data(self, data: Dict):
         """Processar histórico completo do ativo (updateHistoryNewFast)"""
         try:
@@ -217,6 +225,7 @@ class MonitorAPI:
 
         except Exception as e:
             logger.error(f"Erro ao processar histórico: {e}")
+
 
 
 

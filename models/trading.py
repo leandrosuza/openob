@@ -1,6 +1,7 @@
-"""
-Trading models with Pydantic validation
-"""
+"""Trading models with Pydantic validation"""
+
+
+
 
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
@@ -8,11 +9,12 @@ from enum import Enum
 import uuid
 
 
+
+
 class OrderDirection(str, Enum):
     """Direção da ordem"""
     CALL = "call"
     PUT = "put"
-
 
 
 
@@ -29,7 +31,6 @@ class OrderStatus(str, Enum):
 
 
 
-
 class OrderResult(BaseModel):
     """Resultado de uma ordem"""
     order_id: str
@@ -37,9 +38,11 @@ class OrderResult(BaseModel):
     profit: float = 0
     message: str = ""
 
+
+
+
     class Config:
         frozen = True
-
 
 
 
@@ -52,12 +55,18 @@ class Order(BaseModel):
     duration: int
     request_id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))
 
+
+
+
     @field_validator("amount")
     @classmethod
     def amount_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError("Amount must be positive")
         return v
+
+
+
 
     @field_validator("duration")
     @classmethod

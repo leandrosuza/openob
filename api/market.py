@@ -1,6 +1,4 @@
-"""
-Market Data API
-"""
+"""Market Data API"""
 
 import asyncio
 import json
@@ -9,6 +7,9 @@ from datetime import datetime
 from models.market import Candle
 from core.constants import ASSETS, TIMEFRAMES
 from core.logger import get_logger
+
+
+
 
 
 logger = get_logger(__name__)

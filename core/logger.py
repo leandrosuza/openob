@@ -1,6 +1,7 @@
-"""
-Logging configuration for OpenOB
-"""
+"""Logging configuration for OpenOB"""
+
+
+
 
 import logging
 import sys
@@ -8,10 +9,15 @@ from typing import Optional
 from pathlib import Path
 
 
+
+
 class LoggerConfig:
     """Configuração centralizada de logging"""
 
     _configured = False
+
+
+
 
     @classmethod
     def setup(
@@ -54,6 +60,8 @@ class LoggerConfig:
         )
 
         cls._configured = True
+
+
 
 
 def get_logger(name: str) -> logging.Logger:

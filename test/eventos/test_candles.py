@@ -1,10 +1,9 @@
-"""
-Teste de candles/market
-"""
+"""Teste de candles/market"""
 
 import sys
 import asyncio
 import os
+
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 

@@ -1,6 +1,7 @@
-"""
-WebSocket Manager for PocketOption
-"""
+"""WebSocket Manager for PocketOption"""
+
+
+
 
 import asyncio
 import json
@@ -9,13 +10,16 @@ from core.constants import WEBSOCKET_ENDPOINTS, CONNECTION_SETTINGS
 from core.logger import get_logger
 
 
-logger = get_logger(__name__)
 
+
+logger = get_logger(__name__)
 
 DEFAULT_HEADERS = {
     "Origin": "https://pocketoption.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 }
+
+
 
 
 class WebSocketManager:
@@ -34,12 +38,10 @@ class WebSocketManager:
 
 
 
-
     @property
     def is_connected(self):
         """Verificar se está conectado"""
         return self.websocket is not None
-
 
 
 
@@ -92,7 +94,6 @@ class WebSocketManager:
 
 
 
-
     async def _handshake(self, ssid: str = None) -> bool:
         """Executar handshake Socket.IO"""
         initial_message = await self.websocket.recv()
@@ -121,7 +122,6 @@ class WebSocketManager:
 
 
 
-
     async def _ping_loop(self):
         """Enviar ping periodicamente para manter conexão viva"""
         while self._running and self.websocket:
@@ -137,7 +137,6 @@ class WebSocketManager:
 
 
 
-
     async def _receive_messages(self):
         """Receber mensagens do WebSocket"""
         while self._running and self.websocket:
@@ -147,7 +146,6 @@ class WebSocketManager:
             except Exception as e:
                 logger.error(f"Erro ao receber mensagem: {e}")
                 break
-
 
 
 
@@ -175,7 +173,6 @@ class WebSocketManager:
 
 
 
-
     def _handle_binary_message(self, message: str):
         """Handle mensagem binária Socket.IO"""
         if "[" in message:
@@ -185,7 +182,6 @@ class WebSocketManager:
                 event = event_part.strip('"')
                 self._binary_event = event
                 asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
-
 
 
 
@@ -206,7 +202,6 @@ class WebSocketManager:
 
 
 
-
     def _handle_socketio_message(self, message: str):
         """Handle mensagem Socket.IO com dados"""
         data = message[2:]
@@ -222,7 +217,6 @@ class WebSocketManager:
 
 
 
-
     def _handle_json_message(self, message: str):
         """Handle mensagem JSON separada"""
         try:
@@ -231,7 +225,6 @@ class WebSocketManager:
                 asyncio.create_task(self._emit_event("json_data", parsed))
         except json.JSONDecodeError:
             pass
-
 
 
 
@@ -251,13 +244,11 @@ class WebSocketManager:
 
 
 
-
     def add_event_handler(self, event: str, handler):
         """Adicionar handler de evento"""
         if event not in self._event_handlers:
             self._event_handlers[event] = []
         self._event_handlers[event].append(handler)
-
 
 
 
@@ -271,11 +262,9 @@ class WebSocketManager:
 
 
 
-
     def has_event_handler(self, event: str) -> bool:
         """Verificar se existe handler para um evento"""
         return event in self._event_handlers and len(self._event_handlers[event]) > 0
-
 
 
 
@@ -285,7 +274,6 @@ class WebSocketManager:
         if self.websocket:
             await self.websocket.send(message)
             logger.debug(f"Mensagem enviada: {message[:100]}...")
-
 
 
 
@@ -301,7 +289,6 @@ class WebSocketManager:
             await self.websocket.close()
             self.websocket = None
         logger.info(f"Desconectado ({self.name})")
-
 
 
 

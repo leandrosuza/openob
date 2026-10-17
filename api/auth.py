@@ -1,11 +1,12 @@
-"""
-Authentication API
-"""
+"""Authentication API"""
 
 import asyncio
 from typing import Optional
 from core.constants import REGIONS
 from core.logger import get_logger
+
+
+
 
 
 logger = get_logger(__name__)

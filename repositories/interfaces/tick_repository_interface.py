@@ -1,16 +1,17 @@
 """Interface para repositório de ticks"""
 
+
+
+
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import List, Dict, Optional
+from datetime import datetime
 
 
 
 
 class TickRepositoryInterface(ABC):
     """Interface comum para todos os repositórios de ticks"""
-
-
 
 
 

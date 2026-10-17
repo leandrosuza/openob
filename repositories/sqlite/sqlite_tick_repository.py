@@ -1,5 +1,8 @@
 """Implementação SQLite do repositório de ticks"""
 
+
+
+
 import sqlite3
 import os
 import asyncio
@@ -18,8 +21,6 @@ logger = get_logger(__name__)
 
 class SQLiteTickRepository(TickRepositoryInterface):
     """Repositório SQLite - Implementação atual"""
-
-
 
 
 
@@ -107,7 +108,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
         # Converter para UTC se necessário
         if last.tzinfo is None:
             last = last.replace(tzinfo=timezone.utc)
-        
+
         now = datetime.now(timezone.utc)
         return (now - last) > timedelta(minutes=30)
 

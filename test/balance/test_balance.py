@@ -1,10 +1,9 @@
-"""
-Teste de saldo/balance
-"""
+"""Teste de saldo/balance"""
 
 import sys
 import asyncio
 import os
+
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 

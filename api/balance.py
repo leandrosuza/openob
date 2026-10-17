@@ -1,12 +1,13 @@
-"""
-Balance API
-"""
+"""Balance API"""
 
 import asyncio
 from typing import Optional
 from models.market import Balance
 from datetime import datetime
 from core.logger import get_logger
+
+
+
 
 
 logger = get_logger(__name__)
