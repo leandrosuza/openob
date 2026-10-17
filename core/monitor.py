@@ -388,7 +388,6 @@ class MonitorAPI:
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
         """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
-        logger.info(f"MONITOR DE PAYOUT | Iniciando (intervalo: {payout_interval}s)")
         self.payout_running = True
 
         while self.payout_running:
@@ -397,7 +396,6 @@ class MonitorAPI:
                     connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
-                        logger.info("MONITOR DE PAYOUT | CONECTADO!")
                     else:
                         self._log_to_file("connection.txt", "Payout: Falha ao conectar")
                         logger.error("MONITOR DE PAYOUT | FALHA AO CONECTAR")
@@ -407,7 +405,6 @@ class MonitorAPI:
                 if self.payout_ws.is_connected:
                     await self.payout_ws.send_message('42["actives/get"]')
                     self._log_to_file("monitoring_payout.txt", "Solicitação de payout enviada")
-                    logger.info("MONITOR DE PAYOUT | DADOS OBTIDOS!")
                     await asyncio.sleep(1)
 
                 await asyncio.sleep(payout_interval)
@@ -425,7 +422,6 @@ class MonitorAPI:
 
     async def start_actives_monitoring(self, update_interval: int = 30):
         """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
-        logger.info(f"MONITOR DE ATIVOS | Iniciando (Conexão Permanente, atualização a cada {update_interval}s)")
         self.actives_running = True
 
         while self.actives_running:
@@ -434,7 +430,6 @@ class MonitorAPI:
                     connected = await self.actives_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
-                        logger.info("MONITOR DE ATIVOS | CONECTADO!")
                     else:
                         self._log_to_file("connection.txt", "Ativos: Falha ao conectar")
                         logger.error("MONITOR DE ATIVOS | FALHA AO CONECTAR")
@@ -448,14 +443,6 @@ class MonitorAPI:
 
                     # Atualizar dinamicamente os ativos monitorados
                     await self.update_monitored_assets()
-
-                    # Log dos ativos monitorados
-                    monitored = list(self.monitored_assets)
-                    if monitored:
-                        logger.info(f"MONITOR DE ATIVOS | {len(monitored)} ATIVOS MONITORADOS: {', '.join(monitored)}")
-                        recent_ticks = list(self.tick_data.keys())[:5]
-                        if recent_ticks:
-                            logger.info(f"MONITOR DE ATIVOS | DADOS OBTIDOS DE: {', '.join(recent_ticks)} NOS ÚLTIMOS {update_interval}s")
 
                 await asyncio.sleep(update_interval)
 
