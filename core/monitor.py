@@ -23,17 +23,17 @@ logger = get_logger(__name__)
 class MonitorAPI:
     """API de monitoramento de saldo, payout e ativos"""
 
-    def __init__(self, region: str = "DEMO"):
+    def __init__(self):
         load_dotenv()
 
-        self.region = region
+        self.region = "DEMO"
         self.ssid = os.getenv("POCKETOPTION_MONITOR_SSID")
 
         if not self.ssid:
             raise ValueError("POCKETOPTION_MONITOR_SSID não definido no .env")
 
-        self.payout_ws = WebSocketManager(region=region)
-        self.actives_ws = WebSocketManager(region=region)
+        self.payout_ws = WebSocketManager(region=self.region)
+        self.actives_ws = WebSocketManager(region=self.region)
 
         self.payout_running = False
         self.payout_task = None

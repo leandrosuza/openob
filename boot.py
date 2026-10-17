@@ -58,7 +58,7 @@ async def main():
     print("Logs resetados")
 
     try:
-        monitor = MonitorAPI(region="DEMO")
+        monitor = MonitorAPI()
 
         await monitor.start(payout_interval=5)
 

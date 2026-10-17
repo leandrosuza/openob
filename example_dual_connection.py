@@ -17,7 +17,7 @@ async def main():
     print("="*60)
 
     # Inicializar monitor
-    monitor = MonitorAPI(region="DEMO")
+    monitor = MonitorAPI()
 
     try:
         # Iniciar ambos os monitoramentos
