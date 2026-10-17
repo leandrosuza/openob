@@ -1,2 +1,4 @@
-[2026-10-16 22:04:52] Conectado com sucesso
-[2026-10-16 22:05:00] Desconectado para reconexão
+[2026-10-16 22:07:43] Ativos: Conectado com sucesso
+[2026-10-16 22:07:43] Payout: Conectado com sucesso
+[2026-10-16 22:07:49] Payout: Desconectado para reconexão
+[2026-10-16 22:07:51] Payout: Conectado com sucesso

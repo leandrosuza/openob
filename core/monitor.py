@@ -2,8 +2,8 @@
 Monitor API - Monitoramento de saldo, payout e ativos da corretora
 
 Este módulo gerencia conexões dedicadas para monitoramento:
-1. Monitoramento de payout: Extrai payout de updateAssets com dados binários
-2. Monitoramento de ativos: Inscreve em ativos e captura ticks em tempo real
+1. Monitoramento de payout: Reconecta a cada 5s para obter payout atualizado
+2. Monitoramento de ativos: Fica ativo indefinidamente capturando ticks em tempo real
 3. Monitoramento de saldo: Extrai saldo de eventos json_data
 """
 
@@ -32,9 +32,13 @@ class MonitorAPI:
         if not self.ssid:
             raise ValueError("POCKETOPTION_MONITOR_SSID não definido no .env")
 
-        self.ws = WebSocketManager(region=region)
-        self.running = False
-        self.task = None
+        self.payout_ws = WebSocketManager(region=region)
+        self.actives_ws = WebSocketManager(region=region)
+
+        self.payout_running = False
+        self.payout_task = None
+        self.actives_running = False
+        self.actives_task = None
 
         self.payout_data: Dict[str, Dict[str, Any]] = {}
         self.actives_data: Dict[str, Dict[str, Any]] = {}
@@ -48,34 +52,34 @@ class MonitorAPI:
 
 
     def _setup_handlers(self):
-        """Configurar handlers para capturar eventos"""
-        original_emit = self.ws._emit_event
+        """Configurar handlers para capturar eventos em ambas as conexões"""
+        original_emit_payout = self.payout_ws._emit_event
+        original_emit_actives = self.actives_ws._emit_event
 
-        async def patched_emit(event: str, data: Any):
-            """Override para capturar todos os eventos"""
-            await self._capture_event(event, data)
-            return await original_emit(event, data)
+        async def patched_emit_payout(event: str, data: Any):
+            """Override para capturar eventos de payout"""
+            await self._capture_payout_event(event, data)
+            return await original_emit_payout(event, data)
 
-        self.ws._emit_event = patched_emit
+        async def patched_emit_actives(event: str, data: Any):
+            """Override para capturar eventos de ativos"""
+            await self._capture_actives_event(event, data)
+            return await original_emit_actives(event, data)
+
+        self.payout_ws._emit_event = patched_emit_payout
+        self.actives_ws._emit_event = patched_emit_actives
 
 
 
 
 
-    async def _capture_event(self, event: str, data: Any):
-        """Capturar e processar eventos do WebSocket"""
+    async def _capture_payout_event(self, event: str, data: Any):
+        """Capturar eventos de payout do WebSocket"""
         try:
-            log_entry = f"Evento: {event} | Dados: {data}"
-            self._log_to_file("monitoring_actives.txt", log_entry)
-
             if event == "json_data" and isinstance(data, dict):
                 if "balance" in data:
                     self.balance_data = data
                     self._log_to_file("monitoring_payout.txt", f"Saldo: {data}")
-                if "assets" in data or "actives" in data:
-                    self._log_to_file("monitoring_actives.txt", f"Ativos: {data}")
-                if "payout" in data:
-                    self._log_to_file("monitoring_payout.txt", f"Payout: {data}")
 
             if "updateAssets" in event and isinstance(data, dict):
                 if data.get("_placeholder") and "num" in data:
@@ -83,6 +87,19 @@ class MonitorAPI:
 
             if "updateAssets" in event and "_data" in event and isinstance(data, list):
                 self._process_assets_data(data)
+
+        except Exception as e:
+            logger.error(f"Erro ao capturar evento de payout: {e}")
+
+
+
+
+
+    async def _capture_actives_event(self, event: str, data: Any):
+        """Capturar eventos de ativos do WebSocket"""
+        try:
+            log_entry = f"Evento: {event} | Dados: {data}"
+            self._log_to_file("monitoring_actives.txt", log_entry)
 
             if "updateStream" in event and isinstance(data, dict):
                 if data.get("_placeholder") and "num" in data:
@@ -99,7 +116,7 @@ class MonitorAPI:
                     self._log_to_file("monitoring_actives.txt", f"Tick: {asset} = {price}")
 
         except Exception as e:
-            logger.error(f"Erro ao capturar evento: {e}")
+            logger.error(f"Erro ao capturar evento de ativos: {e}")
 
 
 
@@ -172,17 +189,17 @@ class MonitorAPI:
     async def subscribe_asset(self, symbol: str, period: int = 1):
         """Inscrever em um ativo específico para monitoramento"""
         try:
-            await self.ws.send_message(f'42["changeSymbol", {{"asset": "{symbol}", "period": {period}}}]')
+            await self.actives_ws.send_message(f'42["changeSymbol", {{"asset": "{symbol}", "period": {period}}}]')
             self._log_to_file("monitoring_actives.txt", f"Inscrição changeSymbol: {symbol}")
 
             await asyncio.sleep(0.5)
 
-            await self.ws.send_message(f'42["subfor", "{symbol}"]')
+            await self.actives_ws.send_message(f'42["subfor", "{symbol}"]')
             self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
 
             await asyncio.sleep(0.5)
 
-            await self.ws.send_message('42["ps"]')
+            await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico inicial")
 
         except Exception as e:
@@ -192,43 +209,74 @@ class MonitorAPI:
 
 
 
-    async def start_monitoring(self, payout_interval: int = 5):
-        """Iniciar monitoramento com reconexão periódica"""
-        logger.info(f"Iniciando monitoramento (intervalo payout: {payout_interval}s)")
-        self.running = True
+    async def start_payout_monitoring(self, payout_interval: int = 5):
+        """Iniciar monitoramento de payout (reconecta periodicamente)"""
+        logger.info(f"Iniciando monitoramento de payout (intervalo: {payout_interval}s)")
+        self.payout_running = True
 
-        while self.running:
+        while self.payout_running:
             try:
-                if not self.ws.is_connected:
-                    logger.info("Conectando ao servidor")
-                    connected = await self.ws.connect(ssid=self.ssid)
+                if not self.payout_ws.is_connected:
+                    logger.info("Conectando ao servidor de payout")
+                    connected = await self.payout_ws.connect(ssid=self.ssid)
                     if connected:
-                        self._log_to_file("connection.txt", "Conectado com sucesso")
-                        logger.info("Conexão estabelecida")
+                        self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
+                        logger.info("Conexão de payout estabelecida")
                     else:
-                        self._log_to_file("connection.txt", "Falha ao conectar")
-                        logger.error("Falha ao conectar ao servidor")
+                        self._log_to_file("connection.txt", "Payout: Falha ao conectar")
+                        logger.error("Falha ao conectar ao servidor de payout")
 
-                if self.ws.is_connected:
-                    await self.ws.send_message('42["actives/get"]')
+                if self.payout_ws.is_connected:
+                    await self.payout_ws.send_message('42["actives/get"]')
                     self._log_to_file("monitoring_payout.txt", "Solicitação de payout enviada")
                     await asyncio.sleep(1)
 
-                    await self.ws.send_message('42["assets/get"]')
+                await asyncio.sleep(payout_interval)
+
+                if self.payout_ws.is_connected:
+                    await self.payout_ws.disconnect()
+                    self._log_to_file("connection.txt", "Payout: Desconectado para reconexão")
+                    logger.debug("Payout: Desconectado para reconexão")
+
+            except Exception as e:
+                logger.error(f"Erro no monitoramento de payout: {e}")
+                self._log_to_file("connection.txt", f"Payout: Erro - {e}")
+                await asyncio.sleep(payout_interval)
+
+
+
+
+
+    async def start_actives_monitoring(self):
+        """Iniciar monitoramento de ativos (conexão permanente)"""
+        logger.info("Iniciando monitoramento de ativos (conexão permanente)")
+        self.actives_running = True
+
+        while self.actives_running:
+            try:
+                if not self.actives_ws.is_connected:
+                    logger.info("Conectando ao servidor de ativos")
+                    connected = await self.actives_ws.connect(ssid=self.ssid)
+                    if connected:
+                        self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
+                        logger.info("Conexão de ativos estabelecida")
+                    else:
+                        self._log_to_file("connection.txt", "Ativos: Falha ao conectar")
+                        logger.error("Falha ao conectar ao servidor de ativos")
+                        await asyncio.sleep(5)
+                        continue
+
+                if self.actives_ws.is_connected:
+                    await self.actives_ws.send_message('42["assets/get"]')
                     self._log_to_file("monitoring_actives.txt", "Solicitação de ativos enviada")
                     await asyncio.sleep(1)
 
-                await asyncio.sleep(payout_interval)
-
-                if self.ws.is_connected:
-                    await self.ws.disconnect()
-                    self._log_to_file("connection.txt", "Desconectado para reconexão")
-                    logger.debug("Desconectado para reconexão")
+                await asyncio.sleep(10)
 
             except Exception as e:
-                logger.error(f"Erro no monitoramento: {e}")
-                self._log_to_file("connection.txt", f"Erro - {e}")
-                await asyncio.sleep(payout_interval)
+                logger.error(f"Erro no monitoramento de ativos: {e}")
+                self._log_to_file("connection.txt", f"Ativos: Erro - {e}")
+                await asyncio.sleep(5)
 
 
 
@@ -237,7 +285,8 @@ class MonitorAPI:
     async def start(self, payout_interval: int = 5):
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
-        self.task = asyncio.create_task(self.start_monitoring(payout_interval))
+        self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
+        self.actives_task = asyncio.create_task(self.start_actives_monitoring())
         logger.info("Monitoramento iniciado")
 
 
@@ -247,13 +296,18 @@ class MonitorAPI:
     async def stop(self):
         """Parar monitoramento"""
         logger.info("Parando sistema de monitoramento")
-        self.running = False
+        self.payout_running = False
+        self.actives_running = False
 
-        if self.task:
-            self.task.cancel()
+        if self.payout_task:
+            self.payout_task.cancel()
+        if self.actives_task:
+            self.actives_task.cancel()
 
-        if self.ws.is_connected:
-            await self.ws.disconnect()
+        if self.payout_ws.is_connected:
+            await self.payout_ws.disconnect()
+        if self.actives_ws.is_connected:
+            await self.actives_ws.disconnect()
 
         logger.info("Monitoramento parado")
 

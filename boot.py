@@ -69,16 +69,15 @@ async def main():
 
         await asyncio.sleep(3)
 
-        monitor.asset = "EURUSD_otc"
         await monitor.subscribe_asset("EURUSD_otc", period=1)
 
         while True:
             await asyncio.sleep(10)
 
-            balance_data = monitor.get_balance_data()
-            if balance_data:
-                print(f"\n--- Saldo ---")
-                print(f"Valor: {balance_data.get('balance')} {balance_data.get('currency', 'USD')}")
+            payout_data = monitor.get_payout_data()
+            if payout_data:
+                print(f"\n--- Payout ---")
+                print(f"Ativos com payout: {len(payout_data)}")
 
             tick_data = monitor.get_tick_data()
             if tick_data:
