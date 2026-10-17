@@ -58,10 +58,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
         )
         """)
 
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
-
-        # Migrar: adicionar coluna timestamp_unix se não existir
+        # Migrar: adicionar coluna timestamp_unix se não existir (para bancos antigos)
         try:
             self.conn.execute("ALTER TABLE ticks ADD COLUMN timestamp_unix INTEGER")
             # Preencher com dados existentes
@@ -70,6 +67,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
         except sqlite3.OperationalError:
             # Coluna já existe
             pass
+
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
 
         # Tabela de metadata
         self.conn.execute("""
