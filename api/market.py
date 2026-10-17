@@ -7,6 +7,7 @@ from datetime import datetime
 from models.market import Candle
 from core.constants import ASSETS, TIMEFRAMES
 from core.logger import get_logger
+from core.exceptions import ValidationError, ConnectionError as OpenOBConnectionError
 
 
 
@@ -231,13 +232,13 @@ class MarketAPI:
     async def get_candles(self, asset: str, timeframe: str, count: int = 100) -> List[Candle]:
         """Obter candles históricos"""
         if not self.ws_manager.is_connected:
-            raise Exception("WebSocket não está conectado")
+            raise OpenOBConnectionError("WebSocket não está conectado")
 
         if asset not in ASSETS:
-            raise ValueError(f"Ativo inválido: {asset}")
+            raise ValidationError(f"Ativo inválido: {asset}")
 
         if timeframe not in TIMEFRAMES:
-            raise ValueError(f"Timeframe inválido: {timeframe}")
+            raise ValidationError(f"Timeframe inválido: {timeframe}")
 
         try:
             asset_id = ASSETS[asset]
@@ -270,6 +271,8 @@ class MarketAPI:
                 if request_id in self._candle_requests:
                     del self._candle_requests[request_id]
 
+        except OpenOBConnectionError:
+            raise
         except Exception as e:
             logger.error(f"Erro ao obter candles: {e}")
             return []

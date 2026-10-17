@@ -8,6 +8,7 @@ import json
 import ssl
 from core.constants import WEBSOCKET_ENDPOINTS, CONNECTION_SETTINGS
 from core.logger import get_logger
+from core.exceptions import ConnectionError as OpenOBConnectionError
 
 
 
@@ -107,35 +108,40 @@ class WebSocketManager:
                     self.websocket = None
                 continue
 
-        return False
+        raise OpenOBConnectionError(f"Falha ao conectar a todos os endpoints para região {self.region}")
 
 
 
 
     async def _handshake(self, ssid: str = None) -> bool:
         """Executar handshake Socket.IO"""
-        initial_message = await self.websocket.recv()
-        logger.debug(f"Mensagem inicial: {initial_message[:100]}...")
+        try:
+            initial_message = await self.websocket.recv()
+            logger.debug(f"Mensagem inicial: {initial_message[:100]}...")
 
-        if not (initial_message.startswith("0") and "sid" in initial_message):
-            logger.warning(f"Formato de mensagem inicial inesperado: {initial_message}")
-            return False
+            if not (initial_message.startswith("0") and "sid" in initial_message):
+                logger.warning(f"Formato de mensagem inicial inesperado: {initial_message}")
+                raise OpenOBConnectionError("Formato de handshake inválido")
 
-        await self.websocket.send("40")
-        logger.debug("Handshake '40' enviado")
+            await self.websocket.send("40")
+            logger.debug("Handshake '40' enviado")
 
-        conn_message = await self.websocket.recv()
-        logger.debug(f"Mensagem de conexão: {conn_message[:100]}...")
+            conn_message = await self.websocket.recv()
+            logger.debug(f"Mensagem de conexão: {conn_message[:100]}...")
 
-        if not (conn_message.startswith("40") and "sid" in conn_message):
-            logger.warning(f"Formato de mensagem de conexão inesperado: {conn_message}")
-            return False
+            if not (conn_message.startswith("40") and "sid" in conn_message):
+                logger.warning(f"Formato de mensagem de conexão inesperado: {conn_message}")
+                raise OpenOBConnectionError("Formato de conexão inválido")
 
-        if ssid:
-            await self.websocket.send(ssid)
-            logger.debug("SSID enviado durante handshake")
+            if ssid:
+                await self.websocket.send(ssid)
+                logger.debug("SSID enviado durante handshake")
 
-        return True
+            return True
+        except Exception as e:
+            if isinstance(e, OpenOBConnectionError):
+                raise
+            raise OpenOBConnectionError(f"Erro durante handshake: {e}")
 
 
 
@@ -315,9 +321,10 @@ class WebSocketManager:
 
     async def send_message(self, message: str):
         """Enviar mensagem"""
-        if self.websocket:
-            await self.websocket.send(message)
-            logger.debug(f"Mensagem enviada: {message[:100]}...")
+        if not self.websocket:
+            raise OpenOBConnectionError("WebSocket não está conectado")
+        await self.websocket.send(message)
+        logger.debug(f"Mensagem enviada: {message[:100]}...")
 
 
     async def disconnect(self):

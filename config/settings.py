@@ -3,6 +3,7 @@
 import os
 import logging
 from dotenv import load_dotenv
+from core.exceptions import ConfigurationError
 
 load_dotenv()
 
@@ -53,3 +54,22 @@ class Settings:
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
             "LOG_LEVEL": cls.LOG_LEVEL,
         }
+
+    @classmethod
+    def validate(cls) -> list:
+        """Validar configurações e retornar lista de erros"""
+        errors = []
+
+        if not cls.POCKETOPTION_MONITOR_SSID:
+            errors.append("POCKETOPTION_MONITOR_SSID não definido")
+
+        if cls.DATABASE_TYPE not in ["sqlite"]:
+            errors.append(f"DATABASE_TYPE inválido: {cls.DATABASE_TYPE}")
+
+        if cls.MONITOR_TOP_ASSETS < 1 or cls.MONITOR_TOP_ASSETS > 50:
+            errors.append(f"MONITOR_TOP_ASSETS deve estar entre 1 e 50")
+
+        if cls.LOG_LEVEL.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            errors.append(f"LOG_LEVEL inválido: {cls.LOG_LEVEL}")
+
+        return errors

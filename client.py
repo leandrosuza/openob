@@ -8,6 +8,7 @@ from api.market import MarketAPI
 from api.trading import TradingAPI
 from core.constants import REGIONS
 from core.logger import get_logger, LoggerConfig
+from core.exceptions import ConnectionError as OpenOBConnectionError
 from config.settings import Settings
 
 

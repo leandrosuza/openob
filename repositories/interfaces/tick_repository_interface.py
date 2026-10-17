@@ -33,7 +33,7 @@ class TickRepositoryInterface(ABC):
 
 
     @abstractmethod
-    def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
+    async def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
         """Obter ticks recentes de um ativo"""
         pass
 
@@ -41,7 +41,7 @@ class TickRepositoryInterface(ABC):
 
 
     @abstractmethod
-    def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
+    async def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter ticks por range de sequência"""
         pass
 
@@ -49,7 +49,7 @@ class TickRepositoryInterface(ABC):
 
 
     @abstractmethod
-    def get_stats(self) -> Dict:
+    async def get_stats(self) -> Dict:
         """Obter estatísticas do banco"""
         pass
 
@@ -57,6 +57,6 @@ class TickRepositoryInterface(ABC):
 
 
     @abstractmethod
-    def close(self):
+    async def close(self):
         """Fechar conexão"""
         pass

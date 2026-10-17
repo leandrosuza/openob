@@ -79,7 +79,10 @@ async def main():
 
     finally:
         if monitor:
-            await monitor.stop()
+            try:
+                await monitor.stop()
+            except Exception as e:
+                logger.error(f"Erro ao parar monitor: {e}")
             print("Sistema parado")
 
 

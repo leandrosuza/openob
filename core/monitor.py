@@ -20,6 +20,7 @@ from typing import Optional, Dict, Any, List, Set
 from dotenv import load_dotenv
 from connection.websocket import WebSocketManager
 from core.logger import get_logger
+from core.exceptions import ConfigurationError, ConnectionError as OpenOBConnectionError
 from config.settings import Settings
 from repositories.repository_factory import RepositoryFactory
 
@@ -45,7 +46,7 @@ class MonitorAPI:
         self.ssid = os.getenv("POCKETOPTION_MONITOR_SSID")
 
         if not self.ssid:
-            raise ValueError("POCKETOPTION_MONITOR_SSID não definido no .env")
+            raise ConfigurationError("POCKETOPTION_MONITOR_SSID não definido no .env")
 
         # Número de ativos com melhor payout para monitorar
         self.top_assets_count = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
@@ -379,8 +380,11 @@ class MonitorAPI:
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico inicial")
 
+        except OpenOBConnectionError:
+            raise
         except Exception as e:
             logger.error(f"Erro ao inscrever no ativo {symbol}: {e}")
+            raise OpenOBConnectionError(f"Falha ao inscrever no ativo {symbol}: {e}")
 
 
 
@@ -482,6 +486,10 @@ class MonitorAPI:
             await self.payout_ws.disconnect()
         if self.actives_ws.is_connected:
             await self.actives_ws.disconnect()
+
+        # Fechar repositório
+        if self.tick_repo:
+            await self.tick_repo.close()
 
         logger.info("Monitoramento parado")
 

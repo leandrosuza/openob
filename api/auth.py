@@ -4,6 +4,7 @@ import asyncio
 from typing import Optional
 from core.constants import REGIONS
 from core.logger import get_logger
+from core.exceptions import AuthenticationError, ConnectionError as OpenOBConnectionError
 
 
 
@@ -81,9 +82,11 @@ class AuthAPI:
                 logger.warning("Timeout aguardando autenticação - considerando autenticado")
                 return True
 
+        except OpenOBConnectionError:
+            raise
         except Exception as e:
             logger.error(f"Erro ao autenticar: {e}")
-            return False
+            raise AuthenticationError(f"Falha na autenticação: {e}")
 
 
 

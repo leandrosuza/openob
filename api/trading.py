@@ -6,6 +6,7 @@ from typing import Optional
 from models.trading import OrderDirection, OrderResult, OrderStatus, Order
 from core.constants import ASSETS, API_LIMITS
 from core.logger import get_logger
+from core.exceptions import ValidationError, TradingError, ConnectionError as OpenOBConnectionError
 
 
 
@@ -305,7 +306,7 @@ class TradingAPI:
     async def place_order(self, asset: str, amount: float, direction: OrderDirection, duration: int) -> OrderResult:
         """Colocar uma ordem de trading"""
         if not self.ws_manager.is_connected:
-            raise Exception("WebSocket não está conectado")
+            raise OpenOBConnectionError("WebSocket não está conectado")
 
         self._validate_order_parameters(asset, amount, direction, duration)
 
@@ -341,22 +342,24 @@ class TradingAPI:
 
             return result
 
+        except (ValidationError, OpenOBConnectionError):
+            raise
         except Exception as e:
             logger.error(f"Erro ao colocar ordem: {e}")
-            raise
+            raise TradingError(f"Falha ao colocar ordem: {e}")
 
 
 
     def _validate_order_parameters(self, asset: str, amount: float, direction: OrderDirection, duration: int):
         """Validar parâmetros da ordem"""
         if asset not in ASSETS:
-            raise ValueError(f"Ativo inválido: {asset}")
+            raise ValidationError(f"Ativo inválido: {asset}")
 
         if amount < API_LIMITS["min_order_amount"] or amount > API_LIMITS["max_order_amount"]:
-            raise ValueError(f"Valor da ordem deve estar entre {API_LIMITS['min_order_amount']} e {API_LIMITS['max_order_amount']}")
+            raise ValidationError(f"Valor da ordem deve estar entre {API_LIMITS['min_order_amount']} e {API_LIMITS['max_order_amount']}")
 
         if duration < API_LIMITS["min_duration"] or duration > API_LIMITS["max_duration"]:
-            raise ValueError(f"Duração deve estar entre {API_LIMITS['min_duration']} e {API_LIMITS['max_duration']} segundos")
+            raise ValidationError(f"Duração deve estar entre {API_LIMITS['min_duration']} e {API_LIMITS['max_duration']} segundos")
 
 
 
@@ -376,16 +379,18 @@ class TradingAPI:
     async def close_order(self, order_id: str) -> bool:
         """Fechar uma ordem aberta"""
         if not self.ws_manager.is_connected:
-            raise Exception("WebSocket não está conectado")
+            raise OpenOBConnectionError("WebSocket não está conectado")
 
         try:
             message = f'42["closeOrder",{{"id":"{order_id}"}}]'
             await self.ws_manager.send_message(message)
             logger.info(f"Solicitação de fechamento enviada para ordem {order_id}")
             return True
+        except OpenOBConnectionError:
+            raise
         except Exception as e:
             logger.error(f"Erro ao fechar ordem: {e}")
-            return False
+            raise TradingError(f"Falha ao fechar ordem: {e}")
 
 
 
