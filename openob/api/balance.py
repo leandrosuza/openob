@@ -1,5 +1,5 @@
 """
-Account API
+Balance API
 """
 
 import asyncio
@@ -8,8 +8,8 @@ from openob.models.market import Balance
 from datetime import datetime
 
 
-class AccountAPI:
-    """API de conta e saldo"""
+class BalanceAPI:
+    """API de saldo"""
 
     def __init__(self, ws_manager):
         self.ws_manager = ws_manager
@@ -17,13 +17,25 @@ class AccountAPI:
         self._balance_updated = asyncio.Event()
         self._setup_handlers()
 
+
+
+
+
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
-        self.ws_manager.add_event_handler("balance", self._on_balance)
-        self.ws_manager.add_event_handler("balance_updated", self._on_balance)
-        self.ws_manager.add_event_handler("successupdateBalance", self._on_balance)
-        self.ws_manager.add_event_handler("balance_data", self._on_balance)
-        self.ws_manager.add_event_handler("json_data", self._on_json_data)
+        handlers = {
+            "balance": self._on_balance,
+            "balance_updated": self._on_balance,
+            "successupdateBalance": self._on_balance,
+            "balance_data": self._on_balance,
+            "json_data": self._on_json_data,
+        }
+        for event, handler in handlers.items():
+            self.ws_manager.add_event_handler(event, handler)
+
+
+
+
 
     async def _on_balance(self, data):
         """Handler para receber dados de saldo"""
@@ -35,7 +47,11 @@ class AccountAPI:
                 self._balance = Balance(amount=amount, currency=currency, is_demo=is_demo)
                 self._balance_updated.set()
         except Exception as e:
-            pass
+            print(f"Erro ao processar dados de saldo: {e}")
+
+
+
+
 
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
@@ -47,7 +63,11 @@ class AccountAPI:
                 self._balance = Balance(amount=amount, currency=currency, is_demo=is_demo)
                 self._balance_updated.set()
         except Exception as e:
-            pass
+            print(f"Erro ao processar JSON de saldo: {e}")
+
+
+
+
 
     async def get_balance(self) -> Balance:
         """Obter saldo atual"""
@@ -55,10 +75,8 @@ class AccountAPI:
             raise Exception("WebSocket não está conectado")
 
         try:
-            # Solicitar saldo
             await self.ws_manager.send_message('42["balance/get"]')
 
-            # Aguardar resposta (com timeout)
             try:
                 await asyncio.wait_for(self._balance_updated.wait(), timeout=5.0)
                 self._balance_updated.clear()

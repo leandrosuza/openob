@@ -19,11 +19,17 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 
 # Virtual Environment
 venv/
 ENV/
 env/
+.venv/
 
 # IDE
 .vscode/
@@ -31,7 +37,21 @@ env/
 *.swp
 *.swo
 *~
+*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets
+.env
+.env.local
+*.key
+ssid.txt
+
+# Logs
+*.log
+logs/
+
+# Pre-commit
+.pre-commit-config.yaml.local

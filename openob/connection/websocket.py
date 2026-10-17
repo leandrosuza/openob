@@ -7,11 +7,14 @@ import json
 import ssl
 from openob.core.constants import WEBSOCKET_ENDPOINTS, CONNECTION_SETTINGS
 
-# Headers necessários
+
 DEFAULT_HEADERS = {
     "Origin": "https://pocketoption.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 }
+
+
+
 
 
 class WebSocketManager:
@@ -24,22 +27,29 @@ class WebSocketManager:
         self._running = False
         self._receive_task = None
 
+
+
+
+
     @property
     def is_connected(self):
         """Verificar se está conectado"""
         return self.websocket is not None
 
+
+
+
+
     async def connect(self, ssid: str = None) -> bool:
         """Conectar ao servidor"""
+        import websockets.legacy.client
+
         endpoints = [WEBSOCKET_ENDPOINTS.get(self.region)] + [v for k, v in WEBSOCKET_ENDPOINTS.items() if k != self.region]
 
         for endpoint in endpoints:
             try:
                 print(f"Tentando conectar a {endpoint}")
-                import websockets.legacy.client
-                import websockets.exceptions
 
-                # Configurar SSL
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
@@ -54,37 +64,17 @@ class WebSocketManager:
                 )
                 print("Conectado com sucesso")
 
-                # Handshake Engine.IO/Socket.IO
-                # 1. Aguardar mensagem inicial "0" com "sid"
-                initial_message = await self.websocket.recv()
-                print(f"Mensagem inicial: {initial_message[:100]}...")
+                if not await self._handshake(ssid):
+                    await self.websocket.close()
+                    self.websocket = None
+                    continue
 
-                if initial_message.startswith("0") and "sid" in initial_message:
-                    # 2. Enviar "40"
-                    await self.websocket.send("40")
-                    print("Handshake '40' enviado")
+                self._running = True
+                self._receive_task = asyncio.create_task(self._receive_messages())
+                self._ping_task = asyncio.create_task(self._ping_loop())
 
-                    # 3. Aguardar mensagem "40" com "sid"
-                    conn_message = await self.websocket.recv()
-                    print(f"Mensagem de conexão: {conn_message[:100]}...")
-
-                    if conn_message.startswith("40") and "sid" in conn_message:
-                        # Enviar SSID se fornecido
-                        if ssid:
-                            await self.websocket.send(ssid)
-                            print(f"SSID enviado durante handshake")
-
-                        # Iniciar tarefas de background
-                        self._running = True
-                        self._receive_task = asyncio.create_task(self._receive_messages())
-                        self._ping_task = asyncio.create_task(self._ping_loop())
-
-                        print("Handshake completo")
-                        return True
-                    else:
-                        print(f"Formato de mensagem de conexão inesperado: {conn_message}")
-                else:
-                    print(f"Formato de mensagem inicial inesperado: {initial_message}")
+                print("Handshake completo")
+                return True
 
             except Exception as e:
                 print(f"Falha ao conectar a {endpoint}: {e}")
@@ -94,6 +84,39 @@ class WebSocketManager:
                 continue
 
         return False
+
+
+
+
+
+    async def _handshake(self, ssid: str = None) -> bool:
+        """Executar handshake Socket.IO"""
+        initial_message = await self.websocket.recv()
+        print(f"Mensagem inicial: {initial_message[:100]}...")
+
+        if not (initial_message.startswith("0") and "sid" in initial_message):
+            print(f"Formato de mensagem inicial inesperado: {initial_message}")
+            return False
+
+        await self.websocket.send("40")
+        print("Handshake '40' enviado")
+
+        conn_message = await self.websocket.recv()
+        print(f"Mensagem de conexão: {conn_message[:100]}...")
+
+        if not (conn_message.startswith("40") and "sid" in conn_message):
+            print(f"Formato de mensagem de conexão inesperado: {conn_message}")
+            return False
+
+        if ssid:
+            await self.websocket.send(ssid)
+            print(f"SSID enviado durante handshake")
+
+        return True
+
+
+
+
 
     async def _ping_loop(self):
         """Enviar ping periodicamente para manter conexão viva"""
@@ -107,6 +130,10 @@ class WebSocketManager:
                 print(f"Erro ao enviar ping: {e}")
                 break
 
+
+
+
+
     async def _receive_messages(self):
         """Receber mensagens do WebSocket"""
         while self._running and self.websocket:
@@ -116,44 +143,71 @@ class WebSocketManager:
             except Exception as e:
                 break
 
+
+
+
+
     async def _process_message(self, message):
         """Processar mensagem recebida"""
         try:
             if isinstance(message, bytes):
                 message = message.decode("utf-8")
 
-            # Mensagem binária Socket.IO (451-)
             if message.startswith("451-"):
-                if "[" in message:
-                    parts = message.split("[", 1)
-                    if "]" in parts[1]:
-                        event_part = parts[1].split("]", 1)[0]
-                        event = event_part.strip('"')
-                        await self._emit_event(event, {"_placeholder": True, "num": 0})
-                return
-
-            # Mensagem Socket.IO com dados
-            if message.startswith("42"):
-                data = message[2:]
-                try:
-                    parsed = json.loads(data)
-                    if isinstance(parsed, list) and len(parsed) >= 1:
-                        event = parsed[0]
-                        event_data = parsed[1] if len(parsed) > 1 else {}
-                        await self._emit_event(event, event_data)
-                except json.JSONDecodeError:
-                    pass
-
-            # Mensagem JSON separada
-            try:
-                parsed = json.loads(message)
-                if isinstance(parsed, dict):
-                    await self._emit_event("json_data", parsed)
-            except json.JSONDecodeError:
-                pass
+                self._handle_binary_message(message)
+            elif message.startswith("42"):
+                self._handle_socketio_message(message)
+            else:
+                self._handle_json_message(message)
 
         except Exception as e:
             pass
+
+
+
+
+
+    def _handle_binary_message(self, message: str):
+        """Handle mensagem binária Socket.IO"""
+        if "[" in message:
+            parts = message.split("[", 1)
+            if "]" in parts[1]:
+                event_part = parts[1].split("]", 1)[0]
+                event = event_part.strip('"')
+                asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
+
+
+
+
+
+    def _handle_socketio_message(self, message: str):
+        """Handle mensagem Socket.IO com dados"""
+        data = message[2:]
+        try:
+            parsed = json.loads(data)
+            if isinstance(parsed, list) and len(parsed) >= 1:
+                event = parsed[0]
+                event_data = parsed[1] if len(parsed) > 1 else {}
+                asyncio.create_task(self._emit_event(event, event_data))
+        except json.JSONDecodeError:
+            pass
+
+
+
+
+
+    def _handle_json_message(self, message: str):
+        """Handle mensagem JSON separada"""
+        try:
+            parsed = json.loads(message)
+            if isinstance(parsed, dict):
+                asyncio.create_task(self._emit_event("json_data", parsed))
+        except json.JSONDecodeError:
+            pass
+
+
+
+
 
     async def _emit_event(self, event: str, data):
         """Emitir evento para handlers"""
@@ -167,17 +221,47 @@ class WebSocketManager:
                 except Exception as e:
                     print(f"Erro no handler {event}: {e}")
 
+
+
+
+
     def add_event_handler(self, event: str, handler):
         """Adicionar handler de evento"""
         if event not in self._event_handlers:
             self._event_handlers[event] = []
         self._event_handlers[event].append(handler)
 
+
+
+
+
+    def remove_event_handler(self, event: str, handler):
+        """Remover handler de evento"""
+        if event in self._event_handlers:
+            if handler in self._event_handlers[event]:
+                self._event_handlers[event].remove(handler)
+
+
+
+
+
+    def has_event_handler(self, event: str) -> bool:
+        """Verificar se existe handler para um evento"""
+        return event in self._event_handlers and len(self._event_handlers[event]) > 0
+
+
+
+
+
     async def send_message(self, message: str):
         """Enviar mensagem"""
         if self.websocket:
             await self.websocket.send(message)
             print(f"Mensagem enviada: {message[:100]}...")
+
+
+
+
 
     async def disconnect(self):
         """Desconectar"""
@@ -190,3 +274,13 @@ class WebSocketManager:
             await self.websocket.close()
             self.websocket = None
         print("Desconectado")
+
+
+
+
+
+    async def reconnect(self, ssid: str = None) -> bool:
+        """Reconectar ao servidor"""
+        await self.disconnect()
+        await asyncio.sleep(CONNECTION_SETTINGS["reconnect_delay"])
+        return await self.connect(ssid=ssid)

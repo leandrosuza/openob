@@ -25,6 +25,9 @@ class Balance(BaseModel):
         frozen = True
 
 
+
+
+
 class Candle(BaseModel):
     """Candle de mercado com validação"""
     timestamp: datetime
@@ -34,7 +37,7 @@ class Candle(BaseModel):
     low: float
     volume: Optional[float] = None
     asset: str
-    timeframe: int  # in seconds
+    timeframe: int
 
     @model_validator(mode="after")
     def validate_ohlc(self):

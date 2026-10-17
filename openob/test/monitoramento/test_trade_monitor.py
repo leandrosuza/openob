@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from openob.connection.websocket import WebSocketManager
 from openob.api.auth import AuthAPI
-from openob.api.account import AccountAPI
+from openob.api.balance import BalanceAPI
 from openob.api.trading import TradingAPI
 from openob.models.trading import OrderDirection
 
@@ -25,7 +25,7 @@ async def test_trade_monitor():
 
     ws_manager = WebSocketManager(region="DEMO")
     auth_api = AuthAPI(ws_manager, ssid)
-    account_api = AccountAPI(ws_manager)
+    balance_api = BalanceAPI(ws_manager)
     trading_api = TradingAPI(ws_manager)
 
     try:
@@ -40,7 +40,7 @@ async def test_trade_monitor():
 
             if authenticated:
                 print("\n[3/5] Saldo inicial...")
-                balance_initial = await account_api.get_balance()
+                balance_initial = await balance_api.get_balance()
                 print(f"   {balance_initial}")
 
                 print("\n[4/5] Colocando ordem (EURUSD_otc, $10, CALL, 60s)...")
@@ -62,7 +62,7 @@ async def test_trade_monitor():
                         break
 
                 print("\n[FINAL] Saldo final...")
-                balance_final = await account_api.get_balance()
+                balance_final = await balance_api.get_balance()
                 print(f"   {balance_final}")
             else:
                 print("   [SKIP] Não foi possível autenticar")

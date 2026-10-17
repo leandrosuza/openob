@@ -18,7 +18,7 @@ async def main():
     print("Iniciando main()...")
 
     # SSID do usuário (demo)
-    ssid = '42["auth",{"session":"65j1qjhmcrpsnso431359pqntr","isDemo":1,"uid":142476934,"platform":2,"isFastHistory":true,"isOptimized":true}]'
+    ssid = '42["auth",{"session":"i4l5kgudu28vqeppbeios7op3f","isDemo":1,"uid":142541678,"platform":2,"isFastHistory":true,"isOptimized":true}]'
 
     # Criar cliente
     print("Criando cliente...")

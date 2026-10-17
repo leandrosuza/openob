@@ -16,17 +16,28 @@ class MarketAPI:
     def __init__(self, ws_manager):
         self.ws_manager = ws_manager
         self._candles_cache: dict = {}
-        self._candles_received = asyncio.Event()
         self._candle_requests: dict = {}
         self._setup_handlers()
 
+
+
+
+
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
-        self.ws_manager.add_event_handler("changeSymbol", self._on_change_symbol)
-        self.ws_manager.add_event_handler("updateHistoryNewFast", self._on_history_update)
-        self.ws_manager.add_event_handler("updateStream", self._on_stream_update)
-        self.ws_manager.add_event_handler("updateAssets", self._on_assets_update)
-        self.ws_manager.add_event_handler("json_data", self._on_json_data)
+        handlers = {
+            "changeSymbol": self._on_change_symbol,
+            "updateHistoryNewFast": self._on_history_update,
+            "updateStream": self._on_stream_update,
+            "updateAssets": self._on_assets_update,
+            "json_data": self._on_json_data,
+        }
+        for event, handler in handlers.items():
+            self.ws_manager.add_event_handler(event, handler)
+
+
+
+
 
     async def _on_change_symbol(self, data):
         """Handler para resposta do changeSymbol"""
@@ -46,6 +57,10 @@ class MarketAPI:
                             print(f"Candles resolvidos para {request_id}: {len(candles)}")
         except Exception as e:
             print(f"Erro ao processar changeSymbol: {e}")
+
+
+
+
 
     def _parse_stream_candles(self, stream_data: dict, asset: str, timeframe: int):
         """Parse candles de stream data"""
@@ -82,6 +97,10 @@ class MarketAPI:
             print(f"Erro ao parse stream candles: {e}")
         return candles
 
+
+
+
+
     async def _on_history_update(self, data):
         """Handler para updateHistoryNewFast"""
         try:
@@ -98,7 +117,11 @@ class MarketAPI:
                             future.set_result(candles)
                             del self._candle_requests[request_id]
         except Exception as e:
-            pass
+            print(f"Erro em handler de mercado: {e}")
+
+
+
+
 
     def _parse_history_candles(self, history: list, asset: str, timeframe: int):
         """Parse candles de history data"""
@@ -134,22 +157,57 @@ class MarketAPI:
                     candles.append(candle)
 
         except Exception as e:
-            pass
+            print(f"Erro em handler de mercado: {e}")
         return candles
 
+
+
+
+
     async def _on_stream_update(self, data):
-        """Handler para updateStream"""
+        """Handler para updateStream - atualização em tempo real de candles"""
         try:
-            pass
+            if isinstance(data, dict):
+                asset = data.get("asset")
+                period = data.get("period")
+                price = data.get("price") or data.get("close")
+                if asset and period and price:
+                    cache_key = f"{asset}_{period}"
+                    if cache_key in self._candles_cache:
+                        candles = self._candles_cache[cache_key]
+                        if candles:
+                            last_candle = candles[-1]
+                            updated_candle = Candle(
+                                timestamp=last_candle.timestamp,
+                                open=last_candle.open,
+                                close=float(price),
+                                high=max(last_candle.high, float(price)),
+                                low=min(last_candle.low, float(price)),
+                                volume=last_candle.volume + 1,
+                                asset=asset,
+                                timeframe=period,
+                            )
+                            candles[-1] = updated_candle
         except Exception as e:
-            pass
+            print(f"Erro ao processar stream update: {e}")
+
+
+
+
 
     async def _on_assets_update(self, data):
-        """Handler para atualização de ativos"""
+        """Handler para atualização de ativos disponíveis"""
         try:
-            pass
+            if isinstance(data, dict):
+                assets = data.get("assets") or data.get("active")
+                if assets:
+                    print(f"Ativos atualizados: {len(assets) if isinstance(assets, list) else 'N/A'}")
         except Exception as e:
-            pass
+            print(f"Erro ao processar atualização de ativos: {e}")
+
+
+
+
 
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
@@ -158,6 +216,10 @@ class MarketAPI:
                 await self._on_history_update(data)
         except Exception as e:
             print(f"Erro ao processar JSON data: {e}")
+
+
+
+
 
     async def get_candles(self, asset: str, timeframe: str, count: int = 100) -> List[Candle]:
         """Obter candles históricos"""
@@ -205,8 +267,28 @@ class MarketAPI:
             print(f"Erro ao obter candles: {e}")
             return []
 
+
+
+
+
     def _format_candles_message(self, asset: str, timeframe: int, start_time: int, end_time: int, count: int) -> str:
         """Formatar mensagem de solicitação de candles"""
         message_data = ["changeSymbol", {"asset": str(asset), "period": timeframe}]
         message = f"42{json.dumps(message_data)}"
         return message
+
+
+
+
+
+    def get_available_assets(self) -> dict:
+        """Obter lista de ativos disponíveis"""
+        return ASSETS
+
+
+
+
+
+    def get_available_timeframes(self) -> dict:
+        """Obter lista de timeframes disponíveis"""
+        return TIMEFRAMES

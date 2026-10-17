@@ -14,84 +14,158 @@ class TradingAPI:
 
     def __init__(self, ws_manager):
         self.ws_manager = ws_manager
-        self._pending_orders: dict = {}
         self._order_results: dict = {}
         self._order_id_mapping: dict = {}
+        self._current_prices: dict = {}
         self._setup_handlers()
+
+
+
+
 
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
-        self.ws_manager.add_event_handler("order", self._on_order)
-        self.ws_manager.add_event_handler("order-placed", self._on_order_placed)
-        self.ws_manager.add_event_handler("order-won", self._on_order_won)
-        self.ws_manager.add_event_handler("order-lost", self._on_order_lost)
-        self.ws_manager.add_event_handler("buy", self._on_buy)
-        self.ws_manager.add_event_handler("successbuy", self._on_success_buy)
-        self.ws_manager.add_event_handler("openOrder", self._on_open_order)
-        self.ws_manager.add_event_handler("successopenOrder", self._on_success_open_order)
-        self.ws_manager.add_event_handler("closeOrder", self._on_close_order)
-        self.ws_manager.add_event_handler("successcloseOrder", self._on_success_close_order)
-        self.ws_manager.add_event_handler("json_data", self._on_json_data)
-        # Handlers adicionais do PocketOptionAPI
-        self.ws_manager.add_event_handler("order_opened", self._on_order_opened)
-        self.ws_manager.add_event_handler("order_closed", self._on_order_closed)
-        self.ws_manager.add_event_handler("stream_update", self._on_stream_update)
+        handlers = {
+            "order": self._on_order,
+            "order-placed": self._on_order_placed,
+            "order-won": self._on_order_won,
+            "order-lost": self._on_order_lost,
+            "buy": self._on_buy,
+            "successbuy": self._on_success_buy,
+            "openOrder": self._on_open_order,
+            "successopenOrder": self._on_success_open_order,
+            "closeOrder": self._on_close_order,
+            "successcloseOrder": self._on_success_close_order,
+            "json_data": self._on_json_data,
+            "order_opened": self._on_order_opened,
+            "order_closed": self._on_order_closed,
+            "stream_update": self._on_stream_update,
+        }
+        for event, handler in handlers.items():
+            self.ws_manager.add_event_handler(event, handler)
+
+
+
+
+
+    def _update_order_status(self, order_id: str, status: OrderStatus, profit: float = 0, message: str = ""):
+        """Helper para atualizar status de ordem"""
+        for local_id, result in list(self._order_results.items()):
+            if result.status in [OrderStatus.PENDING, OrderStatus.OPEN]:
+                self._order_results[local_id] = OrderResult(
+                    order_id=local_id,
+                    status=status,
+                    profit=profit,
+                    message=message
+                )
+                print(f"Ordem {local_id}: {status.value} ({message})")
+                return local_id
+        return None
+
+
+
+
 
     async def _on_order(self, data):
         """Handler para ordem"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                status = data.get("status")
+                if order_id and status:
+                    self._update_order_status(order_id, OrderStatus.OPEN, 0, f"Ordem atualizada: {status}")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem: {e}")
+
+
+
+
 
     async def _on_order_placed(self, data):
         """Handler para ordem colocada"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.OPEN, 0, "Ordem colocada com sucesso")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem colocada: {e}")
+
+
+
+
 
     async def _on_order_won(self, data):
         """Handler para ordem ganha"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("order_id")
+                profit = data.get("profit", 0)
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.WIN, profit, f"Ordem ganha: ${profit}")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem ganha: {e}")
+
+
+
+
 
     async def _on_order_lost(self, data):
         """Handler para ordem perdida"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("order_id")
+                profit = data.get("profit", 0)
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.LOSS, profit, f"Ordem perdida: ${profit}")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem perdida: {e}")
+
+
+
+
 
     async def _on_buy(self, data):
         """Handler para resposta de compra"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.OPEN, 0, "Ordem de compra processada")
         except Exception as e:
-            pass
+            print(f"Erro ao processar compra: {e}")
+
+
+
+
 
     async def _on_success_buy(self, data):
         """Handler para compra bem-sucedida"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.OPEN, 0, "Compra realizada com sucesso")
         except Exception as e:
-            pass
+            print(f"Erro ao processar sucesso da compra: {e}")
+
+
+
+
 
     async def _on_open_order(self, data):
         """Handler para ordem aberta"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.OPEN, 0, "Ordem aberta no mercado")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem aberta: {e}")
+
+
+
+
 
     async def _on_success_open_order(self, data):
         """Handler para ordem aberta com sucesso - armazenar ID do servidor"""
@@ -105,15 +179,25 @@ class TradingAPI:
                             self._order_id_mapping[server_order_id] = local_id
                             break
         except Exception as e:
-            pass
+            print(f"Erro em handler: {e}")
+
+
+
+
 
     async def _on_close_order(self, data):
         """Handler para ordem fechada"""
         try:
-            # Silencioso
-            pass
+            if isinstance(data, dict):
+                order_id = data.get("id") or data.get("requestId")
+                if order_id:
+                    self._update_order_status(order_id, OrderStatus.CLOSED, 0, "Ordem fechada")
         except Exception as e:
-            pass
+            print(f"Erro ao processar ordem fechada: {e}")
+
+
+
+
 
     async def _on_success_close_order(self, data):
         """Handler para ordem fechada com sucesso - parsing de WIN/LOSS"""
@@ -147,7 +231,11 @@ class TradingAPI:
                             break
 
         except Exception as e:
-            pass
+            print(f"Erro em handler: {e}")
+
+
+
+
 
     async def _on_json_data(self, data):
         """Handler para dados JSON - parsing de resultado de ordem"""
@@ -191,12 +279,20 @@ class TradingAPI:
             import traceback
             traceback.print_exc()
 
+
+
+
+
     async def _on_order_opened(self, data):
         """Handler para ordem aberta"""
         try:
             print(f"Ordem aberta (event): {data}")
         except Exception as e:
             print(f"Erro ao processar ordem aberta: {e}")
+
+
+
+
 
     async def _on_order_closed(self, data):
         """Handler para ordem fechada"""
@@ -205,14 +301,25 @@ class TradingAPI:
         except Exception as e:
             print(f"Erro ao processar ordem fechada: {e}")
 
+
+
+
+
     async def _on_stream_update(self, data):
         """Handler para atualização de stream de preços"""
         try:
-            # Silencioso para não poluir o log - ticks chegam em alta frequência
-            pass
+            if isinstance(data, dict):
+                asset = data.get("asset")
+                price = data.get("price") or data.get("close")
+                order_id = data.get("order_id") or data.get("id")
+                if asset and price:
+                    self._current_prices[asset] = float(price)
         except Exception as e:
-            # Silencioso mesmo em erro
             pass
+
+
+
+
 
     async def place_order(self, asset: str, amount: float, direction: OrderDirection, duration: int) -> OrderResult:
         """Colocar uma ordem de trading"""
@@ -249,7 +356,6 @@ class TradingAPI:
                 message="Ordem enviada"
             )
 
-            self._pending_orders[order.request_id] = result
             self._order_results[order.request_id] = result
 
             return result
@@ -257,6 +363,10 @@ class TradingAPI:
         except Exception as e:
             print(f"Erro ao colocar ordem: {e}")
             raise
+
+
+
+
 
     def _validate_order_parameters(self, asset: str, amount: float, direction: OrderDirection, duration: int):
         """Validar parâmetros da ordem"""
@@ -269,7 +379,56 @@ class TradingAPI:
         if duration < API_LIMITS["min_duration"] or duration > API_LIMITS["max_duration"]:
             raise ValueError(f"Duração deve estar entre {API_LIMITS['min_duration']} e {API_LIMITS['max_duration']} segundos")
 
+
+
+
+
     def _format_order_message(self, asset: str, amount: float, direction: str, duration: int, request_id: str) -> str:
         """Formatar mensagem de ordem para WebSocket - formato openOrder"""
         message = f'42["openOrder",{{"asset":"{asset}","amount":{amount},"action":"{direction}","isDemo":1,"requestId":"{request_id}","optionType":100,"time":{duration}}}]'
         return message
+
+
+
+
+
+    def get_order_result(self, order_id: str) -> Optional[OrderResult]:
+        """Obter resultado de uma ordem pelo ID"""
+        return self._order_results.get(order_id)
+
+
+
+
+
+    async def close_order(self, order_id: str) -> bool:
+        """Fechar uma ordem aberta"""
+        if not self.ws_manager.is_connected:
+            raise Exception("WebSocket não está conectado")
+
+        try:
+            message = f'42["closeOrder",{{"id":"{order_id}"}}]'
+            await self.ws_manager.send_message(message)
+            print(f"Solicitação de fechamento enviada para ordem {order_id}")
+            return True
+        except Exception as e:
+            print(f"Erro ao fechar ordem: {e}")
+            return False
+
+
+
+
+
+    def get_open_orders(self) -> list:
+        """Obter lista de ordens abertas"""
+        return [
+            result for result in self._order_results.values()
+            if result.status in [OrderStatus.PENDING, OrderStatus.OPEN]
+        ]
+
+
+
+
+
+    def get_current_price(self, asset: str) -> Optional[float]:
+        """Obter preço atual de um ativo"""
+        return self._current_prices.get(asset)

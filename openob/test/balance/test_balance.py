@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from openob.connection.websocket import WebSocketManager
 from openob.api.auth import AuthAPI
-from openob.api.account import AccountAPI
+from openob.api.balance import BalanceAPI
 
 
 async def test_balance():
@@ -23,7 +23,7 @@ async def test_balance():
 
     ws_manager = WebSocketManager(region="DEMO")
     auth_api = AuthAPI(ws_manager, ssid)
-    account_api = AccountAPI(ws_manager)
+    balance_api = BalanceAPI(ws_manager)
 
     try:
         print("\n[1/3] Conectando ao servidor...")
@@ -37,7 +37,7 @@ async def test_balance():
 
             if authenticated:
                 print("\n[3/3] Obtendo saldo...")
-                balance = await account_api.get_balance()
+                balance = await balance_api.get_balance()
                 print(f"   Saldo: {balance}")
             else:
                 print("   [SKIP] Não foi possível autenticar")
