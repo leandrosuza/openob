@@ -46,11 +46,6 @@ Thumbs.db
 # Secrets
 .env
 .env.local
-*.key
-ssid.txt
 
 # Logs (excluindo estrutura de diretório)
 *.log
-
-# Pre-commit
-.pre-commit-config.yaml.local

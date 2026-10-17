@@ -23,13 +23,7 @@ WEBSOCKET_ENDPOINTS = {
 }
 
 
-
-
-
 REGIONS = list(WEBSOCKET_ENDPOINTS.keys())
-
-
-
 
 
 ASSETS = {
@@ -67,9 +61,6 @@ ASSETS = {
 }
 
 
-
-
-
 TIMEFRAMES = {
     "5s": 5,
     "15s": 15,
@@ -85,18 +76,12 @@ TIMEFRAMES = {
 }
 
 
-
-
-
 API_LIMITS = {
     "min_order_amount": 1,
     "max_order_amount": 10000,
     "min_duration": 5,
     "max_duration": 3600,
 }
-
-
-
 
 
 CONNECTION_SETTINGS = {

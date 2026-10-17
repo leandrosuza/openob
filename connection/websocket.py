@@ -18,9 +18,6 @@ DEFAULT_HEADERS = {
 }
 
 
-
-
-
 class WebSocketManager:
     """Gerenciador de conexão WebSocket"""
 
