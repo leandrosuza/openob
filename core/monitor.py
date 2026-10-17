@@ -140,7 +140,10 @@ class MonitorAPI:
                     # Salvar automaticamente no repositório
                     if asset in self.monitored_assets:
                         payout = self.payout_data.get(asset, {}).get("payout")
+                        self._log_to_file("monitoring_actives.txt", f"Salvando tick no repositório: {asset} @ {price}")
                         asyncio.create_task(self.tick_repo.save(asset, price, payout))
+                    else:
+                        self._log_to_file("monitoring_actives.txt", f"Ativo não monitorado: {asset}")
 
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
