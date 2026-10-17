@@ -123,8 +123,12 @@ class MonitorAPI:
                 self._process_stream_data(data)
 
             # Processar histórico completo (updateHistoryNewFast)
-            if "updateHistoryNewFast" in event and isinstance(data, dict):
-                self._process_history_data(data)
+            if "updateHistoryNewFast" in event:
+                self._log_to_file("monitoring_actives.txt", f"Evento de histórico detectado: {event}")
+                if isinstance(data, dict):
+                    self._process_history_data(data)
+                else:
+                    self._log_to_file("monitoring_actives.txt", f"Dados de histórico não é dict: {type(data)}")
 
             if isinstance(data, dict):
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
