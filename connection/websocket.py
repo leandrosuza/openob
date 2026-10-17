@@ -34,6 +34,21 @@ class WebSocketManager:
         self._receive_task = None
         self._binary_buffer = None
         self._binary_event = None
+        self._ssid = None
+        self._ssl_context = None
+        self._reconnect_task = None
+        self._should_reconnect = False
+        self._reconnect_attempts = 0
+        self._create_ssl_context()
+
+
+
+
+    def _create_ssl_context(self):
+        """Criar contexto SSL reutilizável"""
+        self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        self._ssl_context.check_hostname = False
+        self._ssl_context.verify_mode = ssl.CERT_NONE
 
 
 
@@ -46,9 +61,13 @@ class WebSocketManager:
 
 
 
-    async def connect(self, ssid: str = None) -> bool:
+    async def connect(self, ssid: str = None, auto_reconnect: bool = False) -> bool:
         """Conectar ao servidor"""
         import websockets.legacy.client
+
+        self._ssid = ssid
+        self._should_reconnect = auto_reconnect
+        self._reconnect_attempts = 0
 
         endpoints = [WEBSOCKET_ENDPOINTS.get(self.region)] + [v for k, v in WEBSOCKET_ENDPOINTS.items() if k != self.region]
 
@@ -56,13 +75,9 @@ class WebSocketManager:
             try:
                 logger.debug(f"Tentando conectar a {endpoint}")
 
-                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
-
                 self.websocket = await websockets.legacy.client.connect(
                     endpoint,
-                    ssl=ssl_context,
+                    ssl=self._ssl_context,
                     extra_headers=DEFAULT_HEADERS,
                     ping_interval=CONNECTION_SETTINGS["ping_interval"],
                     ping_timeout=CONNECTION_SETTINGS["ping_timeout"],
@@ -78,6 +93,9 @@ class WebSocketManager:
                 self._running = True
                 self._receive_task = asyncio.create_task(self._receive_messages())
                 self._ping_task = asyncio.create_task(self._ping_loop())
+
+                if auto_reconnect:
+                    self._reconnect_task = asyncio.create_task(self._auto_reconnect_loop())
 
                 logger.debug("Handshake completo")
                 return True
@@ -137,8 +155,45 @@ class WebSocketManager:
 
 
 
+    async def _auto_reconnect_loop(self):
+        """Loop de reconexão automática com exponential backoff"""
+        while self._should_reconnect:
+            if not self._running or not self.websocket:
+                await asyncio.sleep(self._get_reconnect_delay())
+                
+                if not self._should_reconnect:
+                    break
+
+                logger.info(f"Tentando reconectar ({self.name}) - Tentativa {self._reconnect_attempts + 1}")
+                success = await self.connect(self._ssid, auto_reconnect=True)
+                
+                if success:
+                    self._reconnect_attempts = 0
+                    logger.info(f"Reconexão bem-sucedida ({self.name})")
+                else:
+                    self._reconnect_attempts += 1
+                    max_attempts = CONNECTION_SETTINGS.get("max_reconnect_attempts", 3)
+                    
+                    if self._reconnect_attempts >= max_attempts:
+                        logger.error(f"Máximo de tentativas de reconexão atingido ({self.name})")
+                        self._should_reconnect = False
+            else:
+                await asyncio.sleep(5)
+
+
+
+
+    def _get_reconnect_delay(self) -> float:
+        """Calcular delay de reconexão com exponential backoff"""
+        base_delay = CONNECTION_SETTINGS.get("reconnect_delay", 5)
+        exponential_delay = base_delay * (2 ** min(self._reconnect_attempts, 5))
+        return min(exponential_delay, 60)
+
+
+
+
     async def _receive_messages(self):
-        """Receber mensagens do WebSocket"""
+        """Receber mensagens do WebSocket com reconexão automática"""
         while self._running and self.websocket:
             try:
                 message = await self.websocket.recv()
@@ -146,6 +201,11 @@ class WebSocketManager:
             except Exception as e:
                 logger.error(f"Erro ao receber mensagem: {e}")
                 break
+        
+        if self._should_reconnect:
+            logger.warning(f"Conexão perdida, reconexão automática iniciada ({self.name})")
+        else:
+            logger.info(f"Conexão encerrada ({self.name})")
 
 
 
@@ -184,8 +244,6 @@ class WebSocketManager:
                 asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
 
 
-
-
     def _handle_binary_data(self, data: bytes):
         """Handle dados binários que seguem mensagem 451-"""
         try:
@@ -198,8 +256,6 @@ class WebSocketManager:
         except Exception as e:
             logger.debug(f"Erro ao processar dados binários: {e}")
             self._binary_event = None
-
-
 
 
     def _handle_socketio_message(self, message: str):
@@ -215,8 +271,6 @@ class WebSocketManager:
             pass
 
 
-
-
     def _handle_json_message(self, message: str):
         """Handle mensagem JSON separada"""
         try:
@@ -225,8 +279,6 @@ class WebSocketManager:
                 asyncio.create_task(self._emit_event("json_data", parsed))
         except json.JSONDecodeError:
             pass
-
-
 
 
     async def _emit_event(self, event: str, data):
@@ -242,15 +294,11 @@ class WebSocketManager:
                     logger.error(f"Erro no handler {event}: {e}")
 
 
-
-
     def add_event_handler(self, event: str, handler):
         """Adicionar handler de evento"""
         if event not in self._event_handlers:
             self._event_handlers[event] = []
         self._event_handlers[event].append(handler)
-
-
 
 
     def remove_event_handler(self, event: str, handler):
@@ -260,13 +308,9 @@ class WebSocketManager:
                 self._event_handlers[event].remove(handler)
 
 
-
-
     def has_event_handler(self, event: str) -> bool:
         """Verificar se existe handler para um evento"""
         return event in self._event_handlers and len(self._event_handlers[event]) > 0
-
-
 
 
     async def send_message(self, message: str):
@@ -276,25 +320,29 @@ class WebSocketManager:
             logger.debug(f"Mensagem enviada: {message[:100]}...")
 
 
-
-
     async def disconnect(self):
         """Desconectar"""
+        self._should_reconnect = False
         self._running = False
+        
+        if self._reconnect_task:
+            self._reconnect_task.cancel()
+        
         if self._receive_task:
             self._receive_task.cancel()
+        
         if hasattr(self, '_ping_task') and self._ping_task:
             self._ping_task.cancel()
+        
         if self.websocket:
             await self.websocket.close()
             self.websocket = None
+        
         logger.info(f"Desconectado ({self.name})")
 
 
-
-
     async def reconnect(self, ssid: str = None) -> bool:
-        """Reconectar ao servidor"""
+        """Reconectar ao servidor (única tentativa)"""
         await self.disconnect()
         await asyncio.sleep(CONNECTION_SETTINGS["reconnect_delay"])
-        return await self.connect(ssid=ssid)
+        return await self.connect(ssid=ssid, auto_reconnect=False)

@@ -394,7 +394,7 @@ class MonitorAPI:
         while self.payout_running:
             try:
                 if not self.payout_ws.is_connected:
-                    connected = await self.payout_ws.connect(ssid=self.ssid)
+                    connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
                         logger.info("MONITOR DE PAYOUT | CONECTADO!")
@@ -431,7 +431,7 @@ class MonitorAPI:
         while self.actives_running:
             try:
                 if not self.actives_ws.is_connected:
-                    connected = await self.actives_ws.connect(ssid=self.ssid)
+                    connected = await self.actives_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
                         logger.info("MONITOR DE ATIVOS | CONECTADO!")
