@@ -49,9 +49,8 @@ Thumbs.db
 *.key
 ssid.txt
 
-# Logs
+# Logs (excluindo estrutura de diretório)
 *.log
-logs/
 
 # Pre-commit
 .pre-commit-config.yaml.local

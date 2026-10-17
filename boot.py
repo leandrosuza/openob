@@ -1,78 +1,97 @@
 """
-Boot script para testar a API PocketOption
+Boot script - Inicia ambiente e mantém conexão payout + actives
 """
 
 import sys
 import asyncio
 import os
+import shutil
 
-# Adicionar diretório raiz ao path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from openob.client import PocketOptionClient
-from openob.models.trading import OrderDirection
+from core.monitor import MonitorAPI
+from core.logger import get_logger, LoggerConfig
+
+LoggerConfig.setup(level="INFO")
+logger = get_logger(__name__)
+
+
+def reset_logs():
+    """Limpar e recriar pasta logs/"""
+    logs_dir = "logs"
+    ws_dir = os.path.join(logs_dir, "ws")
+
+    try:
+        if os.path.exists(logs_dir):
+            shutil.rmtree(logs_dir)
+            logger.info("Pasta logs/ removida")
+
+        os.makedirs(ws_dir, exist_ok=True)
+
+        log_files = [
+            os.path.join(logs_dir, "error.txt"),
+            os.path.join(logs_dir, "info.txt"),
+            os.path.join(logs_dir, "debug.txt"),
+            os.path.join(logs_dir, "trading.txt"),
+            os.path.join(ws_dir, "connection.txt"),
+            os.path.join(ws_dir, "monitoring_payout.txt"),
+            os.path.join(ws_dir, "monitoring_actives.txt"),
+        ]
+
+        for log_file in log_files:
+            with open(log_file, "w", encoding="utf-8") as f:
+                pass
+
+        logger.info("Arquivos de log recriados")
+
+    except Exception as e:
+        logger.error(f"Erro ao resetar logs: {e}")
 
 
 async def main():
-    """Função principal de teste"""
-    print("Iniciando main()...")
+    """Função principal - conecta payout e actives, permanece online"""
+    print("="*60)
+    print("OpenOB - Iniciando Ambiente")
+    print("="*60)
 
-    # SSID do usuário (demo)
-    ssid = '42["auth",{"session":"i4l5kgudu28vqeppbeios7op3f","isDemo":1,"uid":142541678,"platform":2,"isFastHistory":true,"isOptimized":true}]'
-
-    # Criar cliente
-    print("Criando cliente...")
-    client = PocketOptionClient(ssid=ssid, is_demo=True, region="DEMO")
-    print("Cliente criado")
+    reset_logs()
+    print("Logs resetados")
 
     try:
-        # Conectar
-        print("Conectando...")
-        connected = await client.connect()
-        print(f"Conectado: {connected}")
+        monitor = MonitorAPI(region="DEMO")
 
-        if connected:
-            print("Conexão estabelecida com sucesso!")
-            print("Aguardando autenticação e dados iniciais...")
-            await asyncio.sleep(3)
+        await monitor.start(payout_interval=5)
 
-            # Obter saldo
-            print("\nObtendo saldo...")
-            balance = await client.get_balance()
-            print(f"Saldo: {balance}")
+        print("\n" + "="*60)
+        print("Sistema Online - Mantendo conexão")
+        print("Pressione Ctrl+C para encerrar")
+        print("="*60)
 
-            # Obter candles
-            print("\nObtendo candles (EURUSD_otc, 5s)...")
-            candles = await client.get_candles("EURUSD_otc", "5s", 10)
-            print(f"Candles recebidos: {len(candles)}")
+        await asyncio.sleep(3)
 
-            # Colocar ordem
-            print("\nColocando ordem de teste (EURUSD_otc, $10, CALL, 5s)...")
-            result = await client.place_order("EURUSD_otc", 10, OrderDirection.CALL, 5)
-            print(f"Ordem enviada: {result.order_id}")
-            print(f"Status inicial: {result.status}")
+        monitor.asset = "EURUSD_otc"
+        await monitor.subscribe_asset("EURUSD_otc", period=1)
 
-            # Aguardar resultado
-            print("\nAguardando resultado da ordem...")
-            await asyncio.sleep(7)
+        while True:
+            await asyncio.sleep(10)
 
-            # Verificar resultado final
-            final_result = client.trading._order_results.get(result.order_id, result)
-            print(f"Resultado final: {final_result.status}")
-            print(f"Profit: ${final_result.profit}")
+            balance_data = monitor.get_balance_data()
+            if balance_data:
+                print(f"\n--- Saldo ---")
+                print(f"Valor: {balance_data.get('balance')} {balance_data.get('currency', 'USD')}")
 
-            # Saldo final
-            print("\nSaldo final...")
-            balance_final = await client.get_balance()
-            print(f"Saldo: {balance_final}")
+            tick_data = monitor.get_tick_data()
+            if tick_data:
+                print(f"\n--- Ticks ---")
+                for asset, price in list(tick_data.items())[:5]:
+                    print(f"{asset}: {price}")
 
-            print("\nTeste concluído")
+    except KeyboardInterrupt:
+        print("\n\nInterrompido pelo usuário")
 
     finally:
-        # Desconectar
-        print("Desconectando...")
-        await client.disconnect()
-        print("Desconectado")
+        await monitor.stop()
+        print("Sistema parado")
 
 
 if __name__ == "__main__":
