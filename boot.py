@@ -8,8 +8,8 @@ import shutil
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from openob.core.monitor import MonitorAPI
-from openob.core.logger import get_logger, LoggerConfig
+from core.monitor import MonitorAPI
+from core.logger import get_logger, LoggerConfig
 
 LoggerConfig.setup(level="INFO")
 logger = get_logger(__name__)
