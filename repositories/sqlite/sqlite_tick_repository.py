@@ -28,11 +28,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def __init__(self, db_path: str = "data/openob_ticks.db"):
         self.db_path = db_path
+        self.conn = None
         self._pending_ticks = []
         self._max_pending = 1000
         self._flush_task = None
         self._initialized = False
         self._flush_started = False
+        self._lock = asyncio.Lock()
         logger.info(f"SQLite Repository inicializado: {db_path}")
 
 
@@ -284,59 +286,60 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
         """Salvar tick - Método principal com verificação de duplicatas e retry"""
-        try:
-            # Iniciar flush loop na primeira chamada
-            if not self._flush_started:
-                self._flush_task = asyncio.create_task(self._flush_loop())
-                self._flush_started = True
+        async with self._lock:
+            try:
+                # Iniciar flush loop na primeira chamada
+                if not self._flush_started:
+                    self._flush_task = asyncio.create_task(self._flush_loop())
+                    self._flush_started = True
 
-            await self._ensure_connection()
+                await self._ensure_connection()
 
-            # Usar timestamp fornecido ou atual (padronizado em UTC)
-            if timestamp is None:
-                timestamp = datetime.now(timezone.utc)
-            elif timestamp.tzinfo is None:
-                timestamp = timestamp.replace(tzinfo=timezone.utc)
+                # Usar timestamp fornecido ou atual (padronizado em UTC)
+                if timestamp is None:
+                    timestamp = datetime.now(timezone.utc)
+                elif timestamp.tzinfo is None:
+                    timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-            # Usar timestamp Unix para precisão (truncar para segundos)
-            timestamp_unix = int(timestamp.timestamp())
-            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+                # Usar timestamp Unix para precisão (truncar para segundos)
+                timestamp_unix = int(timestamp.timestamp())
+                timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
 
-            # Verificar duplicata usando timestamp Unix
-            if await self._check_duplicate_unix(asset, price, timestamp_unix):
-                logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp_normalized}")
+                # Verificar duplicata usando timestamp Unix
+                if await self._check_duplicate_unix(asset, price, timestamp_unix):
+                    logger.debug(f"Tick duplicado ignorado: {asset} @ {price} @ {timestamp_normalized}")
+                    return -1
+
+                # Reset se >30min sem dados
+                if await self._check_reset_needed(asset):
+                    await self._reset_asset(asset)
+
+                # Sequência incremental
+                sequence = await self._get_next_sequence(asset)
+
+                # Salvar com timestamp Unix normalizado
+                async with aiosqlite.connect(self.db_path) as conn:
+                    await conn.execute(
+                        "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                        (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
+                    )
+
+                    # Atualizar metadata
+                    await self._update_metadata(asset, timestamp_normalized, sequence)
+
+                    await conn.commit()
+
+                logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
+                return sequence
+
+            except aiosqlite.OperationalError as e:
+                logger.error(f"Erro ao salvar tick no banco: {e}")
+                self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
                 return -1
-
-            # Reset se >30min sem dados
-            if await self._check_reset_needed(asset):
-                await self._reset_asset(asset)
-
-            # Sequência incremental
-            sequence = await self._get_next_sequence(asset)
-
-            # Salvar com timestamp Unix normalizado
-            async with aiosqlite.connect(self.db_path) as conn:
-                await conn.execute(
-                    "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
-                    (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
-                )
-
-                # Atualizar metadata
-                await self._update_metadata(asset, timestamp_normalized, sequence)
-
-                await conn.commit()
-
-            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
-            return sequence
-
-        except (aiosqlite.OperationalError, aiosqlite.InterfaceError) as e:
-            logger.error(f"Erro ao salvar tick no banco: {e}")
-            self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
-            return -1
-        except Exception as e:
-            logger.error(f"Erro inesperado ao salvar tick: {e}")
-            self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
-            return -1
+            except Exception as e:
+                logger.error(f"Erro inesperado ao salvar tick: {e}")
+                self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
+                return -1
 
 
 
