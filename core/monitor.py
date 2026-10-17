@@ -123,12 +123,12 @@ class MonitorAPI:
                 self._process_stream_data(data)
 
             # Processar histórico completo (updateHistoryNewFast)
-            if "updateHistoryNewFast" in event:
-                self._log_to_file("monitoring_actives.txt", f"Evento de histórico detectado: {event}")
-                if isinstance(data, dict):
-                    self._process_history_data(data)
-                else:
-                    self._log_to_file("monitoring_actives.txt", f"Dados de histórico não é dict: {type(data)}")
+            if "updateHistoryNewFast" in event and "_data" in event and isinstance(data, list):
+                self._log_to_file("monitoring_actives.txt", f"Evento de histórico com dados detectado: {event}")
+                self._process_history_data({"history": data})
+            elif "updateHistoryNewFast" in event and isinstance(data, dict) and not data.get("_placeholder"):
+                self._log_to_file("monitoring_actives.txt", f"Evento de histórico com dict detectado: {event}")
+                self._process_history_data(data)
 
             # Processar ticks em formato dict
             if isinstance(data, dict):
@@ -184,9 +184,27 @@ class MonitorAPI:
             asset = data.get("asset")
             history = data.get("history", [])
 
-            if not asset or not history:
+            if not history:
                 return
 
+            # Se não tiver asset no dict, verificar se está na lista de monitorados
+            if not asset and self.monitored_assets:
+                # Tentar salvar para todos os ativos monitorados (estratégia temporária)
+                for monitored_asset in self.monitored_assets:
+                    self._save_history_for_asset(monitored_asset, history)
+                return
+
+            self._save_history_for_asset(asset, history)
+
+        except Exception as e:
+            logger.error(f"Erro ao processar histórico: {e}")
+
+
+
+
+    def _save_history_for_asset(self, asset: str, history: List):
+        """Salvar histórico para um ativo específico"""
+        try:
             # Converter histórico para formato do repositório
             ticks_batch = []
             for item in history:
@@ -211,7 +229,7 @@ class MonitorAPI:
             self._log_to_file("monitoring_actives.txt", f"Histórico {asset}: {len(ticks_batch)} ticks recebidos")
 
         except Exception as e:
-            logger.error(f"Erro ao processar histórico: {e}")
+            logger.error(f"Erro ao salvar histórico para {asset}: {e}")
 
 
 
