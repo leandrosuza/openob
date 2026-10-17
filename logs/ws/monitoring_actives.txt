@@ -1723,3 +1723,161 @@
 [2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208546.365, 83815.687]]
 [2026-10-16 22:42:26] Stream: BTCUSD_otc = 83815.687 @ 1792208546.365
 [2026-10-16 22:42:26] Solicitação de histórico inicial
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208546.861, 0.94934]]
+[2026-10-16 22:42:26] Stream: AUDCAD_otc = 0.94934 @ 1792208546.861
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208546.862, 0.57428]]
+[2026-10-16 22:42:26] Stream: CADCHF_otc = 0.57428 @ 1792208546.862
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208546.862, 179.071]]
+[2026-10-16 22:42:26] Stream: EURJPY_otc = 179.071 @ 1792208546.862
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208546.863, 180.97]]
+[2026-10-16 22:42:26] Stream: #BA_otc = 180.97 @ 1792208546.863
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BNB-USD_otc', 1792208546.865, 623.6633]]
+[2026-10-16 22:42:26] Stream: BNB-USD_otc = 623.6633 @ 1792208546.865
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:26] Dados binários de stream recebidos
+[2026-10-16 22:42:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208546.865, 83815.698]]
+[2026-10-16 22:42:26] Stream: BTCUSD_otc = 83815.698 @ 1792208546.865
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Inscrição changeSymbol: EURGBP_otc
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208547.064, 0.94934]]
+[2026-10-16 22:42:27] Stream: AUDCAD_otc = 0.94934 @ 1792208547.064
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208547.064, 0.57428]]
+[2026-10-16 22:42:27] Stream: CADCHF_otc = 0.57428 @ 1792208547.064
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208547.064, 179.071]]
+[2026-10-16 22:42:27] Stream: EURJPY_otc = 179.071 @ 1792208547.064
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208547.064, 180.97]]
+[2026-10-16 22:42:27] Stream: #BA_otc = 180.97 @ 1792208547.064
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208547.361, 0.94934]]
+[2026-10-16 22:42:27] Stream: AUDCAD_otc = 0.94934 @ 1792208547.361
+[2026-10-16 22:42:27] Evento: updateHistoryNewFast",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208547.362, 0.5743]]
+[2026-10-16 22:42:27] Stream: CADCHF_otc = 0.5743 @ 1792208547.362
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURGBP_otc', 1792208547.362, 0.87036]]
+[2026-10-16 22:42:27] Stream: EURGBP_otc = 0.87036 @ 1792208547.362
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208547.362, 179.073]]
+[2026-10-16 22:42:27] Stream: EURJPY_otc = 179.073 @ 1792208547.362
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208547.364, 180.97]]
+[2026-10-16 22:42:27] Stream: #BA_otc = 180.97 @ 1792208547.364
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BNB-USD_otc', 1792208547.365, 623.6631]]
+[2026-10-16 22:42:27] Stream: BNB-USD_otc = 623.6631 @ 1792208547.365
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208547.365, 83815.717]]
+[2026-10-16 22:42:27] Stream: BTCUSD_otc = 83815.717 @ 1792208547.365
+[2026-10-16 22:42:27] Inscrição subfor: EURGBP_otc
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208547.862, 0.94929]]
+[2026-10-16 22:42:27] Stream: AUDCAD_otc = 0.94929 @ 1792208547.862
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208547.863, 0.57425]]
+[2026-10-16 22:42:27] Stream: CADCHF_otc = 0.57425 @ 1792208547.863
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURGBP_otc', 1792208547.863, 0.87034]]
+[2026-10-16 22:42:27] Stream: EURGBP_otc = 0.87034 @ 1792208547.863
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208547.863, 179.076]]
+[2026-10-16 22:42:27] Stream: EURJPY_otc = 179.076 @ 1792208547.863
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208547.865, 180.98]]
+[2026-10-16 22:42:27] Stream: #BA_otc = 180.98 @ 1792208547.865
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BNB-USD_otc', 1792208547.866, 623.6633]]
+[2026-10-16 22:42:27] Stream: BNB-USD_otc = 623.6633 @ 1792208547.866
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:27] Dados binários de stream recebidos
+[2026-10-16 22:42:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208547.866, 83815.73]]
+[2026-10-16 22:42:27] Stream: BTCUSD_otc = 83815.73 @ 1792208547.866
+[2026-10-16 22:42:28] Solicitação de histórico inicial
+[2026-10-16 22:42:28] Ativo removido do monitoramento: CADCHF_otc
+[2026-10-16 22:42:28] Ativo removido do monitoramento: BTCUSD_otc
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208548.265, 0.94929]]
+[2026-10-16 22:42:28] Stream: AUDCAD_otc = 0.94929 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208548.265, 0.57425]]
+[2026-10-16 22:42:28] Stream: CADCHF_otc = 0.57425 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURGBP_otc', 1792208548.265, 0.87034]]
+[2026-10-16 22:42:28] Stream: EURGBP_otc = 0.87034 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208548.265, 179.076]]
+[2026-10-16 22:42:28] Stream: EURJPY_otc = 179.076 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208548.265, 180.98]]
+[2026-10-16 22:42:28] Stream: #BA_otc = 180.98 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BNB-USD_otc', 1792208548.265, 623.6633]]
+[2026-10-16 22:42:28] Stream: BNB-USD_otc = 623.6633 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208548.265, 83815.73]]
+[2026-10-16 22:42:28] Stream: BTCUSD_otc = 83815.73 @ 1792208548.265
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['AUDCAD_otc', 1792208548.863, 0.94933]]
+[2026-10-16 22:42:28] Stream: AUDCAD_otc = 0.94933 @ 1792208548.863
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['CADCHF_otc', 1792208548.863, 0.57429]]
+[2026-10-16 22:42:28] Stream: CADCHF_otc = 0.57429 @ 1792208548.863
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURGBP_otc', 1792208548.863, 0.87038]]
+[2026-10-16 22:42:28] Stream: EURGBP_otc = 0.87038 @ 1792208548.863
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['EURJPY_otc', 1792208548.863, 179.082]]
+[2026-10-16 22:42:28] Stream: EURJPY_otc = 179.082 @ 1792208548.863
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#BA_otc', 1792208548.865, 180.93]]
+[2026-10-16 22:42:28] Stream: #BA_otc = 180.93 @ 1792208548.865
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BNB-USD_otc', 1792208548.866, 623.6633]]
+[2026-10-16 22:42:28] Stream: BNB-USD_otc = 623.6633 @ 1792208548.866
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-16 22:42:28] Dados binários de stream recebidos
+[2026-10-16 22:42:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['BTCUSD_otc', 1792208548.866, 83815.735]]
+[2026-10-16 22:42:28] Stream: BTCUSD_otc = 83815.735 @ 1792208548.866
