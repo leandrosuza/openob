@@ -47,5 +47,6 @@ Thumbs.db
 .env
 .env.local
 
-# Logs (excluindo estrutura de diretório)
+# Logs
+logs/
 *.log
