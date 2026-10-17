@@ -60,6 +60,16 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
 
+        # Migrar: adicionar coluna timestamp_unix se não existir
+        try:
+            self.conn.execute("ALTER TABLE ticks ADD COLUMN timestamp_unix INTEGER")
+            # Preencher com dados existentes
+            self.conn.execute("UPDATE ticks SET timestamp_unix = CAST(strftime('%s', timestamp) AS INTEGER) WHERE timestamp_unix IS NULL")
+            logger.info("Migração: coluna timestamp_unix adicionada")
+        except sqlite3.OperationalError:
+            # Coluna já existe
+            pass
+
         # Tabela de metadata
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS asset_metadata (
@@ -71,6 +81,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
             needs_reset BOOLEAN DEFAULT 0
         )
         """)
+
+        # Migrar: adicionar coluna last_tick_unix se não existir
+        try:
+            self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN last_tick_unix INTEGER")
+            logger.info("Migração: coluna last_tick_unix adicionada")
+        except sqlite3.OperationalError:
+            # Coluna já existe
+            pass
 
 
 
@@ -86,7 +104,12 @@ class SQLiteTickRepository(TickRepositoryInterface):
             return False
 
         last = datetime.fromisoformat(result[0])
-        return (datetime.now() - last) > timedelta(minutes=30)
+        # Converter para UTC se necessário
+        if last.tzinfo is None:
+            last = last.replace(tzinfo=timezone.utc)
+        
+        now = datetime.now(timezone.utc)
+        return (now - last) > timedelta(minutes=30)
 
 
 
@@ -198,8 +221,8 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
             # Salvar com timestamp Unix normalizado
             self.conn.execute(
-                "INSERT INTO ticks (asset, timestamp, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?)",
-                (asset, timestamp_normalized.isoformat(), price, payout, sequence)
+                "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
             )
 
             # Atualizar metadata
