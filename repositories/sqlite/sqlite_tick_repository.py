@@ -107,6 +107,40 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+    def _get_last_tick(self, asset: str) -> Optional[Dict]:
+        """Obter último tick salvo do ativo"""
+        row = self.conn.execute(
+            "SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT 1",
+            (asset,)
+        ).fetchone()
+
+        if not row:
+            return None
+
+        return {
+            'timestamp': row[2],
+            'price': row[3],
+            'payout': row[4],
+            'sequence': row[5]
+        }
+
+
+
+
+    def _check_duplicate(self, asset: str, price: float, timestamp: datetime) -> bool:
+        """Verificar se tick já existe nos últimos 5 segundos (evitar duplicatas)"""
+        # Buscar ticks do mesmo ativo nos últimos 5 segundos com mesmo preço
+        five_seconds_ago = (timestamp - timedelta(seconds=5)).isoformat()
+        result = self.conn.execute(
+            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp >= ? LIMIT 1",
+            (asset, price, five_seconds_ago)
+        ).fetchone()
+
+        return result is not None
+
+
+
+
     def _update_metadata(self, asset: str, timestamp: datetime, sequence: int):
         """Atualizar metadata"""
         self.conn.execute("""
@@ -119,8 +153,15 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     async def save(self, asset: str, price: float, payout: Optional[float] = None) -> int:
-        """Salvar tick - Método principal"""
+        """Salvar tick - Método principal com verificação de duplicatas"""
         async with self._lock:
+            timestamp = datetime.now()
+
+            # Verificar duplicata
+            if self._check_duplicate(asset, price, timestamp):
+                logger.debug(f"Tick duplicado ignorado: {asset} @ {price}")
+                return -1
+
             # Reset se >30min sem dados
             if self._check_reset_needed(asset):
                 self._reset_asset(asset)
@@ -129,7 +170,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             sequence = self._get_next_sequence(asset)
 
             # Salvar
-            timestamp = datetime.now()
             self.conn.execute(
                 "INSERT INTO ticks (asset, timestamp, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?)",
                 (asset, timestamp.isoformat(), price, payout, sequence)
@@ -138,7 +178,42 @@ class SQLiteTickRepository(TickRepositoryInterface):
             # Atualizar metadata
             self._update_metadata(asset, timestamp, sequence)
 
+            logger.debug(f"Tick salvo: {asset} seq={sequence} price={price}")
             return sequence
+
+
+
+
+    async def sync_and_save_batch(self, asset: str, new_ticks: List[Dict], limit: int = 50) -> int:
+        """Sincronizar batch de ticks verificando duplicatas com histórico recente"""
+        saved_count = 0
+
+        # Obter últimos N ticks do histórico
+        recent_history = self.get_recent(asset, limit=limit)
+
+        # Criar set de preços recentes para verificação rápida
+        recent_prices = {tick['price'] for tick in recent_history}
+
+        for tick in new_ticks:
+            price = tick.get('price')
+            payout = tick.get('payout')
+
+            # Se preço já existe no histórico recente, verificar se é duplicata
+            if price in recent_prices:
+                # Verificar se existe nos últimos 5 segundos
+                timestamp = datetime.now()
+                if self._check_duplicate(asset, price, timestamp):
+                    logger.debug(f"Tick duplicado ignorado no batch: {asset} @ {price}")
+                    continue
+
+            # Salvar novo tick
+            sequence = await self.save(asset, price, payout)
+            if sequence > 0:
+                saved_count += 1
+                recent_prices.add(price)
+
+        logger.info(f"Sincronização {asset}: {saved_count}/{len(new_ticks)} ticks salvos")
+        return saved_count
 
 
 
