@@ -3,7 +3,7 @@
 import asyncio
 from typing import Optional
 from core.logger import get_logger
-from core.exceptions import AuthenticationError, ConnectionError as OpenOBConnectionError
+from core.exceptions import AuthenticationError
 
 
 logger = get_logger(__name__)

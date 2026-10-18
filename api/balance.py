@@ -4,7 +4,6 @@ import asyncio
 from typing import Optional
 from models.market import Balance
 from core.logger import get_logger
-from core.exceptions import ConnectionError as OpenOBConnectionError
 
 
 logger = get_logger(__name__)
@@ -68,7 +67,7 @@ class BalanceAPI:
     async def get_balance(self) -> Balance:
         """Obter saldo atual"""
         if not self.ws_manager.is_connected:
-            raise OpenOBConnectionError("WebSocket não está conectado")
+            raise ConnectionError("WebSocket não está conectado")
 
         logger.info("Solicitando saldo")
         await self.ws_manager.send_message('42["balance/get"]')
@@ -80,7 +79,7 @@ class BalanceAPI:
                 logger.info(f"Saldo obtido: {self._balance.amount} {self._balance.currency}")
                 return self._balance
             else:
-                raise OpenOBConnectionError("Não foi possível obter saldo")
+                raise ConnectionError("Não foi possível obter saldo")
         except asyncio.TimeoutError:
             logger.warning("Timeout aguardando saldo")
-            raise OpenOBConnectionError("Timeout ao obter saldo")
+            raise ConnectionError("Timeout ao obter saldo")

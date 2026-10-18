@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, List, Set
 from connection.websocket import WebSocketManager
 from core.logger import get_logger
-from core.exceptions import ConfigurationError, ConnectionError as OpenOBConnectionError
+from core.exceptions import ConfigurationError
 from config.settings import Settings
 from repositories.repository_factory import RepositoryFactory
 
@@ -254,11 +254,9 @@ class MonitorAPI:
             self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
             logger.info(f"Stream iniciado para {symbol}")
 
-        except OpenOBConnectionError:
-            raise
         except Exception as e:
             logger.error(f"Erro ao inscrever no ativo {symbol}: {e}")
-            raise OpenOBConnectionError(f"Falha ao inscrever no ativo {symbol}: {e}")
+            raise
 
 
     async def start_payout_monitoring(self, payout_interval: int = 5):

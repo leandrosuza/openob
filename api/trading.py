@@ -5,7 +5,7 @@ from typing import Optional
 from models.trading import OrderDirection, OrderResult, OrderStatus, Order
 from core.constants import ASSETS, API_LIMITS
 from core.logger import get_logger
-from core.exceptions import ValidationError, TradingError, ConnectionError as OpenOBConnectionError
+from core.exceptions import ValidationError, TradingError
 
 
 logger = get_logger(__name__)
@@ -162,7 +162,7 @@ class TradingAPI:
     async def place_order(self, asset: str, amount: float, direction: OrderDirection, duration: int) -> OrderResult:
         """Colocar uma ordem de trading"""
         if not self.ws_manager.is_connected:
-            raise OpenOBConnectionError("WebSocket não está conectado")
+            raise ConnectionError("WebSocket não está conectado")
 
         self._validate_order_parameters(asset, amount, direction, duration)
 
@@ -223,7 +223,7 @@ class TradingAPI:
     async def close_order(self, order_id: str) -> bool:
         """Fechar uma ordem aberta"""
         if not self.ws_manager.is_connected:
-            raise OpenOBConnectionError("WebSocket não está conectado")
+            raise ConnectionError("WebSocket não está conectado")
 
         message = f'42["closeOrder",{{"id":"{order_id}"}}]'
         await self.ws_manager.send_message(message)
