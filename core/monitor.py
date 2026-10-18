@@ -529,6 +529,13 @@ class MonitorAPI:
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico inicial")
 
+            await asyncio.sleep(0.5)
+
+            # Solicitar histórico completo usando updateHistoryNewFast
+            await self.actives_ws.send_message(f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]')
+            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico completo updateHistoryNewFast: {symbol}")
+            logger.info(f"Histórico solicitado para {symbol}")
+
         except OpenOBConnectionError:
             raise
         except Exception as e:
