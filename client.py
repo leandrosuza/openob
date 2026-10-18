@@ -1,14 +1,11 @@
 """PocketOption Client - Facade principal"""
 
-import asyncio
 from connection.websocket import WebSocketManager
 from api.auth import AuthAPI
 from api.balance import BalanceAPI
 from api.market import MarketAPI
 from api.trading import TradingAPI
-from core.constants import REGIONS
 from core.logger import get_logger, LoggerConfig
-from core.exceptions import ConnectionError as OpenOBConnectionError
 from config.settings import Settings
 
 logger = get_logger(__name__)

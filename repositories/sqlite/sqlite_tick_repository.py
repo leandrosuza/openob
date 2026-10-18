@@ -161,35 +161,11 @@ class SQLiteTickRepository(TickRepositoryInterface):
             if self._pending_ticks:
                 await self._flush_pending()
 
-    def _check_reset_needed_sync(self, asset: str) -> bool:
-        """Verifica se precisa reset (>1min) - DESABILITADO"""
-        return False
-
-    async def _check_reset_needed(self, asset: str) -> bool:
-        """Verifica se precisa reset (>1min)"""
-        return await asyncio.to_thread(self._check_reset_needed_sync, asset)
-
-    def _reset_asset_sync(self, asset: str):
-        """Resetar histórico do ativo - síncrono (sem lock interno, chamado de dentro de lock)"""
-        self.conn.execute("DELETE FROM ticks WHERE asset = ?", (asset,))
-        self.conn.execute(
-            "UPDATE asset_metadata SET last_sequence_number = 0 WHERE asset = ?",
-            (asset,)
-        )
-        self.conn.commit()
-        logger.info(f"Histórico resetado para {asset} (gap > 1min detectado)")
-
-    async def _reset_asset(self, asset: str):
-        """Resetar histórico do ativo"""
-        await asyncio.to_thread(self._reset_asset_sync, asset)
-
-    async def reset_asset(self, asset: str):
-        """Resetar histórico do ativo (método público)"""
-        await self._reset_asset(asset)
 
     async def reset_all(self):
         """Resetar todos os dados da tabela ticks"""
         await asyncio.to_thread(self._reset_all_sync)
+
 
     def _reset_all_sync(self):
         """Resetar todos os dados - síncrono"""
@@ -198,6 +174,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self.conn.execute("DELETE FROM asset_metadata")
             self.conn.commit()
             logger.info("Tabela ticks resetada completamente")
+
 
     def _get_next_sequence_sync(self, asset: str) -> int:
         """Próximo número de sequência - síncrono (sem lock interno, chamado de dentro de lock)"""

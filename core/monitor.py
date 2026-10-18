@@ -9,9 +9,8 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 
 import asyncio
 import os
-from datetime import datetime, timezone
-from typing import Optional, Dict, Any, List, Set
-from dotenv import load_dotenv
+from datetime import datetime
+from typing import Dict, Any, List, Set
 from connection.websocket import WebSocketManager
 from core.logger import get_logger
 from core.exceptions import ConfigurationError, ConnectionError as OpenOBConnectionError
@@ -26,16 +25,13 @@ class MonitorAPI:
     """API de monitoramento de saldo, payout e ativos"""
 
     def __init__(self):
-        load_dotenv()
-
         self.region = "DEMO"
-        self.ssid = os.getenv("POCKETOPTION_MONITOR_SSID")
+        self.ssid = Settings.POCKETOPTION_MONITOR_SSID
 
         if not self.ssid:
             raise ConfigurationError("POCKETOPTION_MONITOR_SSID não definido no .env")
 
-        # Número de ativos com melhor payout para monitorar
-        self.top_assets_count = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
+        self.top_assets_count = Settings.MONITOR_TOP_ASSETS
 
         self.payout_ws = WebSocketManager(region=self.region, name="PAYOUT")
         self.actives_ws = WebSocketManager(region=self.region, name="ATIVOS")
@@ -48,10 +44,8 @@ class MonitorAPI:
         self.payout_data: Dict[str, Dict[str, Any]] = {}
         self.balance_data: Dict[str, Any] = {}
 
-        # Ativos atualmente monitorados
         self.monitored_assets: Set[str] = set()
 
-        # Criar repositório via factory
         config = Settings.to_dict()
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
@@ -203,7 +197,6 @@ class MonitorAPI:
         if limit is None:
             limit = self.top_assets_count
 
-        # Filtrar ativos com payout válido e ordenar por payout (maior para menor)
         valid_assets = [
             (symbol, data) for symbol, data in self.payout_data.items()
             if data.get("payout", 0) > 0
@@ -225,7 +218,6 @@ class MonitorAPI:
         top_assets = self.get_top_assets_by_payout()
         new_monitored = {asset["symbol"] for asset in top_assets}
 
-        # Identificar ativos para adicionar e remover
         to_add = new_monitored - self.monitored_assets
         to_remove = self.monitored_assets - new_monitored
 
@@ -234,7 +226,6 @@ class MonitorAPI:
             for i, symbol in enumerate(to_add):
                 await self.subscribe_asset(symbol, period=1)
                 self.monitored_assets.add(symbol)
-                # Delay de 500ms entre cada ativo para evitar flood na API
                 if i < len(to_add) - 1:
                     await asyncio.sleep(0.5)
 
@@ -259,7 +250,6 @@ class MonitorAPI:
             self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
             await asyncio.sleep(0.5)
 
-            # Iniciar stream de dados
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
             logger.info(f"Stream iniciado para {symbol}")
@@ -347,7 +337,6 @@ class MonitorAPI:
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
 
-        # Resetar tabela ticks ao iniciar
         logger.info("Resetando tabela ticks ao iniciar o sistema")
         await self.tick_repo.reset_all()
 
@@ -373,23 +362,7 @@ class MonitorAPI:
         if self.actives_ws.is_connected:
             await self.actives_ws.disconnect()
 
-        # Fechar repositório
         if self.tick_repo:
             await self.tick_repo.close()
 
         logger.info("Monitoramento parado")
-
-
-    def get_payout_data(self) -> Dict[str, Dict[str, Any]]:
-        """Obter dados de payout atual"""
-        return self.payout_data
-
-
-    def get_balance_data(self) -> Dict[str, Any]:
-        """Obter dados de saldo atual"""
-        return self.balance_data
-
-
-    def get_monitored_assets(self) -> Set[str]:
-        """Obter conjunto de ativos atualmente monitorados"""
-        return self.monitored_assets.copy()

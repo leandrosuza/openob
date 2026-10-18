@@ -1,6 +1,5 @@
 """Trading API"""
 
-import uuid
 import asyncio
 from typing import Optional
 from models.trading import OrderDirection, OrderResult, OrderStatus, Order
@@ -18,7 +17,6 @@ class TradingAPI:
     def __init__(self, ws_manager):
         self.ws_manager = ws_manager
         self._order_results: dict = {}
-        self._order_id_mapping: dict = {}
         self._current_prices: dict = {}
         self._setup_handlers()
 
@@ -60,18 +58,15 @@ class TradingAPI:
 
 
     def _update_order_status(self, order_id: str, status: OrderStatus, profit: float = 0, message: str = ""):
-        """Helper para atualizar status de ordem"""
-        for local_id, result in list(self._order_results.items()):
-            if result.status in [OrderStatus.PENDING, OrderStatus.OPEN]:
-                self._order_results[local_id] = OrderResult(
-                    order_id=local_id,
-                    status=status,
-                    profit=profit,
-                    message=message
-                )
-                logger.info(f"Ordem {local_id}: {status.value} ({message})")
-                return local_id
-        return None
+        """Atualizar status de ordem por ID"""
+        if order_id in self._order_results:
+            self._order_results[order_id] = OrderResult(
+                order_id=order_id,
+                status=status,
+                profit=profit,
+                message=message
+            )
+            logger.info(f"Ordem {order_id}: {status.value} ({message})")
 
 
     async def _on_order(self, data):
@@ -97,20 +92,13 @@ class TradingAPI:
 
 
     async def _on_success_open_order(self, data):
-        """Handler para ordem aberta com sucesso - armazenar ID do servidor"""
+        """Handler para ordem aberta com sucesso - atualizar ID se necessário"""
         if not isinstance(data, dict):
             return
 
-        server_order_id = data.get("id")
-        if not server_order_id:
-            return
-
-        for local_id, result in list(self._order_results.items()):
-            if result.status == OrderStatus.PENDING:
-                self._order_id_mapping[local_id] = server_order_id
-                self._order_id_mapping[server_order_id] = local_id
-                logger.debug(f"Ordem mapeada: {local_id} -> {server_order_id}")
-                break
+        new_id = data.get("id")
+        if new_id:
+            logger.debug(f"Ordem aberta com ID: {new_id}")
 
 
     def _parse_order_result(self, data: dict) -> Optional[OrderResult]:
@@ -142,13 +130,8 @@ class TradingAPI:
             return
 
         result = self._parse_order_result(data)
-        if not result:
-            return
-
-        for order_id, order_result in self._order_results.items():
-            if order_result.status == OrderStatus.PENDING:
-                self._order_results[order_id] = result
-                break
+        if result:
+            self._order_results[result.order_id] = result
 
 
     async def _on_json_data(self, data):
@@ -160,16 +143,8 @@ class TradingAPI:
             return
 
         result = self._parse_order_result(data)
-        if not result:
-            return
-
-        self._order_results[result.order_id] = result
-
-        for local_id, order_result in list(self._order_results.items()):
-            if order_result.status == OrderStatus.PENDING and local_id != result.order_id:
-                self._order_results[local_id] = result
-                logger.info(f"Ordem local {local_id} atualizada: {result.status.value} (${result.profit})")
-                break
+        if result:
+            self._order_results[result.order_id] = result
 
 
     async def _on_stream_update(self, data):

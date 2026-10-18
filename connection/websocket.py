@@ -106,7 +106,6 @@ class WebSocketManager:
             logger.debug(f"Mensagem inicial: {initial_message[:100]}...")
 
             if not (initial_message.startswith("0") and "sid" in initial_message):
-                logger.warning(f"Formato de mensagem inicial inesperado: {initial_message}")
                 raise OpenOBConnectionError("Formato de handshake inválido")
 
             await self.websocket.send("40")
@@ -116,7 +115,6 @@ class WebSocketManager:
             logger.debug(f"Mensagem de conexão: {conn_message[:100]}...")
 
             if not (conn_message.startswith("40") and "sid" in conn_message):
-                logger.warning(f"Formato de mensagem de conexão inesperado: {conn_message}")
                 raise OpenOBConnectionError("Formato de conexão inválido")
 
             if ssid:

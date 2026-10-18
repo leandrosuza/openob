@@ -20,51 +20,38 @@ def reset_logs():
     logs_dir = "logs"
     ws_dir = os.path.join(logs_dir, "ws")
 
+    log_files = [
+        os.path.join(logs_dir, "error.txt"),
+        os.path.join(logs_dir, "info.txt"),
+        os.path.join(logs_dir, "debug.txt"),
+        os.path.join(logs_dir, "trading.txt"),
+        os.path.join(ws_dir, "connection.txt"),
+        os.path.join(ws_dir, "monitoring_payout.txt"),
+        os.path.join(ws_dir, "monitoring_actives.txt"),
+    ]
+
     try:
-        # Criar diretórios se não existirem
-        os.makedirs(ws_dir, exist_ok=True)
+        # Em modo DEBUG, resetar completamente
+        if Settings.LOG_LEVEL.upper() == "DEBUG":
+            if os.path.exists(logs_dir):
+                shutil.rmtree(logs_dir)
+                logger.info("Pasta logs/ removida")
 
-        # Se não está em modo DEBUG, apenas garantir que os arquivos existem
-        if Settings.LOG_LEVEL.upper() != "DEBUG":
-            logger.info("Logs não resetados (não está em modo DEBUG)")
-            log_files = [
-                os.path.join(logs_dir, "error.txt"),
-                os.path.join(logs_dir, "info.txt"),
-                os.path.join(logs_dir, "debug.txt"),
-                os.path.join(logs_dir, "trading.txt"),
-                os.path.join(ws_dir, "connection.txt"),
-                os.path.join(ws_dir, "monitoring_payout.txt"),
-                os.path.join(ws_dir, "monitoring_actives.txt"),
-            ]
+            os.makedirs(ws_dir, exist_ok=True)
 
+            for log_file in log_files:
+                with open(log_file, "w", encoding="utf-8") as f:
+                    pass
+
+            logger.info("Arquivos de log recriados")
+        else:
+            # Em outros níveis, apenas garantir que os arquivos existem
+            os.makedirs(ws_dir, exist_ok=True)
             for log_file in log_files:
                 if not os.path.exists(log_file):
                     with open(log_file, "w", encoding="utf-8") as f:
                         pass
-            return
-
-        # Em modo DEBUG, resetar completamente
-        if os.path.exists(logs_dir):
-            shutil.rmtree(logs_dir)
-            logger.info("Pasta logs/ removida")
-
-        os.makedirs(ws_dir, exist_ok=True)
-
-        log_files = [
-            os.path.join(logs_dir, "error.txt"),
-            os.path.join(logs_dir, "info.txt"),
-            os.path.join(logs_dir, "debug.txt"),
-            os.path.join(logs_dir, "trading.txt"),
-            os.path.join(ws_dir, "connection.txt"),
-            os.path.join(ws_dir, "monitoring_payout.txt"),
-            os.path.join(ws_dir, "monitoring_actives.txt"),
-        ]
-
-        for log_file in log_files:
-            with open(log_file, "w", encoding="utf-8") as f:
-                pass
-
-        logger.info("Arquivos de log recriados")
+            logger.info("Logs não resetados (não está em modo DEBUG)")
 
     except Exception as e:
         logger.error(f"Erro ao configurar logs: {e}")
