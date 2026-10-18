@@ -352,10 +352,17 @@ class MonitorAPI:
         self.payout_running = False
         self.actives_running = False
 
+        tasks_to_cancel = []
         if self.payout_task:
-            self.payout_task.cancel()
+            tasks_to_cancel.append(self.payout_task)
         if self.actives_task:
-            self.actives_task.cancel()
+            tasks_to_cancel.append(self.actives_task)
+
+        for task in tasks_to_cancel:
+            task.cancel()
+
+        if tasks_to_cancel:
+            await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
 
         if self.payout_ws.is_connected:
             await self.payout_ws.disconnect()

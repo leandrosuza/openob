@@ -95,6 +95,9 @@ async def main():
         if monitor:
             try:
                 await monitor.stop()
+                await asyncio.sleep(0.5)
+            except asyncio.CancelledError:
+                pass
             except Exception as e:
                 logger.error(f"Erro ao parar monitor: {e}")
             print("Sistema parado")

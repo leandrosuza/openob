@@ -38,16 +38,6 @@ class TickRepositoryInterface(ABC):
         pass
 
 
-
-
-    @abstractmethod
-    async def reset_asset(self, asset: str):
-        """Resetar histórico de um ativo específico"""
-        pass
-
-
-
-
     @abstractmethod
     async def reset_all(self):
         """Resetar todos os dados da tabela ticks"""
