@@ -12,6 +12,8 @@ class OrderDirection(str, Enum):
     PUT = "put"
 
 
+
+
 class OrderStatus(str, Enum):
     """Status da ordem"""
     PENDING = "pending"
@@ -20,6 +22,8 @@ class OrderStatus(str, Enum):
     LOSS = "loss"
     TIMEOUT = "timeout"
     CLOSED = "closed"
+
+
 
 
 class OrderResult(BaseModel):
@@ -31,6 +35,8 @@ class OrderResult(BaseModel):
 
     class Config:
         frozen = True
+
+
 
 
 class Order(BaseModel):

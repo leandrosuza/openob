@@ -23,6 +23,8 @@ class Balance(BaseModel):
         frozen = True
 
 
+
+
 class Candle(BaseModel):
     """Candle de mercado com validação"""
     timestamp: datetime
