@@ -385,43 +385,55 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _save_tick_sync(self, asset: str, price: float, payout: Optional[float], timestamp: datetime) -> int:
         """Salvar tick - síncrono"""
-        with self._thread_lock:
-            timestamp_unix = int(timestamp.timestamp())
-            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+        try:
+            with self._thread_lock:
+                timestamp_unix = int(timestamp.timestamp())
+                timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
 
-            logger.info(f"_save_tick_sync: iniciando para {asset} @ {price}")
+                logger.info(f"_save_tick_sync: iniciando para {asset} @ {price}")
 
-            # Verificar duplicata
-            if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
-                logger.info(f"_save_tick_sync: duplicata detectada para {asset}")
-                return -1
+                # Verificar duplicata
+                logger.info(f"_save_tick_sync: verificando duplicata para {asset}")
+                if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
+                    logger.info(f"_save_tick_sync: duplicata detectada para {asset}")
+                    return -1
+                logger.info(f"_save_tick_sync: duplicata não detectada para {asset}")
 
-            # Reset se >1min sem dados (garante histórico recente)
-            if self._check_reset_needed_sync(asset):
-                logger.info(f"_save_tick_sync: reset necessário para {asset}")
-                self._reset_asset_sync(asset)
+                # Reset se >1min sem dados (garante histórico recente)
+                logger.info(f"_save_tick_sync: verificando se precisa reset para {asset}")
+                if self._check_reset_needed_sync(asset):
+                    logger.info(f"_save_tick_sync: reset necessário para {asset}")
+                    self._reset_asset_sync(asset)
+                logger.info(f"_save_tick_sync: reset não necessário para {asset}")
 
-            # Sequência incremental
-            sequence = self._get_next_sequence_sync(asset)
-            logger.info(f"_save_tick_sync: sequence={sequence} para {asset}")
+                # Sequência incremental
+                logger.info(f"_save_tick_sync: obtendo sequence para {asset}")
+                sequence = self._get_next_sequence_sync(asset)
+                logger.info(f"_save_tick_sync: sequence={sequence} para {asset}")
 
-            # Salvar
-            self.conn.execute(
-                "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
-                (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
-            )
-            logger.info(f"_save_tick_sync: INSERT executado para {asset}")
+                # Salvar
+                logger.info(f"_save_tick_sync: executando INSERT para {asset}")
+                self.conn.execute(
+                    "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                    (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
+                )
+                logger.info(f"_save_tick_sync: INSERT executado para {asset}")
 
-            # Atualizar metadata
-            self._update_metadata_sync(asset, timestamp_normalized, sequence)
-            logger.info(f"_save_tick_sync: metadata atualizado para {asset}")
+                # Atualizar metadata
+                logger.info(f"_save_tick_sync: atualizando metadata para {asset}")
+                self._update_metadata_sync(asset, timestamp_normalized, sequence)
+                logger.info(f"_save_tick_sync: metadata atualizado para {asset}")
 
-            # Commit para persistir no disco
-            self.conn.commit()
-            logger.info(f"_save_tick_sync: commit realizado para {asset}")
+                # Commit para persistir no disco
+                logger.info(f"_save_tick_sync: executando commit para {asset}")
+                self.conn.commit()
+                logger.info(f"_save_tick_sync: commit realizado para {asset}")
 
-            logger.info(f"Tick salvo com sucesso: {asset} seq={sequence} price={price}")
-            return sequence
+                logger.info(f"Tick salvo com sucesso: {asset} seq={sequence} price={price}")
+                return sequence
+        except Exception as e:
+            logger.error(f"_save_tick_sync: EXCEÇÃO CAPTURADA para {asset}: {e}")
+            raise
 
 
 
