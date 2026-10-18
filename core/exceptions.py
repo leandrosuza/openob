@@ -6,13 +6,9 @@ class OpenOBError(Exception):
     pass
 
 
-
-
 class AuthenticationError(OpenOBError):
     """Authentication and authorization errors"""
     pass
-
-
 
 
 class ValidationError(OpenOBError):
@@ -20,13 +16,9 @@ class ValidationError(OpenOBError):
     pass
 
 
-
-
 class ConfigurationError(OpenOBError):
     """Configuration and environment errors"""
     pass
-
-
 
 
 class DatabaseError(OpenOBError):
@@ -34,20 +26,14 @@ class DatabaseError(OpenOBError):
     pass
 
 
-
-
 class TradingError(OpenOBError):
     """Trading and order errors"""
     pass
 
 
-
-
 class MarketDataError(OpenOBError):
     """Market data and candle errors"""
     pass
-
-
 
 
 class TimeoutError(OpenOBError):
