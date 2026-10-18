@@ -194,9 +194,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
-        """Verifica se precisa reset (>1min) - síncrono (sem lock interno, chamado de dentro de lock)"""
-        # Desabilitado por enquanto - causando loop infinito
-        # TODO: Implementar verificação de gaps mais robusta
+        """Verifica se precisa reset (>1min) - DESABILITADO"""
         return False
 
 

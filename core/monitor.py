@@ -78,134 +78,10 @@ class MonitorAPI:
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
-        # Task de health check periódico (1 minuto)
+        # Task de monitoramento
         self._health_check_task = None
 
         self._setup_handlers()
-
-
-
-
-
-
-
-    async def _initial_health_check(self):
-        """Verificação inicial de gaps ao iniciar o sistema"""
-        logger.info("Health check inicial: verificando dados existentes no banco...")
-        
-        try:
-            # Obter estatísticas do banco
-            stats = await self.tick_repo.get_stats()
-            logger.info(f"Health check inicial: banco tem {stats['total_ticks']} ticks em {stats['total_assets']} assets")
-            
-            # Obter lista de todos os assets no banco
-            cursor = None
-            try:
-                # Usar sqlite3 diretamente para obter lista de assets
-                import sqlite3
-                conn = sqlite3.connect('data/openob_ticks.db')
-                cursor = conn.cursor()
-                cursor.execute("SELECT DISTINCT asset FROM ticks ORDER BY asset")
-                assets = [row[0] for row in cursor.fetchall()]
-                conn.close()
-                
-                logger.info(f"Health check inicial: verificando {len(assets)} assets")
-                
-                for asset in assets:
-                    try:
-                        # Obter último tick do asset
-                        recent = await self.tick_repo.get_recent(asset, limit=1)
-                        
-                        if not recent:
-                            logger.warning(f"Health check inicial: Asset {asset} sem ticks no banco")
-                            continue
-                        
-                        last_tick = recent[0]
-                        last_timestamp = datetime.fromisoformat(last_tick['timestamp'])
-                        if last_timestamp.tzinfo is None:
-                            last_timestamp = last_timestamp.replace(tzinfo=timezone.utc)
-                        
-                        now = datetime.now(timezone.utc)
-                        gap = (now - last_timestamp).total_seconds()
-                        
-                        logger.info(f"Health check inicial: {asset} - último tick há {gap:.0f}s")
-                        
-                        # Se gap > 1min, resetar e solicitar novo histórico
-                        if gap > 60:
-                            logger.warning(f"Health check inicial: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
-                            await self.tick_repo.reset_asset(asset)
-                        else:
-                            logger.info(f"Health check inicial: {asset} OK (gap: {gap:.0f}s < 60s)")
-                            
-                    except Exception as e:
-                        logger.error(f"Health check inicial: Erro ao verificar {asset}: {e}")
-                        
-            except Exception as e:
-                logger.error(f"Health check inicial: Erro ao listar assets: {e}")
-            
-            logger.info("Health check inicial: verificação concluída")
-            
-        except Exception as e:
-            logger.error(f"Health check inicial: Erro geral: {e}")
-
-
-
-
-    async def _health_check_loop(self):
-        """Loop de health check periódico (1 minuto)"""
-        logger.info("Health check loop iniciado")
-        
-        while self.payout_running or self.actives_running:
-            try:
-                logger.debug("Health check: aguardando 60 segundos...")
-                await asyncio.sleep(60)  # 1 minuto
-                
-                logger.debug(f"Health check: verificando {len(self.monitored_assets)} assets monitorados")
-                
-                if not self.monitored_assets:
-                    logger.info("Health check: nenhum asset monitorado ainda, aguardando...")
-                    continue
-
-                logger.info(f"Health check: iniciando verificação de {len(self.monitored_assets)} assets")
-                
-                for asset in list(self.monitored_assets):
-                    try:
-                        # Obter último timestamp do asset
-                        recent = await self.tick_repo.get_recent(asset, limit=1)
-                        
-                        if not recent:
-                            logger.warning(f"Health check: Asset {asset} sem ticks - aguardando stream")
-                            continue
-                        
-                        last_tick = recent[0]
-                        last_timestamp = datetime.fromisoformat(last_tick['timestamp'])
-                        if last_timestamp.tzinfo is None:
-                            last_timestamp = last_timestamp.replace(tzinfo=timezone.utc)
-                        
-                        now = datetime.now(timezone.utc)
-                        gap = (now - last_timestamp).total_seconds()
-                        
-                        logger.info(f"Health check: {asset} - último tick há {gap:.0f}s")
-                        
-                        # Se gap > 1min, resetar e solicitar novo histórico
-                        if gap > 60:
-                            logger.warning(f"Health check: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
-                            await self.tick_repo.reset_asset(asset)
-                        else:
-                            logger.debug(f"Health check: {asset} OK (gap: {gap:.0f}s < 60s)")
-                            
-                    except Exception as e:
-                        logger.error(f"Health check: Erro ao verificar {asset}: {e}")
-                
-                logger.info("Health check: verificação concluída")
-                        
-            except asyncio.CancelledError:
-                logger.info("Health check loop cancelado")
-                break
-            except Exception as e:
-                logger.error(f"Health check: Erro no loop: {e}")
-                await asyncio.sleep(60)  # Continuar tentando após erro
-
 
 
 
@@ -267,29 +143,6 @@ class MonitorAPI:
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
 
-            # Processar histórico completo (updateHistoryNewFast)
-            if "updateHistoryNewFast" in event:
-                logger.info(f"Evento updateHistoryNewFast recebido: {type(data)}")
-                if isinstance(data, dict) and data.get("_placeholder"):
-                    # Placeholder indica que dados binários virão no próximo evento
-                    self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados binários")
-                    logger.info("Placeholder de histórico detectado, aguardando dados binários")
-                    # Marcar que estamos esperando dados de histórico
-                    self._history_buffer["waiting"] = True
-                elif isinstance(data, dict) and not data.get("_placeholder"):
-                    # Dados completos em dict - formato: {"asset":"X","period":1,"history":[[ts,price],...],"candles":[]}
-                    self._log_to_file("monitoring_actives.txt", f"Histórico completo recebido: {data.get('asset', 'unknown')}")
-                    logger.info(f"Histórico completo recebido para {data.get('asset', 'unknown')}: {len(data.get('history', []))} ticks")
-                    self._process_history_data(data)
-                elif isinstance(data, list) and self._history_buffer.get("waiting"):
-                    # Dados do histórico em formato de lista (backup)
-                    self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
-                    logger.info(f"Histórico recebido: {len(data)} itens")
-                    self._process_history_data({"history": data})
-                    self._history_buffer["waiting"] = False
-                else:
-                    logger.warning(f"Formato de histórico não reconhecido: {type(data)}")
-
             # Processar ticks em formato dict
             if isinstance(data, dict):
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
@@ -341,58 +194,6 @@ class MonitorAPI:
 
 
 
-    def _process_history_data(self, data: Dict):
-        """Processar histórico completo do ativo (updateHistoryNewFast)"""
-        try:
-            asset = data.get("asset")
-            history = data.get("history", [])
-
-            if not history:
-                return
-
-            # Se não tiver asset no dict, verificar se está na lista de monitorados
-            if not asset and self.monitored_assets:
-                # Tentar salvar para todos os ativos monitorados (estratégia temporária)
-                for monitored_asset in self.monitored_assets:
-                    self._save_history_for_asset(monitored_asset, history)
-                return
-
-            self._save_history_for_asset(asset, history)
-
-        except Exception as e:
-            logger.error(f"Erro ao processar histórico: {e}")
-
-
-
-
-
-    def _save_history_for_asset(self, asset: str, history: List):
-        """Salvar histórico para um ativo específico (opcional - servidor pode não enviar)"""
-        try:
-            # Converter histórico para formato do repositório
-            ticks_batch = []
-            for item in history:
-                if isinstance(item, list) and len(item) >= 2:
-                    timestamp_unix = item[0]
-                    price = item[1]
-
-                    # Converter timestamp Unix para datetime
-                    timestamp = datetime.fromtimestamp(timestamp_unix)
-
-                    ticks_batch.append({
-                        'timestamp': timestamp,
-                        'price': price,
-                        'payout': self.payout_data.get(asset, {}).get("payout")
-                    })
-
-            # Salvar batch no repositório se o ativo é monitorado
-            if asset in self.monitored_assets and ticks_batch:
-                asyncio.create_task(self.tick_repo.sync_and_save_batch(asset, ticks_batch, limit=100))
-                logger.info(f"Histórico {asset}: {len(ticks_batch)} ticks salvos")
-
-            self._log_to_file("monitoring_actives.txt", f"Histórico {asset}: {len(ticks_batch)} ticks recebidos")
-
-        except Exception as e:
             logger.error(f"Erro ao salvar histórico para {asset}: {e}")
 
 
@@ -511,16 +312,10 @@ class MonitorAPI:
             self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
             await asyncio.sleep(0.5)
 
-            # Iniciar stream de dados imediatamente
+            # Iniciar stream de dados
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
             logger.info(f"Stream iniciado para {symbol}")
-
-            # Solicitar histórico completo após stream iniciar
-            await asyncio.sleep(1)
-            await self.actives_ws.send_message(f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]')
-            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol}")
-            logger.info(f"Histórico solicitado para {symbol}")
 
         except OpenOBConnectionError:
             raise
@@ -613,14 +408,10 @@ class MonitorAPI:
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
         
-        # Health check inicial desabilitado por enquanto (causava reset de dados antigos)
-        # await self._initial_health_check()
-        
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
-        self._health_check_task = asyncio.create_task(self._health_check_loop())
         logger.info("Monitoramento iniciado")
-        logger.info(f"Tasks criadas: payout={self.payout_task}, actives={self.actives_task}, health_check={self._health_check_task}")
+        logger.info(f"Tasks criadas: payout={self.payout_task}, actives={self.actives_task}")
 
 
 
@@ -636,8 +427,6 @@ class MonitorAPI:
             self.payout_task.cancel()
         if self.actives_task:
             self.actives_task.cancel()
-        if self._health_check_task:
-            self._health_check_task.cancel()
 
         if self.payout_ws.is_connected:
             await self.payout_ws.disconnect()
