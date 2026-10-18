@@ -378,6 +378,9 @@ class MonitorAPI:
                     connected = await self.actives_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
+                        # Resetar tabela ticks ao reconectar
+                        logger.info("Resetando tabela ticks ao reconectar WebSocket de ativos")
+                        await self.tick_repo.reset_all()
                     else:
                         self._log_to_file("connection.txt", "Ativos: Falha ao conectar")
                         logger.error("MONITOR DE ATIVOS | FALHA AO CONECTAR")
@@ -407,6 +410,10 @@ class MonitorAPI:
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
+        
+        # Resetar tabela ticks ao iniciar
+        logger.info("Resetando tabela ticks ao iniciar o sistema")
+        await self.tick_repo.reset_all()
         
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))

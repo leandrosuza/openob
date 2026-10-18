@@ -231,6 +231,18 @@ class SQLiteTickRepository(TickRepositoryInterface):
         """Resetar histórico do ativo (método público)"""
         await self._reset_asset(asset)
 
+    async def reset_all(self):
+        """Resetar todos os dados da tabela ticks"""
+        await asyncio.to_thread(self._reset_all_sync)
+
+    def _reset_all_sync(self):
+        """Resetar todos os dados - síncrono"""
+        with self._thread_lock:
+            self.conn.execute("DELETE FROM ticks")
+            self.conn.execute("DELETE FROM asset_metadata")
+            self.conn.commit()
+            logger.info("Tabela ticks resetada completamente")
+
 
 
 
