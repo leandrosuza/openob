@@ -24,6 +24,7 @@ class Settings:
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
+
     @classmethod
     def get_log_level(cls) -> int:
         """Obter nível de log como int"""
@@ -36,6 +37,9 @@ class Settings:
         }
         return level_map.get(cls.LOG_LEVEL.upper(), logging.INFO)
 
+
+
+
     @classmethod
     def to_dict(cls) -> dict:
         """Converter para dicionário"""
@@ -46,6 +50,9 @@ class Settings:
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
             "LOG_LEVEL": cls.LOG_LEVEL,
         }
+
+
+
 
     @classmethod
     def validate(cls) -> list:

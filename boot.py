@@ -47,6 +47,8 @@ def reset_logs():
         logger.error(f"Erro ao resetar logs: {e}")
 
 
+
+
 async def main():
     """Função principal - conecta payout e actives, permanece online"""
     print("="*60)
@@ -83,6 +85,7 @@ async def main():
             except Exception as e:
                 logger.error(f"Erro ao parar monitor: {e}")
             print("Sistema parado")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
