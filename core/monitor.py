@@ -105,6 +105,69 @@ class MonitorAPI:
 
 
 
+    async def _initial_health_check(self):
+        """Verificação inicial de gaps ao iniciar o sistema"""
+        logger.info("Health check inicial: verificando dados existentes no banco...")
+        
+        try:
+            # Obter estatísticas do banco
+            stats = await self.tick_repo.get_stats()
+            logger.info(f"Health check inicial: banco tem {stats['total_ticks']} ticks em {stats['total_assets']} assets")
+            
+            # Obter lista de todos os assets no banco
+            cursor = None
+            try:
+                # Usar sqlite3 diretamente para obter lista de assets
+                import sqlite3
+                conn = sqlite3.connect('data/openob_ticks.db')
+                cursor = conn.cursor()
+                cursor.execute("SELECT DISTINCT asset FROM ticks ORDER BY asset")
+                assets = [row[0] for row in cursor.fetchall()]
+                conn.close()
+                
+                logger.info(f"Health check inicial: verificando {len(assets)} assets")
+                
+                for asset in assets:
+                    try:
+                        # Obter último tick do asset
+                        recent = await self.tick_repo.get_recent(asset, limit=1)
+                        
+                        if not recent:
+                            logger.warning(f"Health check inicial: Asset {asset} sem ticks no banco")
+                            continue
+                        
+                        last_tick = recent[0]
+                        last_timestamp = datetime.fromisoformat(last_tick['timestamp'])
+                        if last_timestamp.tzinfo is None:
+                            last_timestamp = last_timestamp.replace(tzinfo=timezone.utc)
+                        
+                        now = datetime.now(timezone.utc)
+                        gap = (now - last_timestamp).total_seconds()
+                        
+                        logger.info(f"Health check inicial: {asset} - último tick há {gap:.0f}s")
+                        
+                        # Se gap > 1min, resetar e solicitar novo histórico
+                        if gap > 60:
+                            logger.warning(f"Health check inicial: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
+                            await self.tick_repo.reset_asset(asset)
+                            await self._on_asset_reset(asset)
+                        else:
+                            logger.info(f"Health check inicial: {asset} OK (gap: {gap:.0f}s < 60s)")
+                            
+                    except Exception as e:
+                        logger.error(f"Health check inicial: Erro ao verificar {asset}: {e}")
+                        
+            except Exception as e:
+                logger.error(f"Health check inicial: Erro ao listar assets: {e}")
+            
+            logger.info("Health check inicial: verificação concluída")
+            
+        except Exception as e:
+            logger.error(f"Health check inicial: Erro geral: {e}")
+
+
+
+
     async def _health_check_loop(self):
         """Loop de health check periódico (1 minuto)"""
         logger.info("Health check loop iniciado")
@@ -556,6 +619,10 @@ class MonitorAPI:
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
+        
+        # Executar health check inicial antes de iniciar monitoramento
+        await self._initial_health_check()
+        
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
         self._health_check_task = asyncio.create_task(self._health_check_loop())
