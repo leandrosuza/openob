@@ -2,7 +2,6 @@ from .constants import *
 from .logger import get_logger, LoggerConfig
 from .exceptions import (
     OpenOBError,
-    ConnectionError,
     AuthenticationError,
     ValidationError,
     ConfigurationError,
@@ -22,7 +21,6 @@ __all__ = [
     "get_logger",
     "LoggerConfig",
     "OpenOBError",
-    "ConnectionError",
     "AuthenticationError",
     "ValidationError",
     "ConfigurationError",
