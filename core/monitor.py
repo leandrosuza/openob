@@ -269,21 +269,26 @@ class MonitorAPI:
 
             # Processar histórico completo (updateHistoryNewFast) - opcional
             if "updateHistoryNewFast" in event:
+                logger.info(f"Evento updateHistoryNewFast recebido: {type(data)}")
                 if isinstance(data, dict) and data.get("_placeholder"):
-                    # Placeholder indica que dados virão no próximo evento
-                    self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados")
+                    # Placeholder indica que dados binários virão no próximo evento
+                    self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados binários")
+                    logger.info("Placeholder de histórico detectado, aguardando dados binários")
                     # Marcar que estamos esperando dados de histórico
                     self._history_buffer["waiting"] = True
                 elif isinstance(data, list) and self._history_buffer.get("waiting"):
-                    # Dados do histórico
+                    # Dados do histórico em formato de lista
                     self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
                     logger.info(f"Histórico recebido: {len(data)} itens")
                     self._process_history_data({"history": data})
                     self._history_buffer["waiting"] = False
                 elif isinstance(data, dict) and not data.get("_placeholder"):
                     # Dados completos em dict
-                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado")
+                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado: {data}")
+                    logger.info(f"Histórico em dict detectado: {data}")
                     self._process_history_data(data)
+                else:
+                    logger.warning(f"Formato de histórico não reconhecido: {type(data)}")
 
             # Processar ticks em formato dict
             if isinstance(data, dict):
@@ -602,8 +607,8 @@ class MonitorAPI:
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
         
-        # Executar health check inicial antes de iniciar monitoramento
-        await self._initial_health_check()
+        # Health check inicial desabilitado por enquanto (causava reset de dados antigos)
+        # await self._initial_health_check()
         
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
