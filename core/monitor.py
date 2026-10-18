@@ -272,20 +272,26 @@ class MonitorAPI:
 
             # Processar histórico completo (updateHistoryNewFast)
             if "updateHistoryNewFast" in event:
+                logger.info(f"Evento updateHistoryNewFast recebido: {type(data)}")
                 if isinstance(data, dict) and data.get("_placeholder"):
                     # Placeholder indica que dados virão no próximo evento
                     self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados")
+                    logger.info("Placeholder de histórico detectado, aguardando dados")
                     # Marcar que estamos esperando dados de histórico
                     self._history_buffer["waiting"] = True
                 elif isinstance(data, list) and self._history_buffer.get("waiting"):
                     # Dados do histórico
                     self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
+                    logger.info(f"Dados de histórico recebidos: {len(data)} itens")
                     self._process_history_data({"history": data})
                     self._history_buffer["waiting"] = False
                 elif isinstance(data, dict) and not data.get("_placeholder"):
                     # Dados completos em dict
-                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado")
+                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado: {data}")
+                    logger.info(f"Histórico em dict detectado: {data}")
                     self._process_history_data(data)
+                else:
+                    logger.warning(f"Formato de histórico não reconhecido: {type(data)}")
 
             # Processar ticks em formato dict
             if isinstance(data, dict):
@@ -510,9 +516,10 @@ class MonitorAPI:
             await asyncio.sleep(0.5)
 
             # Solicitar histórico completo ANTES de iniciar stream
-            await self.actives_ws.send_message(f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]')
-            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol}")
-            logger.info(f"Histórico solicitado para {symbol}")
+            history_msg = f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]'
+            await self.actives_ws.send_message(history_msg)
+            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol} - msg: {history_msg}")
+            logger.info(f"Histórico solicitado para {symbol} - mensagem: {history_msg}")
 
             # Aguardar até 10 segundos para o histórico ser carregado
             max_wait = 10
