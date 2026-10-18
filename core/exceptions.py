@@ -8,13 +8,6 @@ class OpenOBError(Exception):
 
 
 
-class ConnectionError(OpenOBError):
-    """WebSocket connection errors"""
-    pass
-
-
-
-
 class AuthenticationError(OpenOBError):
     """Authentication and authorization errors"""
     pass

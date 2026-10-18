@@ -3206,3 +3206,122 @@
 [2026-10-18 19:26:26] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369586.457, 342.942]]
 [2026-10-18 19:26:26] Stream: #AAPL_otc = 342.942 @ 1792369586.457
 [2026-10-18 19:26:26] Salvando tick stream no repositório: #AAPL_otc @ 342.942
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:27] Dados binários de stream recebidos
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369586.958, 342.945]]
+[2026-10-18 19:26:27] Stream: #AAPL_otc = 342.945 @ 1792369586.958
+[2026-10-18 19:26:27] Salvando tick stream no repositório: #AAPL_otc @ 342.945
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:27] Dados binários de stream recebidos
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369587.306, 342.945]]
+[2026-10-18 19:26:27] Stream: #AAPL_otc = 342.945 @ 1792369587.306
+[2026-10-18 19:26:27] Salvando tick stream no repositório: #AAPL_otc @ 342.945
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:27] Dados binários de stream recebidos
+[2026-10-18 19:26:27] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369587.958, 342.94]]
+[2026-10-18 19:26:27] Stream: #AAPL_otc = 342.94 @ 1792369587.958
+[2026-10-18 19:26:27] Salvando tick stream no repositório: #AAPL_otc @ 342.94
+[2026-10-18 19:26:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:28] Dados binários de stream recebidos
+[2026-10-18 19:26:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369588.458, 342.936]]
+[2026-10-18 19:26:28] Stream: #AAPL_otc = 342.936 @ 1792369588.458
+[2026-10-18 19:26:28] Salvando tick stream no repositório: #AAPL_otc @ 342.936
+[2026-10-18 19:26:28] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:28] Dados binários de stream recebidos
+[2026-10-18 19:26:28] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369588.958, 342.927]]
+[2026-10-18 19:26:28] Stream: #AAPL_otc = 342.927 @ 1792369588.958
+[2026-10-18 19:26:28] Salvando tick stream no repositório: #AAPL_otc @ 342.927
+[2026-10-18 19:26:29] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:29] Dados binários de stream recebidos
+[2026-10-18 19:26:29] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369589.458, 342.925]]
+[2026-10-18 19:26:29] Stream: #AAPL_otc = 342.925 @ 1792369589.458
+[2026-10-18 19:26:29] Salvando tick stream no repositório: #AAPL_otc @ 342.925
+[2026-10-18 19:26:29] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:29] Dados binários de stream recebidos
+[2026-10-18 19:26:29] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369589.975, 342.923]]
+[2026-10-18 19:26:30] Stream: #AAPL_otc = 342.923 @ 1792369589.975
+[2026-10-18 19:26:30] Salvando tick stream no repositório: #AAPL_otc @ 342.923
+[2026-10-18 19:26:30] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:30] Dados binários de stream recebidos
+[2026-10-18 19:26:30] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369590.306, 342.923]]
+[2026-10-18 19:26:30] Stream: #AAPL_otc = 342.923 @ 1792369590.306
+[2026-10-18 19:26:30] Salvando tick stream no repositório: #AAPL_otc @ 342.923
+[2026-10-18 19:26:30] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:30] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 82]]
+[2026-10-18 19:26:30] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:30] Dados binários de stream recebidos
+[2026-10-18 19:26:31] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369590.977, 342.914]]
+[2026-10-18 19:26:31] Stream: #AAPL_otc = 342.914 @ 1792369590.977
+[2026-10-18 19:26:31] Salvando tick stream no repositório: #AAPL_otc @ 342.914
+[2026-10-18 19:26:31] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:31] Dados binários de stream recebidos
+[2026-10-18 19:26:31] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369591.476, 342.91]]
+[2026-10-18 19:26:31] Stream: #AAPL_otc = 342.91 @ 1792369591.476
+[2026-10-18 19:26:31] Salvando tick stream no repositório: #AAPL_otc @ 342.91
+[2026-10-18 19:26:31] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:31] Dados binários de stream recebidos
+[2026-10-18 19:26:31] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369591.982, 342.91]]
+[2026-10-18 19:26:31] Stream: #AAPL_otc = 342.91 @ 1792369591.982
+[2026-10-18 19:26:31] Salvando tick stream no repositório: #AAPL_otc @ 342.91
+[2026-10-18 19:26:32] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:32] Dados binários de stream recebidos
+[2026-10-18 19:26:32] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369592.477, 342.91]]
+[2026-10-18 19:26:32] Stream: #AAPL_otc = 342.91 @ 1792369592.477
+[2026-10-18 19:26:32] Salvando tick stream no repositório: #AAPL_otc @ 342.91
+[2026-10-18 19:26:32] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:32] Dados binários de stream recebidos
+[2026-10-18 19:26:32] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369592.977, 342.904]]
+[2026-10-18 19:26:32] Stream: #AAPL_otc = 342.904 @ 1792369592.977
+[2026-10-18 19:26:32] Salvando tick stream no repositório: #AAPL_otc @ 342.904
+[2026-10-18 19:26:33] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:33] Dados binários de stream recebidos
+[2026-10-18 19:26:33] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369593.307, 342.904]]
+[2026-10-18 19:26:33] Stream: #AAPL_otc = 342.904 @ 1792369593.307
+[2026-10-18 19:26:33] Salvando tick stream no repositório: #AAPL_otc @ 342.904
+[2026-10-18 19:26:34] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:34] Dados binários de stream recebidos
+[2026-10-18 19:26:34] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369593.977, 342.897]]
+[2026-10-18 19:26:34] Stream: #AAPL_otc = 342.897 @ 1792369593.977
+[2026-10-18 19:26:34] Salvando tick stream no repositório: #AAPL_otc @ 342.897
+[2026-10-18 19:26:34] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:34] Dados binários de stream recebidos
+[2026-10-18 19:26:34] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369594.479, 342.902]]
+[2026-10-18 19:26:34] Stream: #AAPL_otc = 342.902 @ 1792369594.479
+[2026-10-18 19:26:34] Salvando tick stream no repositório: #AAPL_otc @ 342.902
+[2026-10-18 19:26:34] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:34] Dados binários de stream recebidos
+[2026-10-18 19:26:35] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369594.979, 342.898]]
+[2026-10-18 19:26:35] Stream: #AAPL_otc = 342.898 @ 1792369594.979
+[2026-10-18 19:26:35] Salvando tick stream no repositório: #AAPL_otc @ 342.898
+[2026-10-18 19:26:35] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:35] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 69]]
+[2026-10-18 19:26:35] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:35] Dados binários de stream recebidos
+[2026-10-18 19:26:35] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369595.481, 342.898]]
+[2026-10-18 19:26:35] Stream: #AAPL_otc = 342.898 @ 1792369595.481
+[2026-10-18 19:26:35] Salvando tick stream no repositório: #AAPL_otc @ 342.898
+[2026-10-18 19:26:35] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:35] Dados binários de stream recebidos
+[2026-10-18 19:26:35] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369596.012, 342.871]]
+[2026-10-18 19:26:35] Stream: #AAPL_otc = 342.871 @ 1792369596.012
+[2026-10-18 19:26:35] Salvando tick stream no repositório: #AAPL_otc @ 342.871
+[2026-10-18 19:26:36] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:36] Dados binários de stream recebidos
+[2026-10-18 19:26:36] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369596.53, 342.869]]
+[2026-10-18 19:26:36] Stream: #AAPL_otc = 342.869 @ 1792369596.53
+[2026-10-18 19:26:36] Salvando tick stream no repositório: #AAPL_otc @ 342.869
+[2026-10-18 19:26:36] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:36] Dados binários de stream recebidos
+[2026-10-18 19:26:37] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369597.043, 342.872]]
+[2026-10-18 19:26:37] Stream: #AAPL_otc = 342.872 @ 1792369597.043
+[2026-10-18 19:26:37] Salvando tick stream no repositório: #AAPL_otc @ 342.872
+[2026-10-18 19:26:37] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:37] Dados binários de stream recebidos
+[2026-10-18 19:26:37] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369597.543, 342.876]]
+[2026-10-18 19:26:37] Stream: #AAPL_otc = 342.876 @ 1792369597.543
+[2026-10-18 19:26:37] Salvando tick stream no repositório: #AAPL_otc @ 342.876
+[2026-10-18 19:26:37] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-18 19:26:37] Dados binários de stream recebidos
+[2026-10-18 19:26:38] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792369598.044, 342.885]]
+[2026-10-18 19:26:38] Stream: #AAPL_otc = 342.885 @ 1792369598.044
+[2026-10-18 19:26:38] Salvando tick stream no repositório: #AAPL_otc @ 342.885
