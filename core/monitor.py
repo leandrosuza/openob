@@ -70,9 +70,6 @@ class MonitorAPI:
         # Timestamp quando cada asset foi adicionado ao monitoramento
         self.asset_start_time: Dict[str, datetime] = {}
 
-        # Assets cujo histórico já foi carregado (prontos para salvar stream)
-        self.history_loaded: Set[str] = set()
-
         # Buffer para dados binários de histórico
         self._history_buffer: Dict[str, List] = {}
 
@@ -270,28 +267,23 @@ class MonitorAPI:
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
 
-            # Processar histórico completo (updateHistoryNewFast)
+            # Processar histórico completo (updateHistoryNewFast) - opcional
             if "updateHistoryNewFast" in event:
-                logger.info(f"Evento updateHistoryNewFast recebido: {type(data)}")
                 if isinstance(data, dict) and data.get("_placeholder"):
                     # Placeholder indica que dados virão no próximo evento
                     self._log_to_file("monitoring_actives.txt", f"Placeholder de histórico detectado, aguardando dados")
-                    logger.info("Placeholder de histórico detectado, aguardando dados")
                     # Marcar que estamos esperando dados de histórico
                     self._history_buffer["waiting"] = True
                 elif isinstance(data, list) and self._history_buffer.get("waiting"):
                     # Dados do histórico
                     self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
-                    logger.info(f"Dados de histórico recebidos: {len(data)} itens")
+                    logger.info(f"Histórico recebido: {len(data)} itens")
                     self._process_history_data({"history": data})
                     self._history_buffer["waiting"] = False
                 elif isinstance(data, dict) and not data.get("_placeholder"):
                     # Dados completos em dict
-                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado: {data}")
-                    logger.info(f"Histórico em dict detectado: {data}")
+                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado")
                     self._process_history_data(data)
-                else:
-                    logger.warning(f"Formato de histórico não reconhecido: {type(data)}")
 
             # Processar ticks em formato dict
             if isinstance(data, dict):
@@ -370,7 +362,7 @@ class MonitorAPI:
 
 
     def _save_history_for_asset(self, asset: str, history: List):
-        """Salvar histórico para um ativo específico e marcar como carregado"""
+        """Salvar histórico para um ativo específico (opcional - servidor pode não enviar)"""
         try:
             # Converter histórico para formato do repositório
             ticks_batch = []
@@ -392,7 +384,6 @@ class MonitorAPI:
             if asset in self.monitored_assets and ticks_batch:
                 asyncio.create_task(self.tick_repo.sync_and_save_batch(asset, ticks_batch, limit=100))
                 logger.info(f"Histórico {asset}: {len(ticks_batch)} ticks salvos")
-                self.history_loaded.add(asset)  # Marcar como histórico carregado
 
             self._log_to_file("monitoring_actives.txt", f"Histórico {asset}: {len(ticks_batch)} ticks recebidos")
 
@@ -505,7 +496,7 @@ class MonitorAPI:
 
 
     async def subscribe_asset(self, symbol: str, period: int = 1):
-        """Inscrever em um ativo específico e carregar histórico antes de salvar stream"""
+        """Inscrever em um ativo específico e iniciar stream"""
         try:
             await self.actives_ws.send_message(f'42["changeSymbol", {{"asset": "{symbol}", "period": {period}}}]')
             self._log_to_file("monitoring_actives.txt", f"Inscrição changeSymbol: {symbol}")
@@ -515,27 +506,10 @@ class MonitorAPI:
             self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
             await asyncio.sleep(0.5)
 
-            # Solicitar histórico completo ANTES de iniciar stream
-            history_msg = f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]'
-            await self.actives_ws.send_message(history_msg)
-            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol} - msg: {history_msg}")
-            logger.info(f"Histórico solicitado para {symbol} - mensagem: {history_msg}")
-
-            # Aguardar até 10 segundos para o histórico ser carregado
-            max_wait = 10
-            waited = 0
-            while symbol not in self.history_loaded and waited < max_wait:
-                await asyncio.sleep(0.5)
-                waited += 0.5
-
-            if symbol in self.history_loaded:
-                logger.info(f"Histórico carregado para {symbol} - pronto para salvar stream")
-            else:
-                logger.warning(f"Histórico não carregado para {symbol} após {max_wait}s - iniciando stream mesmo assim")
-
-            # Iniciar stream de dados
+            # Iniciar stream de dados imediatamente
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
+            logger.info(f"Stream iniciado para {symbol}")
 
         except OpenOBConnectionError:
             raise

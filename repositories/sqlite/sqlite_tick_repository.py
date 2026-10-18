@@ -195,24 +195,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
         """Verifica se precisa reset (>1min) - síncrono (sem lock interno, chamado de dentro de lock)"""
-        # Não fazer reset nos primeiros 2 minutos após startup
-        now = datetime.now(timezone.utc)
-        if (now - self._startup_time).total_seconds() < 120:
-            return False
-
-        result = self.conn.execute(
-            "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
-            (asset,)
-        ).fetchone()
-
-        if not result:
-            return False
-
-        last = datetime.fromisoformat(result[0])
-        if last.tzinfo is None:
-            last = last.replace(tzinfo=timezone.utc)
-
-        return (now - last) > timedelta(minutes=1)
+        # Desabilitado por enquanto - causando loop infinito
+        # TODO: Implementar verificação de gaps mais robusta
+        return False
 
 
 
