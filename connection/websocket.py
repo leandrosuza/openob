@@ -27,7 +27,6 @@ class WebSocketManager:
         self._receive_task = None
         self._ping_task = None
         self._reconnect_task = None
-        self._binary_buffer = None
         self._binary_event = None
         self._ssid = None
         self._ssl_context = None
@@ -248,7 +247,7 @@ class WebSocketManager:
                 event_data = parsed[1] if len(parsed) > 1 else {}
                 asyncio.create_task(self._emit_event(event, event_data))
         except json.JSONDecodeError:
-            pass
+            logger.debug(f"Erro ao decodificar Socket.IO message: {data[:50]}...")
 
 
     def _handle_json_message(self, message: str):
@@ -258,7 +257,7 @@ class WebSocketManager:
             if isinstance(parsed, dict):
                 asyncio.create_task(self._emit_event("json_data", parsed))
         except json.JSONDecodeError:
-            pass
+            logger.debug(f"Erro ao decodificar JSON message: {message[:50]}...")
 
 
     async def _emit_event(self, event: str, data):
@@ -287,11 +286,6 @@ class WebSocketManager:
         """Remover handler de evento"""
         if event in self._event_handlers and handler in self._event_handlers[event]:
             self._event_handlers[event].remove(handler)
-
-
-    def has_event_handler(self, event: str) -> bool:
-        """Verificar se existe handler para um evento"""
-        return event in self._event_handlers and len(self._event_handlers[event]) > 0
 
 
     async def send_message(self, message: str):

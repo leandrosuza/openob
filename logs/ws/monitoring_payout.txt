@@ -591,3 +591,10 @@ osedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
 [2026-10-18 19:27:13] Payout YERUSD_otc: 72%
 [2026-10-18 19:27:13] Payout ZARUSD_otc: 88%
 [2026-10-18 19:27:18] Solicitação de payout enviada
+[2026-10-18 19:27:24] Solicitação de payout enviada
+[2026-10-18 19:27:30] Solicitação de payout enviada
+[2026-10-18 19:27:36] Solicitação de payout enviada
+[2026-10-18 19:27:42] Solicitação de payout enviada
+[2026-10-18 19:27:48] Solicitação de payout enviada
+[2026-10-18 19:27:54] Solicitação de payout enviada
+[2026-10-18 19:28:00] Solicitação de payout enviada
