@@ -219,22 +219,21 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
-        """Verifica se precisa reset (>1min) - síncrono"""
-        with self._thread_lock:
-            result = self.conn.execute(
-                "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
-                (asset,)
-            ).fetchone()
+        """Verifica se precisa reset (>1min) - síncrono (sem lock interno, chamado de dentro de lock)"""
+        result = self.conn.execute(
+            "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
+            (asset,)
+        ).fetchone()
 
-            if not result:
-                return False
+        if not result:
+            return False
 
-            last = datetime.fromisoformat(result[0])
-            if last.tzinfo is None:
-                last = last.replace(tzinfo=timezone.utc)
+        last = datetime.fromisoformat(result[0])
+        if last.tzinfo is None:
+            last = last.replace(tzinfo=timezone.utc)
 
-            now = datetime.now(timezone.utc)
-            return (now - last) > timedelta(minutes=1)
+        now = datetime.now(timezone.utc)
+        return (now - last) > timedelta(minutes=1)
 
 
 
@@ -247,15 +246,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _reset_asset_sync(self, asset: str):
-        """Resetar histórico do ativo - síncrono"""
-        with self._thread_lock:
-            self.conn.execute("DELETE FROM ticks WHERE asset = ?", (asset,))
-            self.conn.execute(
-                "UPDATE asset_metadata SET last_sequence_number = 0 WHERE asset = ?",
-                (asset,)
-            )
-            self.conn.commit()
-            logger.info(f"Histórico resetado para {asset} (gap > 1min detectado)")
+        """Resetar histórico do ativo - síncrono (sem lock interno, chamado de dentro de lock)"""
+        self.conn.execute("DELETE FROM ticks WHERE asset = ?", (asset,))
+        self.conn.execute(
+            "UPDATE asset_metadata SET last_sequence_number = 0 WHERE asset = ?",
+            (asset,)
+        )
+        self.conn.commit()
+        logger.info(f"Histórico resetado para {asset} (gap > 1min detectado)")
 
 
 
@@ -275,14 +273,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _get_next_sequence_sync(self, asset: str) -> int:
-        """Próximo número de sequência - síncrono"""
-        with self._thread_lock:
-            result = self.conn.execute(
-                "SELECT last_sequence_number FROM asset_metadata WHERE asset = ?",
-                (asset,)
-            ).fetchone()
+        """Próximo número de sequência - síncrono (sem lock interno, chamado de dentro de lock)"""
+        result = self.conn.execute(
+            "SELECT last_sequence_number FROM asset_metadata WHERE asset = ?",
+            (asset,)
+        ).fetchone()
 
-            return (result[0] + 1) if result else 1
+        return (result[0] + 1) if result else 1
 
 
 
@@ -343,14 +340,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _check_duplicate_unix_sync(self, asset: str, price: float, timestamp_unix: int) -> bool:
-        """Verificar duplicata usando timestamp Unix - síncrono"""
-        with self._thread_lock:
-            result = self.conn.execute(
-                "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp_unix = ? LIMIT 1",
-                (asset, price, timestamp_unix)
-            ).fetchone()
+        """Verificar duplicata usando timestamp Unix - síncrono (sem lock interno, chamado de dentro de lock)"""
+        result = self.conn.execute(
+            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp_unix = ? LIMIT 1",
+            (asset, price, timestamp_unix)
+        ).fetchone()
 
-            return result is not None
+        return result is not None
 
 
 
@@ -363,15 +359,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _update_metadata_sync(self, asset: str, timestamp: datetime, sequence: int):
-        """Atualizar metadata - síncrono"""
-        with self._thread_lock:
-            timestamp_unix = int(timestamp.timestamp())
-            self.conn.execute("""
-            INSERT OR REPLACE INTO asset_metadata
-            (asset, last_tick_timestamp, last_sequence_number, created_at, needs_reset, last_tick_unix)
-            VALUES (?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP), 0, ?)
-            """, (asset, timestamp.isoformat(), sequence, asset, timestamp_unix))
-            self.conn.commit()
+        """Atualizar metadata - síncrono (sem lock interno, chamado de dentro de lock)"""
+        timestamp_unix = int(timestamp.timestamp())
+        self.conn.execute("""
+        INSERT OR REPLACE INTO asset_metadata
+        (asset, last_tick_timestamp, last_sequence_number, created_at, needs_reset, last_tick_unix)
+        VALUES (?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP), 0, ?)
+        """, (asset, timestamp.isoformat(), sequence, asset, timestamp_unix))
+        self.conn.commit()
 
 
 
