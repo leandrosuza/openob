@@ -267,7 +267,7 @@ class MonitorAPI:
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
 
-            # Processar histórico completo (updateHistoryNewFast) - opcional
+            # Processar histórico completo (updateHistoryNewFast)
             if "updateHistoryNewFast" in event:
                 logger.info(f"Evento updateHistoryNewFast recebido: {type(data)}")
                 if isinstance(data, dict) and data.get("_placeholder"):
@@ -276,17 +276,17 @@ class MonitorAPI:
                     logger.info("Placeholder de histórico detectado, aguardando dados binários")
                     # Marcar que estamos esperando dados de histórico
                     self._history_buffer["waiting"] = True
+                elif isinstance(data, dict) and not data.get("_placeholder"):
+                    # Dados completos em dict - formato: {"asset":"X","period":1,"history":[[ts,price],...],"candles":[]}
+                    self._log_to_file("monitoring_actives.txt", f"Histórico completo recebido: {data.get('asset', 'unknown')}")
+                    logger.info(f"Histórico completo recebido para {data.get('asset', 'unknown')}: {len(data.get('history', []))} ticks")
+                    self._process_history_data(data)
                 elif isinstance(data, list) and self._history_buffer.get("waiting"):
-                    # Dados do histórico em formato de lista
+                    # Dados do histórico em formato de lista (backup)
                     self._log_to_file("monitoring_actives.txt", f"Dados de histórico recebidos: {len(data)} itens")
                     logger.info(f"Histórico recebido: {len(data)} itens")
                     self._process_history_data({"history": data})
                     self._history_buffer["waiting"] = False
-                elif isinstance(data, dict) and not data.get("_placeholder"):
-                    # Dados completos em dict
-                    self._log_to_file("monitoring_actives.txt", f"Histórico em dict detectado: {data}")
-                    logger.info(f"Histórico em dict detectado: {data}")
-                    self._process_history_data(data)
                 else:
                     logger.warning(f"Formato de histórico não reconhecido: {type(data)}")
 
@@ -515,6 +515,12 @@ class MonitorAPI:
             await self.actives_ws.send_message('42["ps"]')
             self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
             logger.info(f"Stream iniciado para {symbol}")
+
+            # Solicitar histórico completo após stream iniciar
+            await asyncio.sleep(1)
+            await self.actives_ws.send_message(f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]')
+            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol}")
+            logger.info(f"Histórico solicitado para {symbol}")
 
         except OpenOBConnectionError:
             raise
