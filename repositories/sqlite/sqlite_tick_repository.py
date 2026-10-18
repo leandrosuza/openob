@@ -37,7 +37,29 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._flush_started = False
         self._lock = asyncio.Lock()
         self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
+        self._reset_callbacks = []  # Callbacks para notificar quando ocorrer reset
         logger.info(f"SQLite Repository inicializado: {db_path}")
+
+
+
+
+    def register_reset_callback(self, callback):
+        """Registrar callback para ser notificado quando ocorrer reset de asset"""
+        self._reset_callbacks.append(callback)
+
+
+
+
+    async def _notify_reset(self, asset: str):
+        """Notificar callbacks sobre reset de asset"""
+        for callback in self._reset_callbacks:
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback(asset)
+                else:
+                    callback(asset)
+            except Exception as e:
+                logger.error(f"Erro ao executar callback de reset: {e}")
 
 
 
@@ -190,7 +212,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
-        """Verifica se precisa reset (>30min) - síncrono"""
+        """Verifica se precisa reset (>1min) - síncrono"""
         with self._thread_lock:
             result = self.conn.execute(
                 "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
@@ -205,13 +227,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 last = last.replace(tzinfo=timezone.utc)
 
             now = datetime.now(timezone.utc)
-            return (now - last) > timedelta(minutes=30)
+            return (now - last) > timedelta(minutes=1)
 
 
 
 
     async def _check_reset_needed(self, asset: str) -> bool:
-        """Verifica se precisa reset (>30min)"""
+        """Verifica se precisa reset (>1min)"""
         return await asyncio.to_thread(self._check_reset_needed_sync, asset)
 
 
@@ -226,7 +248,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 (asset,)
             )
             self.conn.commit()
-            logger.debug(f"Resetado histórico de {asset}")
+            logger.info(f"Histórico resetado para {asset} (gap > 1min detectado)")
 
 
 
@@ -357,7 +379,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
             if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
                 return -1
 
-            # Reset se >30min sem dados
+            # Reset se >1min sem dados (garante histórico recente)
             if self._check_reset_needed_sync(asset):
                 self._reset_asset_sync(asset)
 
@@ -397,6 +419,10 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
                 # Salvar em thread separada
                 sequence = await asyncio.to_thread(self._save_tick_sync, asset, price, payout, timestamp)
+
+                # Verificar se ocorreu reset (sequence voltou para 1)
+                if sequence == 1 and self._reset_callbacks:
+                    await self._notify_reset(asset)
 
                 if sequence > 0:
                     timestamp_unix = int(timestamp.timestamp())

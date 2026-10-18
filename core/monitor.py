@@ -75,7 +75,29 @@ class MonitorAPI:
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
+        # Registrar callback para notificar quando ocorrer reset de asset
+        self.tick_repo.register_reset_callback(self._on_asset_reset)
+
         self._setup_handlers()
+
+
+
+
+    async def _on_asset_reset(self, asset: str):
+        """Callback quando ocorre reset de asset (gap > 1min)"""
+        logger.info(f"Reset detectado para {asset} - solicitando novo histórico")
+        
+        # Solicitar novo histórico para o asset
+        # Enviar mensagem para solicitar updateHistoryNewFast
+        if self.actives_ws and self.actives_ws.is_connected:
+            try:
+                # Formato da mensagem para solicitar histórico
+                # Isso depende da API do PocketOption - ajustar conforme necessário
+                history_request = f'42["updateHistoryNewFast",{{"asset":"{asset}"}}]'
+                await self.actives_ws.send_message(history_request)
+                logger.info(f"Solicitação de histórico enviada para {asset}")
+            except Exception as e:
+                logger.error(f"Erro ao solicitar histórico para {asset}: {e}")
 
 
 
