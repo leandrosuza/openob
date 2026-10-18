@@ -402,6 +402,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
             # Atualizar metadata
             self._update_metadata_sync(asset, timestamp_normalized, sequence)
 
+            # Commit para persistir no disco
+            self.conn.commit()
+
             return sequence
 
 
