@@ -182,7 +182,12 @@ class MonitorAPI:
 
 
     def _log_to_file(self, filename: str, message: str):
-        """Log para arquivo específico em logs/ws/"""
+        """Log para arquivo específico em logs/ws/ apenas em modo DEBUG"""
+        from config.settings import Settings
+
+        if Settings.LOG_LEVEL.upper() != "DEBUG":
+            return
+
         try:
             log_path = f"logs/ws/{filename}"
             os.makedirs(os.path.dirname(log_path), exist_ok=True)
