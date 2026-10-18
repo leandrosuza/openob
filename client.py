@@ -3,7 +3,6 @@
 from connection.websocket import WebSocketManager
 from api.auth import AuthAPI
 from api.balance import BalanceAPI
-from api.market import MarketAPI
 from api.trading import TradingAPI
 from core.logger import get_logger, LoggerConfig
 from config.settings import Settings
@@ -29,7 +28,6 @@ class PocketOptionClient:
 
         self.auth = AuthAPI(self.ws_manager, ssid)
         self.balance = BalanceAPI(self.ws_manager)
-        self.market = MarketAPI(self.ws_manager)
         self.trading = TradingAPI(self.ws_manager)
 
         logger.info(f"PocketOptionClient inicializado (region: {region if region else 'DEMO'})")
@@ -70,15 +68,6 @@ class PocketOptionClient:
         return await self.balance.get_balance()
 
 
-
-
-    async def get_candles(self, asset: str, timeframe: str, count: int = 100):
-        """Obter candles históricos"""
-        return await self.market.get_candles(asset, timeframe, count)
-
-
-
-
     async def place_order(self, asset: str, amount: float, direction, duration: int):
         """Colocar uma ordem"""
         return await self.trading.place_order(asset, amount, direction, duration)
@@ -103,22 +92,6 @@ class PocketOptionClient:
     def get_open_orders(self) -> list:
         """Obter lista de ordens abertas"""
         return self.trading.get_open_orders()
-
-
-
-
-    def get_available_assets(self) -> dict:
-        """Obter lista de ativos disponíveis"""
-        return self.market.get_available_assets()
-
-
-
-
-    def get_available_timeframes(self) -> dict:
-        """Obter lista de timeframes disponíveis"""
-        return self.market.get_available_timeframes()
-
-
 
 
     def get_current_price(self, asset: str):
