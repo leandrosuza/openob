@@ -260,10 +260,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
                 return -1
 
-            # Reset se >1min sem dados (garante histórico recente)
-            if self._check_reset_needed_sync(asset):
-                self._reset_asset_sync(asset)
-
             # Sequência incremental
             sequence = self._get_next_sequence_sync(asset)
 
