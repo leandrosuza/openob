@@ -53,19 +53,10 @@ class MonitorAPI:
         # Ativos atualmente monitorados
         self.monitored_assets: Set[str] = set()
 
-        # Timestamp quando cada asset foi adicionado ao monitoramento
-        self.asset_start_time: Dict[str, datetime] = {}
-
-        # Buffer para dados binários de histórico
-        self._history_buffer: Dict[str, List] = {}
-
         # Criar repositório via factory
         config = Settings.to_dict()
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
-
-        # Task de monitoramento
-        self._health_check_task = None
 
         self._setup_handlers()
 
@@ -90,6 +81,9 @@ class MonitorAPI:
     async def _capture_payout_event(self, event: str, data: Any):
         """Capturar eventos de payout do WebSocket"""
         try:
+            # Log de todos os eventos para debug
+            self._log_to_file("monitoring_payout.txt", f"Evento recebido: {event} | Tipo: {type(data)}")
+
             if event == "json_data" and isinstance(data, dict):
                 if "balance" in data:
                     self.balance_data = data
@@ -234,7 +228,6 @@ class MonitorAPI:
             for i, symbol in enumerate(to_add):
                 await self.subscribe_asset(symbol, period=1)
                 self.monitored_assets.add(symbol)
-                self.asset_start_time[symbol] = datetime.now(timezone.utc)
                 # Delay de 500ms entre cada ativo para evitar flood na API
                 if i < len(to_add) - 1:
                     await asyncio.sleep(0.5)
@@ -278,7 +271,7 @@ class MonitorAPI:
         while self.payout_running:
             try:
                 logger.debug(f"Payout monitoring: payout_running={self.payout_running}, is_connected={self.payout_ws.is_connected}")
-                
+
                 if not self.payout_ws.is_connected:
                     logger.info("Payout monitoring: tentando conectar...")
                     connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=True)
