@@ -38,6 +38,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._lock = asyncio.Lock()
         self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
         self._reset_callbacks = []  # Callbacks para notificar quando ocorrer reset
+
+        # Inicializar banco de forma síncrona no __init__
+        self._initialize_db_sync()
         logger.info(f"SQLite Repository inicializado: {db_path}")
 
 
@@ -145,12 +148,16 @@ class SQLiteTickRepository(TickRepositoryInterface):
     async def _ensure_connection(self):
         """Verificar e restaurar conexão se necessário"""
         try:
+            logger.debug("_ensure_connection: verificando conexão")
             if self.conn:
                 await asyncio.to_thread(self.conn.execute, "SELECT 1")
+                logger.debug("_ensure_connection: conexão OK")
             else:
+                logger.debug("_ensure_connection: conexão inexistente, inicializando")
                 await self._initialize_db()
+                logger.debug("_ensure_connection: banco inicializado")
         except Exception as e:
-            logger.warning(f"Conexão com banco perdida, tentando reconectar...")
+            logger.warning(f"Conexão com banco perdida, tentando reconectar: {e}")
             try:
                 await self._initialize_db()
                 logger.info("Conexão com banco restaurada")
@@ -382,29 +389,38 @@ class SQLiteTickRepository(TickRepositoryInterface):
             timestamp_unix = int(timestamp.timestamp())
             timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
 
+            logger.debug(f"_save_tick_sync: iniciando para {asset} @ {price}")
+
             # Verificar duplicata
             if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
+                logger.debug(f"_save_tick_sync: duplicata detectada para {asset}")
                 return -1
 
             # Reset se >1min sem dados (garante histórico recente)
             if self._check_reset_needed_sync(asset):
+                logger.debug(f"_save_tick_sync: reset necessário para {asset}")
                 self._reset_asset_sync(asset)
 
             # Sequência incremental
             sequence = self._get_next_sequence_sync(asset)
+            logger.debug(f"_save_tick_sync: sequence={sequence} para {asset}")
 
             # Salvar
             self.conn.execute(
                 "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
                 (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
             )
+            logger.debug(f"_save_tick_sync: INSERT executado para {asset}")
 
             # Atualizar metadata
             self._update_metadata_sync(asset, timestamp_normalized, sequence)
+            logger.debug(f"_save_tick_sync: metadata atualizado para {asset}")
 
             # Commit para persistir no disco
             self.conn.commit()
+            logger.debug(f"_save_tick_sync: commit realizado para {asset}")
 
+            logger.info(f"Tick salvo com sucesso: {asset} seq={sequence} price={price}")
             return sequence
 
 
@@ -414,6 +430,8 @@ class SQLiteTickRepository(TickRepositoryInterface):
         """Salvar tick - Método principal com verificação de duplicatas e retry"""
         async with self._lock:
             try:
+                logger.debug(f"save() chamado para {asset} @ {price}")
+
                 # Iniciar flush loop na primeira chamada
                 if not self._flush_started:
                     self._flush_task = asyncio.create_task(self._flush_loop())
@@ -427,8 +445,12 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 elif timestamp.tzinfo is None:
                     timestamp = timestamp.replace(tzinfo=timezone.utc)
 
+                logger.debug(f"save(): chamando _save_tick_sync para {asset}")
+
                 # Salvar em thread separada
                 sequence = await asyncio.to_thread(self._save_tick_sync, asset, price, payout, timestamp)
+
+                logger.debug(f"save(): _save_tick_sync retornou sequence={sequence} para {asset}")
 
                 # Verificar se ocorreu reset (sequence voltou para 1)
                 if sequence == 1 and self._reset_callbacks:
