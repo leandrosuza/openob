@@ -260,6 +260,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
 
 
+    async def reset_asset(self, asset: str):
+        """Resetar histórico do ativo (método público)"""
+        await self._reset_asset(asset)
+
+
+
+
     def _get_next_sequence_sync(self, asset: str) -> int:
         """Próximo número de sequência - síncrono"""
         with self._thread_lock:

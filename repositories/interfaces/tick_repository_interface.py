@@ -57,6 +57,14 @@ class TickRepositoryInterface(ABC):
 
 
     @abstractmethod
+    async def reset_asset(self, asset: str):
+        """Resetar histórico de um ativo específico"""
+        pass
+
+
+
+
+    @abstractmethod
     async def close(self):
         """Fechar conexão"""
         pass

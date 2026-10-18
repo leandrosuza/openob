@@ -78,6 +78,9 @@ class MonitorAPI:
         # Registrar callback para notificar quando ocorrer reset de asset
         self.tick_repo.register_reset_callback(self._on_asset_reset)
 
+        # Task de health check periódico (1 minuto)
+        self._health_check_task = None
+
         self._setup_handlers()
 
 
@@ -98,6 +101,59 @@ class MonitorAPI:
                 logger.info(f"Solicitação de histórico enviada para {asset}")
             except Exception as e:
                 logger.error(f"Erro ao solicitar histórico para {asset}: {e}")
+
+
+
+
+    async def _health_check_loop(self):
+        """Loop de health check periódico (1 minuto)"""
+        while self.payout_running or self.actives_running:
+            try:
+                await asyncio.sleep(60)  # 1 minuto
+                
+                if not self.monitored_assets:
+                    continue
+
+                logger.debug("Iniciando health check de gaps...")
+                
+                for asset in list(self.monitored_assets):
+                    try:
+                        # Verificar último tick do asset
+                        stats = await self.tick_repo.get_stats()
+                        
+                        # Obter último timestamp do asset
+                        recent = await self.tick_repo.get_recent(asset, limit=1)
+                        
+                        if not recent:
+                            logger.warning(f"Asset {asset} sem ticks - solicitando histórico")
+                            await self._on_asset_reset(asset)
+                            continue
+                        
+                        last_tick = recent[0]
+                        last_timestamp = datetime.fromisoformat(last_tick['timestamp'])
+                        if last_timestamp.tzinfo is None:
+                            last_timestamp = last_timestamp.replace(tzinfo=timezone.utc)
+                        
+                        now = datetime.now(timezone.utc)
+                        gap = (now - last_timestamp).total_seconds()
+                        
+                        # Se gap > 1min, resetar e solicitar novo histórico
+                        if gap > 60:
+                            logger.warning(f"Health check: Gap de {gap:.0f}s detectado para {asset} - resetando")
+                            # Forçar reset manual
+                            await self.tick_repo._reset_asset(asset)
+                            await self._on_asset_reset(asset)
+                        else:
+                            logger.debug(f"Health check: {asset} OK (gap: {gap:.0f}s)")
+                            
+                    except Exception as e:
+                        logger.error(f"Erro no health check para {asset}: {e}")
+                        
+            except asyncio.CancelledError:
+                logger.info("Health check loop cancelado")
+                break
+            except Exception as e:
+                logger.error(f"Erro no health check loop: {e}")
 
 
 
@@ -487,6 +543,7 @@ class MonitorAPI:
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
+        self._health_check_task = asyncio.create_task(self._health_check_loop())
         logger.info("Monitoramento iniciado")
 
 
@@ -503,6 +560,8 @@ class MonitorAPI:
             self.payout_task.cancel()
         if self.actives_task:
             self.actives_task.cancel()
+        if self._health_check_task:
+            self._health_check_task.cancel()
 
         if self.payout_ws.is_connected:
             await self.payout_ws.disconnect()
