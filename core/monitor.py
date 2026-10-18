@@ -107,25 +107,28 @@ class MonitorAPI:
 
     async def _health_check_loop(self):
         """Loop de health check periódico (1 minuto)"""
+        logger.info("Health check loop iniciado")
+        
         while self.payout_running or self.actives_running:
             try:
+                logger.debug("Health check: aguardando 60 segundos...")
                 await asyncio.sleep(60)  # 1 minuto
                 
+                logger.debug(f"Health check: verificando {len(self.monitored_assets)} assets monitorados")
+                
                 if not self.monitored_assets:
+                    logger.info("Health check: nenhum asset monitorado ainda, aguardando...")
                     continue
 
-                logger.debug("Iniciando health check de gaps...")
+                logger.info(f"Health check: iniciando verificação de {len(self.monitored_assets)} assets")
                 
                 for asset in list(self.monitored_assets):
                     try:
-                        # Verificar último tick do asset
-                        stats = await self.tick_repo.get_stats()
-                        
                         # Obter último timestamp do asset
                         recent = await self.tick_repo.get_recent(asset, limit=1)
                         
                         if not recent:
-                            logger.warning(f"Asset {asset} sem ticks - solicitando histórico")
+                            logger.warning(f"Health check: Asset {asset} sem ticks - solicitando histórico")
                             await self._on_asset_reset(asset)
                             continue
                         
@@ -137,23 +140,28 @@ class MonitorAPI:
                         now = datetime.now(timezone.utc)
                         gap = (now - last_timestamp).total_seconds()
                         
+                        logger.info(f"Health check: {asset} - último tick há {gap:.0f}s")
+                        
                         # Se gap > 1min, resetar e solicitar novo histórico
                         if gap > 60:
-                            logger.warning(f"Health check: Gap de {gap:.0f}s detectado para {asset} - resetando")
+                            logger.warning(f"Health check: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
                             # Forçar reset manual
-                            await self.tick_repo._reset_asset(asset)
+                            await self.tick_repo.reset_asset(asset)
                             await self._on_asset_reset(asset)
                         else:
-                            logger.debug(f"Health check: {asset} OK (gap: {gap:.0f}s)")
+                            logger.debug(f"Health check: {asset} OK (gap: {gap:.0f}s < 60s)")
                             
                     except Exception as e:
-                        logger.error(f"Erro no health check para {asset}: {e}")
+                        logger.error(f"Health check: Erro ao verificar {asset}: {e}")
+                
+                logger.info("Health check: verificação concluída")
                         
             except asyncio.CancelledError:
                 logger.info("Health check loop cancelado")
                 break
             except Exception as e:
-                logger.error(f"Erro no health check loop: {e}")
+                logger.error(f"Health check: Erro no loop: {e}")
+                await asyncio.sleep(60)  # Continuar tentando após erro
 
 
 
@@ -471,13 +479,18 @@ class MonitorAPI:
     async def start_payout_monitoring(self, payout_interval: int = 5):
         """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
         self.payout_running = True
+        logger.info("Payout monitoring: iniciado")
 
         while self.payout_running:
             try:
+                logger.debug(f"Payout monitoring: payout_running={self.payout_running}, is_connected={self.payout_ws.is_connected}")
+                
                 if not self.payout_ws.is_connected:
+                    logger.info("Payout monitoring: tentando conectar...")
                     connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
+                        logger.info("Payout monitoring: conectado com sucesso")
                     else:
                         self._log_to_file("connection.txt", "Payout: Falha ao conectar")
                         logger.error("MONITOR DE PAYOUT | FALHA AO CONECTAR")
@@ -485,10 +498,12 @@ class MonitorAPI:
                         continue
 
                 if self.payout_ws.is_connected:
+                    logger.debug("Payout monitoring: enviando solicitação de actives")
                     await self.payout_ws.send_message('42["actives/get"]')
                     self._log_to_file("monitoring_payout.txt", "Solicitação de payout enviada")
                     await asyncio.sleep(1)
 
+                logger.debug(f"Payout monitoring: aguardando {payout_interval}s antes da próxima requisição")
                 await asyncio.sleep(payout_interval)
 
             except Exception as e:
@@ -545,6 +560,7 @@ class MonitorAPI:
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
         self._health_check_task = asyncio.create_task(self._health_check_loop())
         logger.info("Monitoramento iniciado")
+        logger.info(f"Tasks criadas: payout={self.payout_task}, actives={self.actives_task}, health_check={self._health_check_task}")
 
 
 
