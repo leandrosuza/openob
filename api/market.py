@@ -4,10 +4,12 @@ import asyncio
 import json
 from typing import List, Optional
 from datetime import datetime
+from collections import defaultdict
 from models.market import Candle
 from core.constants import ASSETS, TIMEFRAMES
 from core.logger import get_logger
 from core.exceptions import ValidationError, ConnectionError as OpenOBConnectionError
+
 
 logger = get_logger(__name__)
 
@@ -21,6 +23,7 @@ class MarketAPI:
         self._candle_requests: dict = {}
         self._setup_handlers()
 
+
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
         handlers = {
@@ -33,161 +36,194 @@ class MarketAPI:
         for event, handler in handlers.items():
             self.ws_manager.add_event_handler(event, handler)
 
-    async def _on_change_symbol(self, data):
-        """Handler para resposta do changeSymbol"""
-        try:
-            logger.debug(f"changeSymbol response recebido: {str(data)[:100]}...")
-            if isinstance(data, dict):
-                asset = data.get("asset")
-                period = data.get("period")
-                if asset and period:
-                    request_id = f"{asset}_{period}"
-                    if request_id in self._candle_requests:
-                        future = self._candle_requests[request_id]
-                        if not future.done():
-                            candles = self._parse_stream_candles(data, asset, period)
-                            future.set_result(candles)
-                            del self._candle_requests[request_id]
-                            logger.info(f"Candles resolvidos para {request_id}: {len(candles)}")
-        except Exception as e:
-            logger.error(f"Erro ao processar changeSymbol: {e}")
 
-    def _parse_stream_candles(self, stream_data: dict, asset: str, timeframe: int):
+    def _parse_candle_from_dict(self, item: dict, asset: str, timeframe: int) -> Optional[Candle]:
+        """Parse candle de dict"""
+        try:
+            return Candle(
+                timestamp=datetime.fromtimestamp(item.get("time", 0)),
+                open=float(item.get("open", 0)),
+                high=float(item.get("high", 0)),
+                low=float(item.get("low", 0)),
+                close=float(item.get("close", 0)),
+                volume=float(item.get("volume", 0)),
+                asset=asset,
+                timeframe=timeframe,
+            )
+        except Exception as e:
+            logger.error(f"Erro ao parsear candle de dict: {e}")
+            return None
+
+
+    def _parse_candle_from_list(self, item: list, asset: str, timeframe: int) -> Optional[Candle]:
+        """Parse candle de lista/tupla"""
+        try:
+            return Candle(
+                timestamp=datetime.fromtimestamp(item[0]),
+                open=float(item[1]),
+                close=float(item[2]),
+                high=float(item[3]),
+                low=float(item[4]),
+                volume=float(item[5]) if len(item) > 5 else 0.0,
+                asset=asset,
+                timeframe=timeframe,
+            )
+        except Exception as e:
+            logger.error(f"Erro ao parsear candle de lista: {e}")
+            return None
+
+
+    def _parse_stream_candles(self, stream_data: dict, asset: str, timeframe: int) -> List[Candle]:
         """Parse candles de stream data"""
         candles = []
-        try:
-            candle_data = stream_data.get("data") or stream_data.get("candles") or []
-            if isinstance(candle_data, list):
-                for item in candle_data:
-                    if isinstance(item, dict):
-                        candle = Candle(
-                            timestamp=datetime.fromtimestamp(item.get("time", 0)),
-                            open=float(item.get("open", 0)),
-                            high=float(item.get("high", 0)),
-                            low=float(item.get("low", 0)),
-                            close=float(item.get("close", 0)),
-                            volume=float(item.get("volume", 0)),
-                            asset=asset,
-                            timeframe=timeframe,
-                        )
-                        candles.append(candle)
-                    elif isinstance(item, (list, tuple)) and len(item) >= 5:
-                        candle = Candle(
-                            timestamp=datetime.fromtimestamp(item[0]),
-                            open=float(item[1]),
-                            close=float(item[2]),
-                            high=float(item[3]),
-                            low=float(item[4]),
-                            volume=float(item[5]) if len(item) > 5 else 0.0,
-                            asset=asset,
-                            timeframe=timeframe,
-                        )
-                        candles.append(candle)
-        except Exception as e:
-            logger.error(f"Erro ao parse stream candles: {e}")
+        candle_data = stream_data.get("data") or stream_data.get("candles") or []
+
+        if not isinstance(candle_data, list):
+            return candles
+
+        for item in candle_data:
+            if isinstance(item, dict):
+                candle = self._parse_candle_from_dict(item, asset, timeframe)
+                if candle:
+                    candles.append(candle)
+            elif isinstance(item, (list, tuple)) and len(item) >= 5:
+                candle = self._parse_candle_from_list(item, asset, timeframe)
+                if candle:
+                    candles.append(candle)
+
         return candles
+
+
+    def _parse_history_candles(self, history: list, asset: str, timeframe: int) -> List[Candle]:
+        """Parse candles de history data"""
+        if not history:
+            return []
+
+        candles = []
+        candle_groups = defaultdict(list)
+
+        for item in history:
+            if isinstance(item, list) and len(item) >= 2:
+                timestamp = item[0]
+                price = item[1]
+                bucket = int(timestamp // timeframe) * timeframe
+                candle_groups[bucket].append((timestamp, price))
+
+        for bucket in sorted(candle_groups.keys()):
+            prices = [p for _, p in candle_groups[bucket]]
+            if prices:
+                candle = Candle(
+                    timestamp=datetime.fromtimestamp(bucket),
+                    open=float(prices[0]),
+                    close=float(prices[-1]),
+                    high=float(max(prices)),
+                    low=float(min(prices)),
+                    volume=len(prices),
+                    asset=asset,
+                    timeframe=timeframe,
+                )
+                candles.append(candle)
+
+        return candles
+
+
+    async def _on_change_symbol(self, data):
+        """Handler para resposta do changeSymbol"""
+        if not isinstance(data, dict):
+            return
+
+        asset = data.get("asset")
+        period = data.get("period")
+        if not asset or not period:
+            return
+
+        request_id = f"{asset}_{period}"
+        if request_id not in self._candle_requests:
+            return
+
+        future = self._candle_requests[request_id]
+        if future.done():
+            return
+
+        candles = self._parse_stream_candles(data, asset, period)
+        future.set_result(candles)
+        del self._candle_requests[request_id]
+        logger.info(f"Candles resolvidos para {request_id}: {len(candles)}")
+
 
     async def _on_history_update(self, data):
         """Handler para updateHistoryNewFast"""
-        try:
-            if isinstance(data, dict):
-                asset = data.get("asset")
-                period = data.get("period")
-                history = data.get("history", [])
-                if asset and period and history:
-                    request_id = f"{asset}_{period}"
-                    if request_id in self._candle_requests:
-                        future = self._candle_requests[request_id]
-                        if not future.done():
-                            candles = self._parse_history_candles(history, asset, period)
-                            future.set_result(candles)
-                            del self._candle_requests[request_id]
-                            logger.debug(f"História atualizada para {request_id}")
-        except Exception as e:
-            logger.error(f"Erro em handler de mercado: {e}")
+        if not isinstance(data, dict):
+            return
 
-    def _parse_history_candles(self, history: list, asset: str, timeframe: int):
-        """Parse candles de history data"""
-        candles = []
-        try:
-            if not history:
-                return candles
+        asset = data.get("asset")
+        period = data.get("period")
+        history = data.get("history", [])
+        if not asset or not period or not history:
+            return
 
-            from collections import defaultdict
-            candle_groups = defaultdict(list)
+        request_id = f"{asset}_{period}"
+        if request_id not in self._candle_requests:
+            return
 
-            for item in history:
-                if isinstance(item, list) and len(item) >= 2:
-                    timestamp = item[0]
-                    price = item[1]
-                    bucket = int(timestamp // timeframe) * timeframe
-                    candle_groups[bucket].append((timestamp, price))
+        future = self._candle_requests[request_id]
+        if future.done():
+            return
 
-            for bucket in sorted(candle_groups.keys()):
-                prices = [p for _, p in candle_groups[bucket]]
-                if prices:
-                    candle_data = {
-                        "timestamp": datetime.fromtimestamp(bucket),
-                        "open": float(prices[0]),
-                        "close": float(prices[-1]),
-                        "high": float(max(prices)),
-                        "low": float(min(prices)),
-                        "volume": len(prices),
-                        "asset": asset,
-                        "timeframe": timeframe,
-                    }
-                    candle = Candle.model_validate(candle_data)
-                    candles.append(candle)
+        candles = self._parse_history_candles(history, asset, period)
+        future.set_result(candles)
+        del self._candle_requests[request_id]
+        logger.debug(f"História atualizada para {request_id}")
 
-        except Exception as e:
-            logger.error(f"Erro em handler de mercado: {e}")
-        return candles
 
     async def _on_stream_update(self, data):
         """Handler para updateStream - atualização em tempo real de candles"""
-        try:
-            if isinstance(data, dict):
-                asset = data.get("asset")
-                period = data.get("period")
-                price = data.get("price") or data.get("close")
-                if asset and period and price:
-                    cache_key = f"{asset}_{period}"
-                    if cache_key in self._candles_cache:
-                        candles = self._candles_cache[cache_key]
-                        if candles:
-                            last_candle = candles[-1]
-                            updated_candle = Candle(
-                                timestamp=last_candle.timestamp,
-                                open=last_candle.open,
-                                close=float(price),
-                                high=max(last_candle.high, float(price)),
-                                low=min(last_candle.low, float(price)),
-                                volume=last_candle.volume + 1,
-                                asset=asset,
-                                timeframe=period,
-                            )
-                            candles[-1] = updated_candle
-                            logger.debug(f"Candle atualizado para {asset}: {price}")
-        except Exception as e:
-            logger.error(f"Erro ao processar stream update: {e}")
+        if not isinstance(data, dict):
+            return
+
+        asset = data.get("asset")
+        period = data.get("period")
+        price = data.get("price") or data.get("close")
+        if not asset or not period or not price:
+            return
+
+        cache_key = f"{asset}_{period}"
+        if cache_key not in self._candles_cache or not self._candles_cache[cache_key]:
+            return
+
+        candles = self._candles_cache[cache_key]
+        last_candle = candles[-1]
+        price_float = float(price)
+
+        updated_candle = Candle(
+            timestamp=last_candle.timestamp,
+            open=last_candle.open,
+            close=price_float,
+            high=max(last_candle.high, price_float),
+            low=min(last_candle.low, price_float),
+            volume=last_candle.volume + 1,
+            asset=asset,
+            timeframe=period,
+        )
+        candles[-1] = updated_candle
+        logger.debug(f"Candle atualizado para {asset}: {price}")
+
 
     async def _on_assets_update(self, data):
         """Handler para atualização de ativos disponíveis"""
-        try:
-            if isinstance(data, dict):
-                assets = data.get("assets") or data.get("active")
-                if assets:
-                    logger.info(f"Ativos atualizados: {len(assets) if isinstance(assets, list) else 'N/A'}")
-        except Exception as e:
-            logger.error(f"Erro ao processar atualização de ativos: {e}")
+        if not isinstance(data, dict):
+            return
+
+        assets = data.get("assets") or data.get("active")
+        if assets:
+            logger.info(f"Ativos atualizados: {len(assets) if isinstance(assets, list) else 'N/A'}")
+
 
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
-        try:
-            if isinstance(data, dict) and "asset" in data and "period" in data and "history" in data:
-                await self._on_history_update(data)
-        except Exception as e:
-            logger.error(f"Erro ao processar JSON data: {e}")
+        if isinstance(data, dict) and "asset" in data and "period" in data and "history" in data:
+            await self._on_history_update(data)
+
 
     async def get_candles(self, asset: str, timeframe: str, count: int = 100) -> List[Candle]:
         """Obter candles históricos"""
@@ -237,15 +273,17 @@ class MarketAPI:
             logger.error(f"Erro ao obter candles: {e}")
             return []
 
+
     def _format_candles_message(self, asset: str, timeframe: int, start_time: int, end_time: int, count: int) -> str:
         """Formatar mensagem de solicitação de candles"""
         message_data = ["changeSymbol", {"asset": str(asset), "period": timeframe}]
-        message = f"42{json.dumps(message_data)}"
-        return message
+        return f"42{json.dumps(message_data)}"
+
 
     def get_available_assets(self) -> dict:
         """Obter lista de ativos disponíveis"""
         return ASSETS
+
 
     def get_available_timeframes(self) -> dict:
         """Obter lista de timeframes disponíveis"""

@@ -2,10 +2,10 @@
 
 import asyncio
 from typing import Optional
-from datetime import datetime
 from models.market import Balance
 from core.logger import get_logger
 from core.exceptions import ConnectionError as OpenOBConnectionError
+
 
 logger = get_logger(__name__)
 
@@ -19,6 +19,7 @@ class BalanceAPI:
         self._balance_updated = asyncio.Event()
         self._setup_handlers()
 
+
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
         handlers = {
@@ -31,31 +32,38 @@ class BalanceAPI:
         for event, handler in handlers.items():
             self.ws_manager.add_event_handler(event, handler)
 
+
+    def _parse_balance_data(self, data: dict) -> Optional[Balance]:
+        """Parse dados de saldo de um dict"""
+        try:
+            amount = data.get("balance", 0)
+            currency = data.get("currency", "USD")
+            is_demo = data.get("isDemo", True)
+            return Balance(amount=amount, currency=currency, is_demo=is_demo)
+        except Exception as e:
+            logger.error(f"Erro ao parsear dados de saldo: {e}")
+            return None
+
+
     async def _on_balance(self, data):
         """Handler para receber dados de saldo"""
-        try:
-            if isinstance(data, dict):
-                amount = data.get("balance", 0)
-                currency = data.get("currency", "USD")
-                is_demo = data.get("isDemo", True)
-                self._balance = Balance(amount=amount, currency=currency, is_demo=is_demo)
+        if isinstance(data, dict):
+            balance = self._parse_balance_data(data)
+            if balance:
+                self._balance = balance
                 self._balance_updated.set()
-                logger.debug(f"Saldo atualizado: {amount} {currency}")
-        except Exception as e:
-            logger.error(f"Erro ao processar dados de saldo: {e}")
+                logger.debug(f"Saldo atualizado: {balance.amount} {balance.currency}")
+
 
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
-        try:
-            if isinstance(data, dict) and "balance" in data:
-                amount = data.get("balance", 0)
-                currency = data.get("currency", "USD")
-                is_demo = data.get("isDemo", True)
-                self._balance = Balance(amount=amount, currency=currency, is_demo=is_demo)
+        if isinstance(data, dict) and "balance" in data:
+            balance = self._parse_balance_data(data)
+            if balance:
+                self._balance = balance
                 self._balance_updated.set()
-                logger.debug(f"Saldo atualizado via JSON: {amount} {currency}")
-        except Exception as e:
-            logger.error(f"Erro ao processar JSON de saldo: {e}")
+                logger.debug(f"Saldo atualizado via JSON: {balance.amount} {balance.currency}")
+
 
     async def get_balance(self) -> Balance:
         """Obter saldo atual"""
@@ -69,17 +77,17 @@ class BalanceAPI:
             try:
                 await asyncio.wait_for(self._balance_updated.wait(), timeout=5.0)
                 self._balance_updated.clear()
-                logger.info(f"Saldo obtido: {self._balance.amount} {self._balance.currency}")
+                if self._balance:
+                    logger.info(f"Saldo obtido: {self._balance.amount} {self._balance.currency}")
+                    return self._balance
+                else:
+                    raise OpenOBConnectionError("Não foi possível obter saldo")
             except asyncio.TimeoutError:
                 logger.warning("Timeout aguardando saldo")
-                if not self._balance:
-                    self._balance = Balance(amount=0, currency="USD", is_demo=True)
-                raise
-
-            return self._balance
+                raise OpenOBConnectionError("Timeout ao obter saldo")
 
         except OpenOBConnectionError:
             raise
         except Exception as e:
             logger.error(f"Erro ao obter saldo: {e}")
-            raise
+            raise OpenOBConnectionError(f"Falha ao obter saldo: {e}")
