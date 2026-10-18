@@ -13,12 +13,10 @@ logger = get_logger(__name__)
 class PocketOptionClient:
     """Cliente principal para PocketOption"""
 
-    def __init__(self, ssid: str, is_demo: bool = True, region: str = None, log_level: str = None):
+    def __init__(self, ssid: str, region: str = None, log_level: str = None):
         self.ssid = ssid
-        self.is_demo = is_demo
         self.region = region
 
-        # Configurar logging
         if log_level:
             LoggerConfig.setup(level=getattr(__import__("logging"), log_level.upper()))
         else:
