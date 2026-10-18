@@ -4,7 +4,7 @@ import os
 import sqlite3
 import asyncio
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import List, Dict, Optional
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
 from core.logger import get_logger
@@ -25,10 +25,8 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._initialized = False
         self._flush_started = False
         self._lock = asyncio.Lock()
-        self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
-        self._startup_time = datetime.now(timezone.utc)  # Timestamp de inicialização do repositório
+        self._thread_lock = threading.Lock()
 
-        # Inicializar banco de forma síncrona no __init__
         self._initialize_db_sync()
         logger.info(f"SQLite Repository inicializado: {db_path}")
 
