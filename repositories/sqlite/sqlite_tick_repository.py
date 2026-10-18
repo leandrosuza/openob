@@ -6,6 +6,7 @@
 import os
 import sqlite3
 import asyncio
+import threading
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
@@ -35,6 +36,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._initialized = False
         self._flush_started = False
         self._lock = asyncio.Lock()
+        self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
         logger.info(f"SQLite Repository inicializado: {db_path}")
 
 
@@ -42,70 +44,71 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _initialize_db_sync(self):
         """Setup inicial do banco (síncrono)"""
-        if self._initialized:
-            return
+        with self._thread_lock:
+            if self._initialized:
+                return
 
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
-        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        self.conn.execute("PRAGMA journal_mode=WAL")
-        self.conn.execute("PRAGMA synchronous=NORMAL")
-        self.conn.execute("PRAGMA cache_size=-64000")
-        self.conn.execute("PRAGMA temp_store=MEMORY")
-        self.conn.execute("PRAGMA busy_timeout=5000")
+            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.execute("PRAGMA synchronous=NORMAL")
+            self.conn.execute("PRAGMA cache_size=-64000")
+            self.conn.execute("PRAGMA temp_store=MEMORY")
+            self.conn.execute("PRAGMA busy_timeout=5000")
 
-        # Tabela de ticks
-        self.conn.execute("""
-        CREATE TABLE IF NOT EXISTS ticks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            asset TEXT NOT NULL,
-            timestamp DATETIME NOT NULL,
-            timestamp_unix INTEGER NOT NULL,
-            price REAL NOT NULL,
-            payout REAL,
-            sequence_number INTEGER NOT NULL
-        )
-        """)
+            # Tabela de ticks
+            self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS ticks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                asset TEXT NOT NULL,
+                timestamp DATETIME NOT NULL,
+                timestamp_unix INTEGER NOT NULL,
+                price REAL NOT NULL,
+                payout REAL,
+                sequence_number INTEGER NOT NULL
+            )
+            """)
 
-        # Migrar: adicionar coluna timestamp_unix se não existir
-        try:
-            self.conn.execute("ALTER TABLE ticks ADD COLUMN timestamp_unix INTEGER")
-            self.conn.execute("UPDATE ticks SET timestamp_unix = CAST(strftime('%s', timestamp) AS INTEGER) WHERE timestamp_unix IS NULL")
-            logger.info("Migração: coluna timestamp_unix adicionada")
-        except sqlite3.OperationalError:
-            pass
+            # Migrar: adicionar coluna timestamp_unix se não existir
+            try:
+                self.conn.execute("ALTER TABLE ticks ADD COLUMN timestamp_unix INTEGER")
+                self.conn.execute("UPDATE ticks SET timestamp_unix = CAST(strftime('%s', timestamp) AS INTEGER) WHERE timestamp_unix IS NULL")
+                logger.info("Migração: coluna timestamp_unix adicionada")
+            except sqlite3.OperationalError:
+                pass
 
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_seq ON ticks(asset, sequence_number)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_asset_time ON ticks(asset, timestamp_unix)")
 
-        # Tabela de metadata
-        self.conn.execute("""
-        CREATE TABLE IF NOT EXISTS asset_metadata (
-            asset TEXT PRIMARY KEY,
-            last_tick_timestamp DATETIME,
-            last_tick_unix INTEGER,
-            last_sequence_number INTEGER DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            needs_reset BOOLEAN DEFAULT 0
-        )
-        """)
+            # Tabela de metadata
+            self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS asset_metadata (
+                asset TEXT PRIMARY KEY,
+                last_tick_timestamp DATETIME,
+                last_sequence_number INTEGER DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                needs_reset BOOLEAN DEFAULT 0,
+                last_tick_unix INTEGER
+            )
+            """)
 
-        # Migrar: adicionar coluna last_tick_unix
-        try:
-            self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN last_tick_unix INTEGER")
-            logger.info("Migração: coluna last_tick_unix adicionada")
-        except sqlite3.OperationalError:
-            pass
+            # Migrar: adicionar coluna last_tick_unix
+            try:
+                self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN last_tick_unix INTEGER")
+                logger.info("Migração: coluna last_tick_unix adicionada")
+            except sqlite3.OperationalError:
+                pass
 
-        # Migrar: adicionar coluna needs_reset
-        try:
-            self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN needs_reset BOOLEAN DEFAULT 0")
-            logger.info("Migração: coluna needs_reset adicionada")
-        except sqlite3.OperationalError:
-            pass
+            # Migrar: adicionar coluna needs_reset
+            try:
+                self.conn.execute("ALTER TABLE asset_metadata ADD COLUMN needs_reset BOOLEAN DEFAULT 0")
+                logger.info("Migração: coluna needs_reset adicionada")
+            except sqlite3.OperationalError:
+                pass
 
-        self.conn.commit()
-        self._initialized = True
+            self.conn.commit()
+            self._initialized = True
 
 
 
@@ -188,20 +191,21 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
         """Verifica se precisa reset (>30min) - síncrono"""
-        result = self.conn.execute(
-            "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
-            (asset,)
-        ).fetchone()
+        with self._thread_lock:
+            result = self.conn.execute(
+                "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
+                (asset,)
+            ).fetchone()
 
-        if not result:
-            return False
+            if not result:
+                return False
 
-        last = datetime.fromisoformat(result[0])
-        if last.tzinfo is None:
-            last = last.replace(tzinfo=timezone.utc)
+            last = datetime.fromisoformat(result[0])
+            if last.tzinfo is None:
+                last = last.replace(tzinfo=timezone.utc)
 
-        now = datetime.now(timezone.utc)
-        return (now - last) > timedelta(minutes=30)
+            now = datetime.now(timezone.utc)
+            return (now - last) > timedelta(minutes=30)
 
 
 
@@ -215,13 +219,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _reset_asset_sync(self, asset: str):
         """Resetar histórico do ativo - síncrono"""
-        self.conn.execute("DELETE FROM ticks WHERE asset = ?", (asset,))
-        self.conn.execute(
-            "UPDATE asset_metadata SET last_sequence_number = 0 WHERE asset = ?",
-            (asset,)
-        )
-        self.conn.commit()
-        logger.debug(f"Resetado histórico de {asset}")
+        with self._thread_lock:
+            self.conn.execute("DELETE FROM ticks WHERE asset = ?", (asset,))
+            self.conn.execute(
+                "UPDATE asset_metadata SET last_sequence_number = 0 WHERE asset = ?",
+                (asset,)
+            )
+            self.conn.commit()
+            logger.debug(f"Resetado histórico de {asset}")
 
 
 
@@ -235,12 +240,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _get_next_sequence_sync(self, asset: str) -> int:
         """Próximo número de sequência - síncrono"""
-        result = self.conn.execute(
-            "SELECT last_sequence_number FROM asset_metadata WHERE asset = ?",
-            (asset,)
-        ).fetchone()
+        with self._thread_lock:
+            result = self.conn.execute(
+                "SELECT last_sequence_number FROM asset_metadata WHERE asset = ?",
+                (asset,)
+            ).fetchone()
 
-        return (result[0] + 1) if result else 1
+            return (result[0] + 1) if result else 1
 
 
 
@@ -254,20 +260,21 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _get_last_tick_sync(self, asset: str) -> Optional[Dict]:
         """Obter último tick salvo do ativo - síncrono"""
-        row = self.conn.execute(
-            "SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT 1",
-            (asset,)
-        ).fetchone()
+        with self._thread_lock:
+            row = self.conn.execute(
+                "SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT 1",
+                (asset,)
+            ).fetchone()
 
-        if not row:
-            return None
+            if not row:
+                return None
 
-        return {
-            'timestamp': row[2],
-            'price': row[3],
-            'payout': row[4],
-            'sequence': row[5]
-        }
+            return {
+                'timestamp': row[2],
+                'price': row[3],
+                'payout': row[4],
+                'sequence': row[5]
+            }
 
 
 
@@ -281,12 +288,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _check_duplicate_sync(self, asset: str, price: float, timestamp: datetime) -> bool:
         """Verificar se tick já existe - síncrono"""
-        result = self.conn.execute(
-            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp = ? LIMIT 1",
-            (asset, price, timestamp.isoformat())
-        ).fetchone()
+        with self._thread_lock:
+            result = self.conn.execute(
+                "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp = ? LIMIT 1",
+                (asset, price, timestamp.isoformat())
+            ).fetchone()
 
-        return result is not None
+            return result is not None
 
 
 
@@ -300,12 +308,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _check_duplicate_unix_sync(self, asset: str, price: float, timestamp_unix: int) -> bool:
         """Verificar duplicata usando timestamp Unix - síncrono"""
-        result = self.conn.execute(
-            "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp_unix = ? LIMIT 1",
-            (asset, price, timestamp_unix)
-        ).fetchone()
+        with self._thread_lock:
+            result = self.conn.execute(
+                "SELECT id FROM ticks WHERE asset = ? AND price = ? AND timestamp_unix = ? LIMIT 1",
+                (asset, price, timestamp_unix)
+            ).fetchone()
 
-        return result is not None
+            return result is not None
 
 
 
@@ -319,13 +328,14 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _update_metadata_sync(self, asset: str, timestamp: datetime, sequence: int):
         """Atualizar metadata - síncrono"""
-        timestamp_unix = int(timestamp.timestamp())
-        self.conn.execute("""
-        INSERT OR REPLACE INTO asset_metadata
-        (asset, last_tick_timestamp, last_tick_unix, last_sequence_number, created_at)
-        VALUES (?, ?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP))
-        """, (asset, timestamp.isoformat(), timestamp_unix, sequence, asset))
-        self.conn.commit()
+        with self._thread_lock:
+            timestamp_unix = int(timestamp.timestamp())
+            self.conn.execute("""
+            INSERT OR REPLACE INTO asset_metadata
+            (asset, last_tick_timestamp, last_sequence_number, created_at, needs_reset, last_tick_unix)
+            VALUES (?, ?, ?, COALESCE((SELECT created_at FROM asset_metadata WHERE asset = ?), CURRENT_TIMESTAMP), 0, ?)
+            """, (asset, timestamp.isoformat(), sequence, asset, timestamp_unix))
+            self.conn.commit()
 
 
 
@@ -339,30 +349,31 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _save_tick_sync(self, asset: str, price: float, payout: Optional[float], timestamp: datetime) -> int:
         """Salvar tick - síncrono"""
-        timestamp_unix = int(timestamp.timestamp())
-        timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+        with self._thread_lock:
+            timestamp_unix = int(timestamp.timestamp())
+            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
 
-        # Verificar duplicata
-        if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
-            return -1
+            # Verificar duplicata
+            if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
+                return -1
 
-        # Reset se >30min sem dados
-        if self._check_reset_needed_sync(asset):
-            self._reset_asset_sync(asset)
+            # Reset se >30min sem dados
+            if self._check_reset_needed_sync(asset):
+                self._reset_asset_sync(asset)
 
-        # Sequência incremental
-        sequence = self._get_next_sequence_sync(asset)
+            # Sequência incremental
+            sequence = self._get_next_sequence_sync(asset)
 
-        # Salvar
-        self.conn.execute(
-            "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
-            (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
-        )
+            # Salvar
+            self.conn.execute(
+                "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
+            )
 
-        # Atualizar metadata
-        self._update_metadata_sync(asset, timestamp_normalized, sequence)
+            # Atualizar metadata
+            self._update_metadata_sync(asset, timestamp_normalized, sequence)
 
-        return sequence
+            return sequence
 
 
 
@@ -458,18 +469,19 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _get_recent_sync(self, asset: str, limit: int) -> List[Dict]:
         """Obter ticks recentes - síncrono"""
-        query = f"SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT {limit}"
-        rows = self.conn.execute(query, (asset,)).fetchall()
+        with self._thread_lock:
+            query = f"SELECT * FROM ticks WHERE asset = ? ORDER BY sequence_number DESC LIMIT {limit}"
+            rows = self.conn.execute(query, (asset,)).fetchall()
 
-        return [
-            {
-                'timestamp': row[2],
-                'price': row[3],
-                'payout': row[4],
-                'sequence': row[5]
-            }
-            for row in reversed(rows)
-        ]
+            return [
+                {
+                    'timestamp': row[2],
+                    'price': row[3],
+                    'payout': row[4],
+                    'sequence': row[5]
+                }
+                for row in reversed(rows)
+            ]
 
 
 
@@ -488,20 +500,21 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _get_by_sequence_sync(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter range de sequência - síncrono"""
-        rows = self.conn.execute(
-            "SELECT * FROM ticks WHERE asset = ? AND sequence_number BETWEEN ? AND ? ORDER BY sequence_number",
-            (asset, start, end)
-        ).fetchall()
+        with self._thread_lock:
+            rows = self.conn.execute(
+                "SELECT * FROM ticks WHERE asset = ? AND sequence_number BETWEEN ? AND ? ORDER BY sequence_number",
+                (asset, start, end)
+            ).fetchall()
 
-        return [
-            {
-                'timestamp': row[2],
-                'price': row[3],
-                'payout': row[4],
-                'sequence': row[5]
-            }
-            for row in rows
-        ]
+            return [
+                {
+                    'timestamp': row[2],
+                    'price': row[3],
+                    'payout': row[4],
+                    'sequence': row[5]
+                }
+                for row in rows
+            ]
 
 
 
@@ -520,15 +533,16 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _get_stats_sync(self) -> Dict:
         """Estatísticas do banco - síncrono"""
-        total = self.conn.execute("SELECT COUNT(*) FROM ticks").fetchone()[0]
-        assets = self.conn.execute("SELECT COUNT(DISTINCT asset) FROM ticks").fetchone()[0]
+        with self._thread_lock:
+            total = self.conn.execute("SELECT COUNT(*) FROM ticks").fetchone()[0]
+            assets = self.conn.execute("SELECT COUNT(DISTINCT asset) FROM ticks").fetchone()[0]
 
-        return {
-            'total_ticks': total,
-            'total_assets': assets,
-            'db_size_mb': os.path.getsize(self.db_path) / (1024 * 1024),
-            'pending_ticks': len(self._pending_ticks)
-        }
+            return {
+                'total_ticks': total,
+                'total_assets': assets,
+                'db_size_mb': os.path.getsize(self.db_path) / (1024 * 1024),
+                'pending_ticks': len(self._pending_ticks)
+            }
 
 
 
