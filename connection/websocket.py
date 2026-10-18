@@ -327,9 +327,7 @@ class WebSocketManager:
             self.websocket = None
 
         logger.info(f"Desconectado ({self.name})")
-            self.websocket = None
-        
-        logger.info(f"Desconectado ({self.name})")
+
 
     async def reconnect(self, ssid: str = None) -> bool:
         """Reconectar ao servidor (única tentativa)"""
