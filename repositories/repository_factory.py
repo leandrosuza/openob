@@ -1,20 +1,12 @@
 """Factory para criação de repositórios"""
 
-
-
-
 from typing import Dict
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
 from repositories.sqlite.sqlite_tick_repository import SQLiteTickRepository
 
 
-
-
 class RepositoryFactory:
     """Fábrica de repositórios"""
-
-
-
 
     @staticmethod
     def create_tick_repository(config: Dict) -> TickRepositoryInterface:

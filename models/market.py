@@ -1,13 +1,8 @@
 """Market models with Pydantic validation"""
 
-
-
-
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime
-
-
 
 
 class Balance(BaseModel):
@@ -17,9 +12,6 @@ class Balance(BaseModel):
     is_demo: bool = True
     last_updated: datetime = Field(default_factory=datetime.now)
 
-
-
-
     @field_validator("amount")
     @classmethod
     def amount_must_be_valid(cls, v):
@@ -27,13 +19,8 @@ class Balance(BaseModel):
             raise ValueError("Balance cannot be negative")
         return v
 
-
-
-
     class Config:
         frozen = True
-
-
 
 
 class Candle(BaseModel):
@@ -47,18 +34,12 @@ class Candle(BaseModel):
     asset: str
     timeframe: int
 
-
-
-
     @model_validator(mode="after")
     def validate_ohlc(self):
         """Validar que high >= low"""
         if self.high < self.low:
             raise ValueError("High must be greater than or equal to low")
         return self
-
-
-
 
     class Config:
         frozen = True

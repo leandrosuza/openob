@@ -5,7 +5,6 @@ import asyncio
 import os
 import shutil
 
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.monitor import MonitorAPI
@@ -84,7 +83,6 @@ async def main():
             except Exception as e:
                 logger.error(f"Erro ao parar monitor: {e}")
             print("Sistema parado")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

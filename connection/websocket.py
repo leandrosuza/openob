@@ -1,8 +1,5 @@
 """WebSocket Manager for PocketOption"""
 
-
-
-
 import asyncio
 import json
 import ssl
@@ -10,17 +7,12 @@ from core.constants import WEBSOCKET_ENDPOINTS, CONNECTION_SETTINGS
 from core.logger import get_logger
 from core.exceptions import ConnectionError as OpenOBConnectionError
 
-
-
-
 logger = get_logger(__name__)
 
 DEFAULT_HEADERS = {
     "Origin": "https://pocketoption.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 }
-
-
 
 
 class WebSocketManager:
@@ -42,25 +34,16 @@ class WebSocketManager:
         self._reconnect_attempts = 0
         self._create_ssl_context()
 
-
-
-
     def _create_ssl_context(self):
         """Criar contexto SSL reutilizável"""
         self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         self._ssl_context.check_hostname = False
         self._ssl_context.verify_mode = ssl.CERT_NONE
 
-
-
-
     @property
     def is_connected(self):
         """Verificar se está conectado"""
         return self.websocket is not None
-
-
-
 
     async def connect(self, ssid: str = None, auto_reconnect: bool = False) -> bool:
         """Conectar ao servidor"""
@@ -110,9 +93,6 @@ class WebSocketManager:
 
         raise OpenOBConnectionError(f"Falha ao conectar a todos os endpoints para região {self.region}")
 
-
-
-
     async def _handshake(self, ssid: str = None) -> bool:
         """Executar handshake Socket.IO"""
         try:
@@ -143,9 +123,6 @@ class WebSocketManager:
                 raise
             raise OpenOBConnectionError(f"Erro durante handshake: {e}")
 
-
-
-
     async def _ping_loop(self):
         """Enviar ping periodicamente para manter conexão viva"""
         while self._running and self.websocket:
@@ -157,9 +134,6 @@ class WebSocketManager:
             except Exception as e:
                 logger.error(f"Erro ao enviar ping: {e}")
                 break
-
-
-
 
     async def _auto_reconnect_loop(self):
         """Loop de reconexão automática com exponential backoff"""
@@ -186,17 +160,11 @@ class WebSocketManager:
             else:
                 await asyncio.sleep(5)
 
-
-
-
     def _get_reconnect_delay(self) -> float:
         """Calcular delay de reconexão com exponential backoff"""
         base_delay = CONNECTION_SETTINGS.get("reconnect_delay", 5)
         exponential_delay = base_delay * (2 ** min(self._reconnect_attempts, 5))
         return min(exponential_delay, 60)
-
-
-
 
     async def _receive_messages(self):
         """Receber mensagens do WebSocket com reconexão automática"""
@@ -212,9 +180,6 @@ class WebSocketManager:
             logger.warning(f"Conexão perdida, reconexão automática iniciada ({self.name})")
         else:
             logger.info(f"Conexão encerrada ({self.name})")
-
-
-
 
     async def _process_message(self, message):
         """Processar mensagem recebida"""
@@ -236,9 +201,6 @@ class WebSocketManager:
         except Exception as e:
             logger.debug(f"Erro ao processar mensagem: {e}")
 
-
-
-
     def _handle_binary_message(self, message: str):
         """Handle mensagem binária Socket.IO"""
         if "[" in message:
@@ -248,7 +210,6 @@ class WebSocketManager:
                 event = event_part.strip('"')
                 self._binary_event = event
                 asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
-
 
     def _handle_binary_data(self, data: bytes):
         """Handle dados binários que seguem mensagem 451-"""
@@ -263,7 +224,6 @@ class WebSocketManager:
             logger.debug(f"Erro ao processar dados binários: {e}")
             self._binary_event = None
 
-
     def _handle_socketio_message(self, message: str):
         """Handle mensagem Socket.IO com dados"""
         data = message[2:]
@@ -276,7 +236,6 @@ class WebSocketManager:
         except json.JSONDecodeError:
             pass
 
-
     def _handle_json_message(self, message: str):
         """Handle mensagem JSON separada"""
         try:
@@ -285,7 +244,6 @@ class WebSocketManager:
                 asyncio.create_task(self._emit_event("json_data", parsed))
         except json.JSONDecodeError:
             pass
-
 
     async def _emit_event(self, event: str, data):
         """Emitir evento para handlers"""
@@ -299,13 +257,11 @@ class WebSocketManager:
                 except Exception as e:
                     logger.error(f"Erro no handler {event}: {e}")
 
-
     def add_event_handler(self, event: str, handler):
         """Adicionar handler de evento"""
         if event not in self._event_handlers:
             self._event_handlers[event] = []
         self._event_handlers[event].append(handler)
-
 
     def remove_event_handler(self, event: str, handler):
         """Remover handler de evento"""
@@ -313,11 +269,9 @@ class WebSocketManager:
             if handler in self._event_handlers[event]:
                 self._event_handlers[event].remove(handler)
 
-
     def has_event_handler(self, event: str) -> bool:
         """Verificar se existe handler para um evento"""
         return event in self._event_handlers and len(self._event_handlers[event]) > 0
-
 
     async def send_message(self, message: str):
         """Enviar mensagem"""
@@ -325,7 +279,6 @@ class WebSocketManager:
             raise OpenOBConnectionError("WebSocket não está conectado")
         await self.websocket.send(message)
         logger.debug(f"Mensagem enviada: {message[:100]}...")
-
 
     async def disconnect(self):
         """Desconectar"""
@@ -346,7 +299,6 @@ class WebSocketManager:
             self.websocket = None
         
         logger.info(f"Desconectado ({self.name})")
-
 
     async def reconnect(self, ssid: str = None) -> bool:
         """Reconectar ao servidor (única tentativa)"""

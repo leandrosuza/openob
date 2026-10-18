@@ -4,7 +4,6 @@ import sys
 import asyncio
 import os
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from connection.websocket import WebSocketManager
@@ -53,7 +52,6 @@ async def test_order_execution():
         print("\nDesconectando...")
         await ws_manager.disconnect()
         print("[OK] Desconectado")
-
 
 if __name__ == "__main__":
     asyncio.run(test_order_execution())

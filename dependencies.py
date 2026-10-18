@@ -1,5 +1,4 @@
-"""
-Instalação de Dependências do Projeto OpenOB
+"""Instalação de Dependências do Projeto OpenOB
 
 Este script instala todas as dependências necessárias para o projeto.
 Uso:
@@ -79,7 +78,6 @@ def main():
     print("  black openob/")
     print("  ruff check openob/")
     print("  mypy openob/")
-
 
 if __name__ == "__main__":
     main()

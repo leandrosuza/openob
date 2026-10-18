@@ -8,8 +8,6 @@ from core.exceptions import ConfigurationError
 load_dotenv()
 
 
-
-
 class Settings:
     """Configurações centralizadas"""
 
@@ -26,9 +24,6 @@ class Settings:
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-
-
-
     @classmethod
     def get_log_level(cls) -> int:
         """Obter nível de log como int"""
@@ -40,9 +35,6 @@ class Settings:
             "CRITICAL": logging.CRITICAL,
         }
         return level_map.get(cls.LOG_LEVEL.upper(), logging.INFO)
-
-
-
 
     @classmethod
     def to_dict(cls) -> dict:

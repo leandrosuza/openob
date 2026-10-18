@@ -4,7 +4,6 @@ import sys
 import asyncio
 import os
 
-
 # Adicionar diretório raiz do projeto ao path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -38,7 +37,6 @@ async def test_connection():
         print("\nDesconectando...")
         await ws_manager.disconnect()
         print("[OK] Desconectado")
-
 
 if __name__ == "__main__":
     asyncio.run(test_connection())

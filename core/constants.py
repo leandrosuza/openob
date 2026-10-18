@@ -1,8 +1,5 @@
 """Core constants"""
 
-
-
-
 WEBSOCKET_ENDPOINTS = {
     "DEMO": "wss://demo-api-eu.po.market/socket.io/?EIO=4&transport=websocket",
     "api-eu": "wss://api-eu.po.market/socket.io/?EIO=4&transport=websocket",
@@ -23,13 +20,7 @@ WEBSOCKET_ENDPOINTS = {
     "api-us-south": "wss://api-us-south.po.market/socket.io/?EIO=4&transport=websocket",
 }
 
-
-
-
 REGIONS = list(WEBSOCKET_ENDPOINTS.keys())
-
-
-
 
 ASSETS = {
     "EURUSD_otc": 66,
@@ -65,9 +56,6 @@ ASSETS = {
     "CHFJPY": 30,
 }
 
-
-
-
 TIMEFRAMES = {
     "5s": 5,
     "15s": 15,
@@ -82,18 +70,12 @@ TIMEFRAMES = {
     "1w": 604800,
 }
 
-
-
-
 API_LIMITS = {
     "min_order_amount": 1,
     "max_order_amount": 10000,
     "min_duration": 5,
     "max_duration": 3600,
 }
-
-
-
 
 CONNECTION_SETTINGS = {
     "ping_interval": 20,

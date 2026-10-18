@@ -7,11 +7,6 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 4. Monitoramento dinâmico: Monitora automaticamente os ativos com melhor payout
 """
 
-
-
-
-
-
 import asyncio
 import os
 import json
@@ -24,16 +19,7 @@ from core.exceptions import ConfigurationError, ConnectionError as OpenOBConnect
 from config.settings import Settings
 from repositories.repository_factory import RepositoryFactory
 
-
-
-
-
-
 logger = get_logger(__name__)
-
-
-
-
 
 
 class MonitorAPI:
@@ -83,9 +69,6 @@ class MonitorAPI:
 
         self._setup_handlers()
 
-
-
-
     def _setup_handlers(self):
         """Configurar handlers para capturar eventos em ambas as conexões"""
         original_emit_payout = self.payout_ws._emit_event
@@ -104,10 +87,6 @@ class MonitorAPI:
         self.payout_ws._emit_event = patched_emit_payout
         self.actives_ws._emit_event = patched_emit_actives
 
-
-
-
-
     async def _capture_payout_event(self, event: str, data: Any):
         """Capturar eventos de payout do WebSocket"""
         try:
@@ -125,10 +104,6 @@ class MonitorAPI:
 
         except Exception as e:
             logger.error(f"Erro ao capturar evento de payout: {e}")
-
-
-
-
 
     async def _capture_actives_event(self, event: str, data: Any):
         """Capturar eventos de ativos do WebSocket"""
@@ -162,10 +137,6 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
 
-
-
-
-
     def _process_stream_data(self, data: List):
         """Processar dados de stream de preços"""
         try:
@@ -190,15 +161,7 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao processar stream: {e}")
 
-
-
-
-
             logger.error(f"Erro ao salvar histórico para {asset}: {e}")
-
-
-
-
 
     def _process_assets_data(self, data: List):
         """Processar dados binários de ativos para extrair payout"""
@@ -225,10 +188,6 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao processar dados de ativos: {e}")
 
-
-
-
-
     def _log_to_file(self, filename: str, message: str):
         """Log para arquivo específico em logs/ws/"""
         try:
@@ -239,10 +198,6 @@ class MonitorAPI:
                 f.write(f"[{timestamp}] {message}\n")
         except Exception as e:
             logger.error(f"Erro ao escrever no arquivo {filename}: {e}")
-
-
-
-
 
     def get_top_assets_by_payout(self, limit: int = None) -> List[Dict[str, Any]]:
         """Obter os ativos com os melhores payouts"""
@@ -260,10 +215,6 @@ class MonitorAPI:
 
         logger.debug(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
         return top_assets
-
-
-
-
 
     async def update_monitored_assets(self):
         """Atualizar dinamicamente os ativos monitorados baseado no payout"""
@@ -297,10 +248,6 @@ class MonitorAPI:
         if not to_add and not to_remove:
             logger.debug("Nenhuma alteração necessária nos ativos monitorados")
 
-
-
-
-
     async def subscribe_asset(self, symbol: str, period: int = 1):
         """Inscrever em um ativo específico e iniciar stream"""
         try:
@@ -322,10 +269,6 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao inscrever no ativo {symbol}: {e}")
             raise OpenOBConnectionError(f"Falha ao inscrever no ativo {symbol}: {e}")
-
-
-
-
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
         """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
@@ -364,10 +307,6 @@ class MonitorAPI:
                     await self.payout_ws.disconnect()
                 await asyncio.sleep(payout_interval)
 
-
-
-
-
     async def start_actives_monitoring(self, update_interval: int = 30):
         """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
         self.actives_running = True
@@ -402,10 +341,6 @@ class MonitorAPI:
                 self._log_to_file("connection.txt", f"Ativos: Erro - {e}")
                 await asyncio.sleep(5)
 
-
-
-
-
     async def start(self, payout_interval: int = 5, update_interval: int = 30):
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
@@ -419,10 +354,6 @@ class MonitorAPI:
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
         logger.info("Monitoramento iniciado")
         logger.info(f"Tasks criadas: payout={self.payout_task}, actives={self.actives_task}")
-
-
-
-
 
     async def stop(self):
         """Parar monitoramento"""
@@ -446,41 +377,21 @@ class MonitorAPI:
 
         logger.info("Monitoramento parado")
 
-
-
-
-
     def get_payout_data(self) -> Dict[str, Dict[str, Any]]:
         """Obter dados de payout atual"""
         return self.payout_data
-
-
-
-
 
     def get_actives_data(self) -> Dict[str, Dict[str, Any]]:
         """Obter dados de ativos atual"""
         return self.actives_data
 
-
-
-
-
     def get_tick_data(self) -> Dict[str, float]:
         """Obter dados de ticks atual"""
         return self.tick_data
 
-
-
-
-
     def get_balance_data(self) -> Dict[str, Any]:
         """Obter dados de saldo atual"""
         return self.balance_data
-
-
-
-
 
     def get_monitored_assets(self) -> Set[str]:
         """Obter conjunto de ativos atualmente monitorados"""

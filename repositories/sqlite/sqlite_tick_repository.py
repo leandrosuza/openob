@@ -1,8 +1,5 @@
 """Implementação SQLite do repositório de ticks"""
 
-
-
-
 import os
 import sqlite3
 import asyncio
@@ -13,19 +10,11 @@ from repositories.interfaces.tick_repository_interface import TickRepositoryInte
 from core.logger import get_logger
 from core.exceptions import DatabaseError
 
-
-
-
 logger = get_logger(__name__)
-
-
 
 
 class SQLiteTickRepository(TickRepositoryInterface):
     """Repositório SQLite - Implementação com asyncio.to_thread()"""
-
-
-
 
     def __init__(self, db_path: str = "data/openob_ticks.db"):
         self.db_path = db_path
@@ -42,9 +31,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         # Inicializar banco de forma síncrona no __init__
         self._initialize_db_sync()
         logger.info(f"SQLite Repository inicializado: {db_path}")
-
-
-
 
     def _initialize_db_sync(self):
         """Setup inicial do banco (síncrono)"""
@@ -114,15 +100,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self.conn.commit()
             self._initialized = True
 
-
-
-
     async def _initialize_db(self):
         """Setup inicial do banco (async wrapper)"""
         await asyncio.to_thread(self._initialize_db_sync)
-
-
-
 
     async def _ensure_connection(self):
         """Verificar e restaurar conexão se necessário"""
@@ -140,9 +120,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 logger.error(f"Falha ao reconectar ao banco: {e}")
                 raise DatabaseError(f"Falha ao conectar ao banco: {e}")
 
-
-
-
     def _add_to_pending(self, asset: str, price: float, payout: Optional[float], timestamp: datetime):
         """Adicionar tick ao buffer pendente"""
         if len(self._pending_ticks) < self._max_pending:
@@ -153,9 +130,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 'timestamp': timestamp
             })
             logger.debug(f"Tick adicionado ao buffer pendente: {len(self._pending_ticks)} ticks")
-
-
-
 
     async def _flush_pending(self):
         """Salvar ticks pendentes do buffer"""
@@ -180,9 +154,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self._pending_ticks = self._pending_ticks[saved:]
             logger.info(f"Ticks pendentes salvos: {saved}/{len(self._pending_ticks + saved)}")
 
-
-
-
     async def _flush_loop(self):
         """Loop periódico para tentar salvar ticks pendentes"""
         while True:
@@ -190,22 +161,13 @@ class SQLiteTickRepository(TickRepositoryInterface):
             if self._pending_ticks:
                 await self._flush_pending()
 
-
-
-
     def _check_reset_needed_sync(self, asset: str) -> bool:
         """Verifica se precisa reset (>1min) - DESABILITADO"""
         return False
 
-
-
-
     async def _check_reset_needed(self, asset: str) -> bool:
         """Verifica se precisa reset (>1min)"""
         return await asyncio.to_thread(self._check_reset_needed_sync, asset)
-
-
-
 
     def _reset_asset_sync(self, asset: str):
         """Resetar histórico do ativo - síncrono (sem lock interno, chamado de dentro de lock)"""
@@ -217,15 +179,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self.conn.commit()
         logger.info(f"Histórico resetado para {asset} (gap > 1min detectado)")
 
-
-
-
     async def _reset_asset(self, asset: str):
         """Resetar histórico do ativo"""
         await asyncio.to_thread(self._reset_asset_sync, asset)
-
-
-
 
     async def reset_asset(self, asset: str):
         """Resetar histórico do ativo (método público)"""
@@ -243,9 +199,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self.conn.commit()
             logger.info("Tabela ticks resetada completamente")
 
-
-
-
     def _get_next_sequence_sync(self, asset: str) -> int:
         """Próximo número de sequência - síncrono (sem lock interno, chamado de dentro de lock)"""
         result = self.conn.execute(
@@ -255,15 +208,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
         return (result[0] + 1) if result else 1
 
-
-
-
     async def _get_next_sequence(self, asset: str) -> int:
         """Próximo número de sequência"""
         return await asyncio.to_thread(self._get_next_sequence_sync, asset)
-
-
-
 
     def _get_last_tick_sync(self, asset: str) -> Optional[Dict]:
         """Obter último tick salvo do ativo - síncrono"""
@@ -283,15 +230,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 'sequence': row[5]
             }
 
-
-
-
     async def _get_last_tick(self, asset: str) -> Optional[Dict]:
         """Obter último tick salvo do ativo"""
         return await asyncio.to_thread(self._get_last_tick_sync, asset)
-
-
-
 
     def _check_duplicate_sync(self, asset: str, price: float, timestamp: datetime) -> bool:
         """Verificar se tick já existe - síncrono"""
@@ -303,15 +244,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
             return result is not None
 
-
-
-
     async def _check_duplicate(self, asset: str, price: float, timestamp: datetime) -> bool:
         """Verificar se tick já existe (timestamp + preço único)"""
         return await asyncio.to_thread(self._check_duplicate_sync, asset, price, timestamp)
-
-
-
 
     def _check_duplicate_unix_sync(self, asset: str, price: float, timestamp_unix: int) -> bool:
         """Verificar duplicata usando timestamp Unix - síncrono (sem lock interno, chamado de dentro de lock)"""
@@ -322,15 +257,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
         return result is not None
 
-
-
-
     async def _check_duplicate_unix(self, asset: str, price: float, timestamp_unix: int) -> bool:
         """Verificar duplicata usando timestamp Unix (mais preciso)"""
         return await asyncio.to_thread(self._check_duplicate_unix_sync, asset, price, timestamp_unix)
-
-
-
 
     def _update_metadata_sync(self, asset: str, timestamp: datetime, sequence: int):
         """Atualizar metadata - síncrono (sem lock interno, chamado de dentro de lock)"""
@@ -342,15 +271,9 @@ class SQLiteTickRepository(TickRepositoryInterface):
         """, (asset, timestamp.isoformat(), sequence, asset, timestamp_unix))
         self.conn.commit()
 
-
-
-
     async def _update_metadata(self, asset: str, timestamp: datetime, sequence: int):
         """Atualizar metadata"""
         await asyncio.to_thread(self._update_metadata_sync, asset, timestamp, sequence)
-
-
-
 
     def _save_tick_sync(self, asset: str, price: float, payout: Optional[float], timestamp: datetime) -> int:
         """Salvar tick - síncrono"""
@@ -382,9 +305,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self.conn.commit()
 
             return sequence
-
-
-
 
     async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
         """Salvar tick - Método principal com verificação de duplicatas e retry"""
@@ -421,9 +341,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 logger.error(f"Erro inesperado ao salvar tick: {e}")
                 self._add_to_pending(asset, price, payout, timestamp or datetime.now(timezone.utc))
                 return -1
-
-
-
 
     async def sync_and_save_batch(self, asset: str, new_ticks: List[Dict], limit: int = 500) -> int:
         """Sincronizar batch de ticks verificando duplicatas com histórico recente"""
@@ -470,9 +387,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         logger.info(f"Sincronização {asset}: {saved_count}/{len(new_ticks)} ticks salvos")
         return saved_count
 
-
-
-
     def _get_recent_sync(self, asset: str, limit: int) -> List[Dict]:
         """Obter ticks recentes - síncrono"""
         with self._thread_lock:
@@ -489,9 +403,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 for row in reversed(rows)
             ]
 
-
-
-
     async def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
         """Obter ticks recentes"""
         try:
@@ -500,9 +411,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         except Exception as e:
             logger.error(f"Erro ao obter ticks recentes: {e}")
             return []
-
-
-
 
     def _get_by_sequence_sync(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter range de sequência - síncrono"""
@@ -522,9 +430,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 for row in rows
             ]
 
-
-
-
     async def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter range de sequência"""
         try:
@@ -533,9 +438,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         except Exception as e:
             logger.error(f"Erro ao obter ticks por sequência: {e}")
             return []
-
-
-
 
     def _get_stats_sync(self) -> Dict:
         """Estatísticas do banco - síncrono"""
@@ -549,9 +451,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 'db_size_mb': os.path.getsize(self.db_path) / (1024 * 1024),
                 'pending_ticks': len(self._pending_ticks)
             }
-
-
-
 
     async def get_stats(self) -> Dict:
         """Estatísticas do banco"""
@@ -567,9 +466,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 'pending_ticks': len(self._pending_ticks)
             }
 
-
-
-
     def _close_sync(self):
         """Fechar conexão - síncrono"""
         if self._flush_task:
@@ -580,9 +476,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
             self.conn = None
         
         logger.info("SQLite Repository fechado")
-
-
-
 
     async def close(self):
         """Fechar conexão"""

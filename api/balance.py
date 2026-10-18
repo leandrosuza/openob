@@ -7,10 +7,6 @@ from models.market import Balance
 from core.logger import get_logger
 from core.exceptions import ConnectionError as OpenOBConnectionError
 
-
-
-
-
 logger = get_logger(__name__)
 
 
@@ -23,10 +19,6 @@ class BalanceAPI:
         self._balance_updated = asyncio.Event()
         self._setup_handlers()
 
-
-
-
-
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
         handlers = {
@@ -38,10 +30,6 @@ class BalanceAPI:
         }
         for event, handler in handlers.items():
             self.ws_manager.add_event_handler(event, handler)
-
-
-
-
 
     async def _on_balance(self, data):
         """Handler para receber dados de saldo"""
@@ -56,10 +44,6 @@ class BalanceAPI:
         except Exception as e:
             logger.error(f"Erro ao processar dados de saldo: {e}")
 
-
-
-
-
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
         try:
@@ -72,10 +56,6 @@ class BalanceAPI:
                 logger.debug(f"Saldo atualizado via JSON: {amount} {currency}")
         except Exception as e:
             logger.error(f"Erro ao processar JSON de saldo: {e}")
-
-
-
-
 
     async def get_balance(self) -> Balance:
         """Obter saldo atual"""

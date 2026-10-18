@@ -9,10 +9,6 @@ from core.constants import ASSETS, TIMEFRAMES
 from core.logger import get_logger
 from core.exceptions import ValidationError, ConnectionError as OpenOBConnectionError
 
-
-
-
-
 logger = get_logger(__name__)
 
 
@@ -25,10 +21,6 @@ class MarketAPI:
         self._candle_requests: dict = {}
         self._setup_handlers()
 
-
-
-
-
     def _setup_handlers(self):
         """Configurar handlers de eventos"""
         handlers = {
@@ -40,10 +32,6 @@ class MarketAPI:
         }
         for event, handler in handlers.items():
             self.ws_manager.add_event_handler(event, handler)
-
-
-
-
 
     async def _on_change_symbol(self, data):
         """Handler para resposta do changeSymbol"""
@@ -63,10 +51,6 @@ class MarketAPI:
                             logger.info(f"Candles resolvidos para {request_id}: {len(candles)}")
         except Exception as e:
             logger.error(f"Erro ao processar changeSymbol: {e}")
-
-
-
-
 
     def _parse_stream_candles(self, stream_data: dict, asset: str, timeframe: int):
         """Parse candles de stream data"""
@@ -103,10 +87,6 @@ class MarketAPI:
             logger.error(f"Erro ao parse stream candles: {e}")
         return candles
 
-
-
-
-
     async def _on_history_update(self, data):
         """Handler para updateHistoryNewFast"""
         try:
@@ -125,10 +105,6 @@ class MarketAPI:
                             logger.debug(f"História atualizada para {request_id}")
         except Exception as e:
             logger.error(f"Erro em handler de mercado: {e}")
-
-
-
-
 
     def _parse_history_candles(self, history: list, asset: str, timeframe: int):
         """Parse candles de history data"""
@@ -167,10 +143,6 @@ class MarketAPI:
             logger.error(f"Erro em handler de mercado: {e}")
         return candles
 
-
-
-
-
     async def _on_stream_update(self, data):
         """Handler para updateStream - atualização em tempo real de candles"""
         try:
@@ -199,10 +171,6 @@ class MarketAPI:
         except Exception as e:
             logger.error(f"Erro ao processar stream update: {e}")
 
-
-
-
-
     async def _on_assets_update(self, data):
         """Handler para atualização de ativos disponíveis"""
         try:
@@ -213,10 +181,6 @@ class MarketAPI:
         except Exception as e:
             logger.error(f"Erro ao processar atualização de ativos: {e}")
 
-
-
-
-
     async def _on_json_data(self, data):
         """Handler para dados JSON"""
         try:
@@ -224,10 +188,6 @@ class MarketAPI:
                 await self._on_history_update(data)
         except Exception as e:
             logger.error(f"Erro ao processar JSON data: {e}")
-
-
-
-
 
     async def get_candles(self, asset: str, timeframe: str, count: int = 100) -> List[Candle]:
         """Obter candles históricos"""
@@ -277,27 +237,15 @@ class MarketAPI:
             logger.error(f"Erro ao obter candles: {e}")
             return []
 
-
-
-
-
     def _format_candles_message(self, asset: str, timeframe: int, start_time: int, end_time: int, count: int) -> str:
         """Formatar mensagem de solicitação de candles"""
         message_data = ["changeSymbol", {"asset": str(asset), "period": timeframe}]
         message = f"42{json.dumps(message_data)}"
         return message
 
-
-
-
-
     def get_available_assets(self) -> dict:
         """Obter lista de ativos disponíveis"""
         return ASSETS
-
-
-
-
 
     def get_available_timeframes(self) -> dict:
         """Obter lista de timeframes disponíveis"""

@@ -4,7 +4,6 @@ import sys
 import asyncio
 import os
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from test.conexao.test_connection import test_connection
@@ -58,7 +57,6 @@ async def run_all_tests():
     passed = sum(1 for _, r in results if r == "OK")
     total = len(results)
     print(f"\nTotal: {passed}/{total} testes passaram")
-
 
 if __name__ == "__main__":
     asyncio.run(run_all_tests())
