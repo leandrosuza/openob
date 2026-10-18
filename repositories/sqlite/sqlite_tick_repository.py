@@ -148,14 +148,10 @@ class SQLiteTickRepository(TickRepositoryInterface):
     async def _ensure_connection(self):
         """Verificar e restaurar conexão se necessário"""
         try:
-            logger.debug("_ensure_connection: verificando conexão")
             if self.conn:
                 await asyncio.to_thread(self.conn.execute, "SELECT 1")
-                logger.debug("_ensure_connection: conexão OK")
             else:
-                logger.debug("_ensure_connection: conexão inexistente, inicializando")
                 await self._initialize_db()
-                logger.debug("_ensure_connection: banco inicializado")
         except Exception as e:
             logger.warning(f"Conexão com banco perdida, tentando reconectar: {e}")
             try:
@@ -380,55 +376,34 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _save_tick_sync(self, asset: str, price: float, payout: Optional[float], timestamp: datetime) -> int:
         """Salvar tick - síncrono"""
-        try:
-            with self._thread_lock:
-                timestamp_unix = int(timestamp.timestamp())
-                timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
+        with self._thread_lock:
+            timestamp_unix = int(timestamp.timestamp())
+            timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
 
-                logger.info(f"_save_tick_sync: iniciando para {asset} @ {price}")
+            # Verificar duplicata
+            if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
+                return -1
 
-                # Verificar duplicata
-                logger.info(f"_save_tick_sync: verificando duplicata para {asset}")
-                if self._check_duplicate_unix_sync(asset, price, timestamp_unix):
-                    logger.info(f"_save_tick_sync: duplicata detectada para {asset}")
-                    return -1
-                logger.info(f"_save_tick_sync: duplicata não detectada para {asset}")
+            # Reset se >1min sem dados (garante histórico recente)
+            if self._check_reset_needed_sync(asset):
+                self._reset_asset_sync(asset)
 
-                # Reset se >1min sem dados (garante histórico recente)
-                logger.info(f"_save_tick_sync: verificando se precisa reset para {asset}")
-                if self._check_reset_needed_sync(asset):
-                    logger.info(f"_save_tick_sync: reset necessário para {asset}")
-                    self._reset_asset_sync(asset)
-                logger.info(f"_save_tick_sync: reset não necessário para {asset}")
+            # Sequência incremental
+            sequence = self._get_next_sequence_sync(asset)
 
-                # Sequência incremental
-                logger.info(f"_save_tick_sync: obtendo sequence para {asset}")
-                sequence = self._get_next_sequence_sync(asset)
-                logger.info(f"_save_tick_sync: sequence={sequence} para {asset}")
+            # Salvar
+            self.conn.execute(
+                "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
+                (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
+            )
 
-                # Salvar
-                logger.info(f"_save_tick_sync: executando INSERT para {asset}")
-                self.conn.execute(
-                    "INSERT INTO ticks (asset, timestamp, timestamp_unix, price, payout, sequence_number) VALUES (?, ?, ?, ?, ?, ?)",
-                    (asset, timestamp_normalized.isoformat(), timestamp_unix, price, payout, sequence)
-                )
-                logger.info(f"_save_tick_sync: INSERT executado para {asset}")
+            # Atualizar metadata
+            self._update_metadata_sync(asset, timestamp_normalized, sequence)
 
-                # Atualizar metadata
-                logger.info(f"_save_tick_sync: atualizando metadata para {asset}")
-                self._update_metadata_sync(asset, timestamp_normalized, sequence)
-                logger.info(f"_save_tick_sync: metadata atualizado para {asset}")
+            # Commit para persistir no disco
+            self.conn.commit()
 
-                # Commit para persistir no disco
-                logger.info(f"_save_tick_sync: executando commit para {asset}")
-                self.conn.commit()
-                logger.info(f"_save_tick_sync: commit realizado para {asset}")
-
-                logger.info(f"Tick salvo com sucesso: {asset} seq={sequence} price={price}")
-                return sequence
-        except Exception as e:
-            logger.error(f"_save_tick_sync: EXCEÇÃO CAPTURADA para {asset}: {e}")
-            raise
+            return sequence
 
 
 
@@ -437,8 +412,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         """Salvar tick - Método principal com verificação de duplicatas e retry"""
         async with self._lock:
             try:
-                logger.info(f"save() chamado para {asset} @ {price}")
-
                 # Iniciar flush loop na primeira chamada
                 if not self._flush_started:
                     self._flush_task = asyncio.create_task(self._flush_loop())
@@ -452,23 +425,17 @@ class SQLiteTickRepository(TickRepositoryInterface):
                 elif timestamp.tzinfo is None:
                     timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-                logger.info(f"save(): chamando _save_tick_sync para {asset}")
-
                 # Salvar em thread separada
                 sequence = await asyncio.to_thread(self._save_tick_sync, asset, price, payout, timestamp)
-
-                logger.info(f"save(): _save_tick_sync retornou sequence={sequence} para {asset}")
 
                 # Verificar se ocorreu reset (sequence voltou para 1)
                 if sequence == 1 and self._reset_callbacks:
                     await self._notify_reset(asset)
 
                 if sequence > 0:
-                    timestamp_unix = int(timestamp.timestamp())
-                    timestamp_normalized = datetime.fromtimestamp(timestamp_unix, tz=timezone.utc)
-                    logger.info(f"Tick salvo: {asset} seq={sequence} price={price} @ {timestamp_normalized}")
+                    logger.debug(f"Tick salvo: {asset} seq={sequence} price={price}")
                 else:
-                    logger.info(f"Tick duplicado ignorado: {asset} @ {price}")
+                    logger.debug(f"Tick duplicado ignorado: {asset} @ {price}")
 
                 return sequence
 
