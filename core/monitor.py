@@ -70,6 +70,9 @@ class MonitorAPI:
         # Timestamp quando cada asset foi adicionado ao monitoramento
         self.asset_start_time: Dict[str, datetime] = {}
 
+        # Assets cujo histórico já foi carregado (prontos para salvar stream)
+        self.history_loaded: Set[str] = set()
+
         # Buffer para dados binários de histórico
         self._history_buffer: Dict[str, List] = {}
 
@@ -78,9 +81,6 @@ class MonitorAPI:
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
-        # Registrar callback para notificar quando ocorrer reset de asset
-        self.tick_repo.register_reset_callback(self._on_asset_reset)
-
         # Task de health check periódico (1 minuto)
         self._health_check_task = None
 
@@ -88,12 +88,6 @@ class MonitorAPI:
 
 
 
-
-    async def _on_asset_reset(self, asset: str):
-        """Callback quando ocorre reset de asset (gap > 1min)"""
-        logger.info(f"Reset detectado para {asset} - histórico será solicitado automaticamente")
-        # Não solicitar histórico aqui - já é solicitado no subscribe_asset
-        # Isso evita loop infinito de reset
 
 
 
@@ -143,7 +137,6 @@ class MonitorAPI:
                         if gap > 60:
                             logger.warning(f"Health check inicial: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
                             await self.tick_repo.reset_asset(asset)
-                            await self._on_asset_reset(asset)
                         else:
                             logger.info(f"Health check inicial: {asset} OK (gap: {gap:.0f}s < 60s)")
                             
@@ -184,8 +177,7 @@ class MonitorAPI:
                         recent = await self.tick_repo.get_recent(asset, limit=1)
                         
                         if not recent:
-                            logger.warning(f"Health check: Asset {asset} sem ticks - solicitando histórico")
-                            await self._on_asset_reset(asset)
+                            logger.warning(f"Health check: Asset {asset} sem ticks - aguardando stream")
                             continue
                         
                         last_tick = recent[0]
@@ -201,9 +193,7 @@ class MonitorAPI:
                         # Se gap > 1min, resetar e solicitar novo histórico
                         if gap > 60:
                             logger.warning(f"Health check: GAP DETECTADO - {asset} com gap de {gap:.0f}s (> 60s) - resetando")
-                            # Forçar reset manual
                             await self.tick_repo.reset_asset(asset)
-                            await self._on_asset_reset(asset)
                         else:
                             logger.debug(f"Health check: {asset} OK (gap: {gap:.0f}s < 60s)")
                             
@@ -374,7 +364,7 @@ class MonitorAPI:
 
 
     def _save_history_for_asset(self, asset: str, history: List):
-        """Salvar histórico para um ativo específico"""
+        """Salvar histórico para um ativo específico e marcar como carregado"""
         try:
             # Converter histórico para formato do repositório
             ticks_batch = []
@@ -395,7 +385,8 @@ class MonitorAPI:
             # Salvar batch no repositório se o ativo é monitorado
             if asset in self.monitored_assets and ticks_batch:
                 asyncio.create_task(self.tick_repo.sync_and_save_batch(asset, ticks_batch, limit=100))
-                logger.info(f"Histórico {asset}: {len(ticks_batch)} ticks processados")
+                logger.info(f"Histórico {asset}: {len(ticks_batch)} ticks salvos")
+                self.history_loaded.add(asset)  # Marcar como histórico carregado
 
             self._log_to_file("monitoring_actives.txt", f"Histórico {asset}: {len(ticks_batch)} ticks recebidos")
 
@@ -508,27 +499,36 @@ class MonitorAPI:
 
 
     async def subscribe_asset(self, symbol: str, period: int = 1):
-        """Inscrever em um ativo específico para monitoramento"""
+        """Inscrever em um ativo específico e carregar histórico antes de salvar stream"""
         try:
             await self.actives_ws.send_message(f'42["changeSymbol", {{"asset": "{symbol}", "period": {period}}}]')
             self._log_to_file("monitoring_actives.txt", f"Inscrição changeSymbol: {symbol}")
-
             await asyncio.sleep(0.5)
 
             await self.actives_ws.send_message(f'42["subfor", "{symbol}"]')
             self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
-
             await asyncio.sleep(0.5)
 
-            await self.actives_ws.send_message('42["ps"]')
-            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico inicial")
-
-            await asyncio.sleep(0.5)
-
-            # Solicitar histórico completo usando updateHistoryNewFast
+            # Solicitar histórico completo ANTES de iniciar stream
             await self.actives_ws.send_message(f'42["updateHistoryNewFast",{{"asset":"{symbol}"}}]')
-            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico completo updateHistoryNewFast: {symbol}")
+            self._log_to_file("monitoring_actives.txt", f"Solicitação de histórico: {symbol}")
             logger.info(f"Histórico solicitado para {symbol}")
+
+            # Aguardar até 10 segundos para o histórico ser carregado
+            max_wait = 10
+            waited = 0
+            while symbol not in self.history_loaded and waited < max_wait:
+                await asyncio.sleep(0.5)
+                waited += 0.5
+
+            if symbol in self.history_loaded:
+                logger.info(f"Histórico carregado para {symbol} - pronto para salvar stream")
+            else:
+                logger.warning(f"Histórico não carregado para {symbol} após {max_wait}s - iniciando stream mesmo assim")
+
+            # Iniciar stream de dados
+            await self.actives_ws.send_message('42["ps"]')
+            self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
 
         except OpenOBConnectionError:
             raise

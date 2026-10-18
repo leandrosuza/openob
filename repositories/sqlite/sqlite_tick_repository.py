@@ -37,33 +37,11 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._flush_started = False
         self._lock = asyncio.Lock()
         self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
-        self._reset_callbacks = []  # Callbacks para notificar quando ocorrer reset
         self._startup_time = datetime.now(timezone.utc)  # Timestamp de inicialização do repositório
 
         # Inicializar banco de forma síncrona no __init__
         self._initialize_db_sync()
         logger.info(f"SQLite Repository inicializado: {db_path}")
-
-
-
-
-    def register_reset_callback(self, callback):
-        """Registrar callback para ser notificado quando ocorrer reset de asset"""
-        self._reset_callbacks.append(callback)
-
-
-
-
-    async def _notify_reset(self, asset: str):
-        """Notificar callbacks sobre reset de asset"""
-        for callback in self._reset_callbacks:
-            try:
-                if asyncio.iscoroutinefunction(callback):
-                    await callback(asset)
-                else:
-                    callback(asset)
-            except Exception as e:
-                logger.error(f"Erro ao executar callback de reset: {e}")
 
 
 
@@ -432,10 +410,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
                 # Salvar em thread separada
                 sequence = await asyncio.to_thread(self._save_tick_sync, asset, price, payout, timestamp)
-
-                # Verificar se ocorreu reset (sequence voltou para 1)
-                if sequence == 1 and self._reset_callbacks:
-                    await self._notify_reset(asset)
 
                 if sequence > 0:
                     logger.debug(f"Tick salvo: {asset} seq={sequence} price={price}")
