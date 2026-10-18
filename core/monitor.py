@@ -15,7 +15,7 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 import asyncio
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List, Set
 from dotenv import load_dotenv
 from connection.websocket import WebSocketManager
@@ -67,6 +67,9 @@ class MonitorAPI:
         # Ativos atualmente monitorados
         self.monitored_assets: Set[str] = set()
 
+        # Timestamp quando cada asset foi adicionado ao monitoramento
+        self.asset_start_time: Dict[str, datetime] = {}
+
         # Buffer para dados binários de histórico
         self._history_buffer: Dict[str, List] = {}
 
@@ -88,19 +91,9 @@ class MonitorAPI:
 
     async def _on_asset_reset(self, asset: str):
         """Callback quando ocorre reset de asset (gap > 1min)"""
-        logger.info(f"Reset detectado para {asset} - solicitando novo histórico")
-        
-        # Solicitar novo histórico para o asset
-        # Enviar mensagem para solicitar updateHistoryNewFast
-        if self.actives_ws and self.actives_ws.is_connected:
-            try:
-                # Formato da mensagem para solicitar histórico
-                # Isso depende da API do PocketOption - ajustar conforme necessário
-                history_request = f'42["updateHistoryNewFast",{{"asset":"{asset}"}}]'
-                await self.actives_ws.send_message(history_request)
-                logger.info(f"Solicitação de histórico enviada para {asset}")
-            except Exception as e:
-                logger.error(f"Erro ao solicitar histórico para {asset}: {e}")
+        logger.info(f"Reset detectado para {asset} - histórico será solicitado automaticamente")
+        # Não solicitar histórico aqui - já é solicitado no subscribe_asset
+        # Isso evita loop infinito de reset
 
 
 
@@ -496,6 +489,7 @@ class MonitorAPI:
             for i, symbol in enumerate(to_add):
                 await self.subscribe_asset(symbol, period=1)
                 self.monitored_assets.add(symbol)
+                self.asset_start_time[symbol] = datetime.now(timezone.utc)
                 # Delay de 500ms entre cada ativo para evitar flood na API
                 if i < len(to_add) - 1:
                     await asyncio.sleep(0.5)

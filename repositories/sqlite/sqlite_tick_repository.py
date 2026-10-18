@@ -38,6 +38,7 @@ class SQLiteTickRepository(TickRepositoryInterface):
         self._lock = asyncio.Lock()
         self._thread_lock = threading.Lock()  # Lock para proteger sqlite3 de threads concorrentes
         self._reset_callbacks = []  # Callbacks para notificar quando ocorrer reset
+        self._startup_time = datetime.now(timezone.utc)  # Timestamp de inicialização do repositório
 
         # Inicializar banco de forma síncrona no __init__
         self._initialize_db_sync()
@@ -216,6 +217,11 @@ class SQLiteTickRepository(TickRepositoryInterface):
 
     def _check_reset_needed_sync(self, asset: str) -> bool:
         """Verifica se precisa reset (>1min) - síncrono (sem lock interno, chamado de dentro de lock)"""
+        # Não fazer reset nos primeiros 2 minutos após startup
+        now = datetime.now(timezone.utc)
+        if (now - self._startup_time).total_seconds() < 120:
+            return False
+
         result = self.conn.execute(
             "SELECT last_tick_timestamp FROM asset_metadata WHERE asset = ?",
             (asset,)
@@ -228,7 +234,6 @@ class SQLiteTickRepository(TickRepositoryInterface):
         if last.tzinfo is None:
             last = last.replace(tzinfo=timezone.utc)
 
-        now = datetime.now(timezone.utc)
         return (now - last) > timedelta(minutes=1)
 
 
