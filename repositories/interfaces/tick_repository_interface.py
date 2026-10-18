@@ -13,35 +13,48 @@ class TickRepositoryInterface(ABC):
         """Salvar tick e retornar sequence number"""
         pass
 
-    @abstractmethod
-    async def sync_and_save_batch(self, asset: str, new_ticks: List[Dict], limit: int = 50) -> int:
-        """Sincronizar batch de ticks verificando duplicatas com histórico recente"""
-        pass
+
+
 
     @abstractmethod
     async def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
         """Obter ticks recentes de um ativo"""
         pass
 
+
+
+
     @abstractmethod
     async def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
         """Obter ticks por range de sequência"""
         pass
+
+
+
 
     @abstractmethod
     async def get_stats(self) -> Dict:
         """Obter estatísticas do banco"""
         pass
 
+
+
+
     @abstractmethod
     async def reset_asset(self, asset: str):
         """Resetar histórico de um ativo específico"""
         pass
 
+
+
+
     @abstractmethod
     async def reset_all(self):
         """Resetar todos os dados da tabela ticks"""
         pass
+
+
+
 
     @abstractmethod
     async def close(self):
