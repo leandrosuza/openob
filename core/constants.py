@@ -20,7 +20,9 @@ WEBSOCKET_ENDPOINTS = {
     "api-us-south": "wss://api-us-south.po.market/socket.io/?EIO=4&transport=websocket",
 }
 
+
 REGIONS = list(WEBSOCKET_ENDPOINTS.keys())
+
 
 ASSETS = {
     "EURUSD_otc": 66,
@@ -47,14 +49,11 @@ ASSETS = {
     "GBPAUD": 21,
     "GBPCAD": 22,
     "GBPNZD": 23,
-    "GBPAUD": 24,
-    "EURNZD": 25,
-    "AUDCHF": 26,
-    "NZDCHF": 27,
-    "NZDCAD": 28,
-    "CADJPY": 29,
-    "CHFJPY": 30,
+    "AUDCHF": 24,
+    "NZDCHF": 25,
+    "NZDCAD": 26,
 }
+
 
 TIMEFRAMES = {
     "5s": 5,
@@ -70,12 +69,14 @@ TIMEFRAMES = {
     "1w": 604800,
 }
 
+
 API_LIMITS = {
     "min_order_amount": 1,
     "max_order_amount": 10000,
     "min_duration": 5,
     "max_duration": 3600,
 }
+
 
 CONNECTION_SETTINGS = {
     "ping_interval": 20,

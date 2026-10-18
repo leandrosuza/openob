@@ -6,9 +6,13 @@ class OpenOBError(Exception):
     pass
 
 
+
+
 class ConnectionError(OpenOBError):
     """WebSocket connection errors"""
     pass
+
+
 
 
 class AuthenticationError(OpenOBError):
@@ -16,9 +20,13 @@ class AuthenticationError(OpenOBError):
     pass
 
 
+
+
 class ValidationError(OpenOBError):
     """Data validation errors"""
     pass
+
+
 
 
 class ConfigurationError(OpenOBError):
@@ -26,9 +34,13 @@ class ConfigurationError(OpenOBError):
     pass
 
 
+
+
 class DatabaseError(OpenOBError):
     """Database and repository errors"""
     pass
+
+
 
 
 class TradingError(OpenOBError):
@@ -36,9 +48,13 @@ class TradingError(OpenOBError):
     pass
 
 
+
+
 class MarketDataError(OpenOBError):
     """Market data and candle errors"""
     pass
+
+
 
 
 class TimeoutError(OpenOBError):

@@ -11,6 +11,7 @@ class LoggerConfig:
 
     _configured = False
 
+
     @classmethod
     def setup(
         cls,
@@ -52,6 +53,8 @@ class LoggerConfig:
         )
 
         cls._configured = True
+
+
 
 
 def get_logger(name: str) -> logging.Logger:

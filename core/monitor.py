@@ -9,7 +9,6 @@ Este módulo gerencia conexões dedicadas para monitoramento:
 
 import asyncio
 import os
-import json
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List, Set
 from dotenv import load_dotenv
@@ -18,6 +17,7 @@ from core.logger import get_logger
 from core.exceptions import ConfigurationError, ConnectionError as OpenOBConnectionError
 from config.settings import Settings
 from repositories.repository_factory import RepositoryFactory
+
 
 logger = get_logger(__name__)
 
@@ -46,8 +46,6 @@ class MonitorAPI:
         self.actives_task = None
 
         self.payout_data: Dict[str, Dict[str, Any]] = {}
-        self.actives_data: Dict[str, Dict[str, Any]] = {}
-        self.tick_data: Dict[str, float] = {}
         self.balance_data: Dict[str, Any] = {}
 
         # Ativos atualmente monitorados
@@ -59,6 +57,7 @@ class MonitorAPI:
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
         self._setup_handlers()
+
 
     def _setup_handlers(self):
         """Configurar handlers para capturar eventos em ambas as conexões"""
@@ -77,6 +76,7 @@ class MonitorAPI:
 
         self.payout_ws._emit_event = patched_emit_payout
         self.actives_ws._emit_event = patched_emit_actives
+
 
     async def _capture_payout_event(self, event: str, data: Any):
         """Capturar eventos de payout do WebSocket"""
@@ -99,6 +99,7 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao capturar evento de payout: {e}")
 
+
     async def _capture_actives_event(self, event: str, data: Any):
         """Capturar eventos de ativos do WebSocket"""
         try:
@@ -117,7 +118,6 @@ class MonitorAPI:
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
                 price = data.get("price", data.get("value", data.get("close", data.get("bid", None))))
                 if asset and price:
-                    self.tick_data[asset] = price
                     self._log_to_file("monitoring_actives.txt", f"Tick: {asset} = {price}")
 
                     # Salvar automaticamente no repositório
@@ -131,56 +131,55 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
 
+
     def _process_stream_data(self, data: List):
         """Processar dados de stream de preços"""
-        try:
-            if isinstance(data, list) and len(data) > 0:
-                for item in data:
-                    if isinstance(item, list) and len(item) >= 3:
-                        asset = item[0]
-                        timestamp_unix = item[1]
-                        price = item[2]
+        if not isinstance(data, list) or len(data) == 0:
+            return
 
-                        self.tick_data[asset] = price
-                        self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
+        for item in data:
+            if not isinstance(item, list) or len(item) < 3:
+                continue
 
-                        # Salvar automaticamente no repositório se ativo monitorado
-                        if asset in self.monitored_assets:
-                            payout = self.payout_data.get(asset, {}).get("payout")
-                            # Converter timestamp Unix para datetime
-                            timestamp = datetime.fromtimestamp(timestamp_unix)
-                            self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
-                            asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
+            asset = item[0]
+            timestamp_unix = item[1]
+            price = item[2]
 
-        except Exception as e:
-            logger.error(f"Erro ao processar stream: {e}")
+            self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
 
-            logger.error(f"Erro ao salvar histórico para {asset}: {e}")
+            # Salvar automaticamente no repositório se ativo monitorado
+            if asset in self.monitored_assets:
+                payout = self.payout_data.get(asset, {}).get("payout")
+                timestamp = datetime.fromtimestamp(timestamp_unix)
+                self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
+                asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
+
 
     def _process_assets_data(self, data: List):
         """Processar dados binários de ativos para extrair payout"""
-        try:
-            if isinstance(data, list) and len(data) > 0:
-                for item in data:
-                    if isinstance(item, list) and len(item) >= 6:
-                        asset_id = item[0]
-                        symbol = item[1]
-                        name = item[2]
-                        asset_type = item[3]
-                        payout = item[5]
+        if not isinstance(data, list) or len(data) == 0:
+            return
 
-                        self.payout_data[symbol] = {
-                            "id": asset_id,
-                            "symbol": symbol,
-                            "name": name,
-                            "type": asset_type,
-                            "payout": payout
-                        }
+        for item in data:
+            if not isinstance(item, list) or len(item) < 6:
+                continue
 
-                        self._log_to_file("monitoring_payout.txt", f"Payout {symbol}: {payout}%")
+            asset_id = item[0]
+            symbol = item[1]
+            name = item[2]
+            asset_type = item[3]
+            payout = item[5]
 
-        except Exception as e:
-            logger.error(f"Erro ao processar dados de ativos: {e}")
+            self.payout_data[symbol] = {
+                "id": asset_id,
+                "symbol": symbol,
+                "name": name,
+                "type": asset_type,
+                "payout": payout
+            }
+
+            self._log_to_file("monitoring_payout.txt", f"Payout {symbol}: {payout}%")
+
 
     def _log_to_file(self, filename: str, message: str):
         """Log para arquivo específico em logs/ws/"""
@@ -192,6 +191,7 @@ class MonitorAPI:
                 f.write(f"[{timestamp}] {message}\n")
         except Exception as e:
             logger.error(f"Erro ao escrever no arquivo {filename}: {e}")
+
 
     def get_top_assets_by_payout(self, limit: int = None) -> List[Dict[str, Any]]:
         """Obter os ativos com os melhores payouts"""
@@ -209,6 +209,7 @@ class MonitorAPI:
 
         logger.debug(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
         return top_assets
+
 
     async def update_monitored_assets(self):
         """Atualizar dinamicamente os ativos monitorados baseado no payout"""
@@ -241,6 +242,7 @@ class MonitorAPI:
         if not to_add and not to_remove:
             logger.debug("Nenhuma alteração necessária nos ativos monitorados")
 
+
     async def subscribe_asset(self, symbol: str, period: int = 1):
         """Inscrever em um ativo específico e iniciar stream"""
         try:
@@ -262,6 +264,7 @@ class MonitorAPI:
         except Exception as e:
             logger.error(f"Erro ao inscrever no ativo {symbol}: {e}")
             raise OpenOBConnectionError(f"Falha ao inscrever no ativo {symbol}: {e}")
+
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
         """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
@@ -296,9 +299,8 @@ class MonitorAPI:
             except Exception as e:
                 logger.error(f"MONITOR DE PAYOUT | ERRO: {e}")
                 self._log_to_file("connection.txt", f"Payout: Erro - {e}")
-                if self.payout_ws.is_connected:
-                    await self.payout_ws.disconnect()
                 await asyncio.sleep(payout_interval)
+
 
     async def start_actives_monitoring(self, update_interval: int = 30):
         """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
@@ -334,19 +336,21 @@ class MonitorAPI:
                 self._log_to_file("connection.txt", f"Ativos: Erro - {e}")
                 await asyncio.sleep(5)
 
+
     async def start(self, payout_interval: int = 5, update_interval: int = 30):
         """Iniciar monitoramento"""
         logger.info("Iniciando sistema de monitoramento")
         logger.info(f"Monitorando top {self.top_assets_count} ativos por payout")
-        
+
         # Resetar tabela ticks ao iniciar
         logger.info("Resetando tabela ticks ao iniciar o sistema")
         await self.tick_repo.reset_all()
-        
+
         self.payout_task = asyncio.create_task(self.start_payout_monitoring(payout_interval))
         self.actives_task = asyncio.create_task(self.start_actives_monitoring(update_interval))
         logger.info("Monitoramento iniciado")
         logger.info(f"Tasks criadas: payout={self.payout_task}, actives={self.actives_task}")
+
 
     async def stop(self):
         """Parar monitoramento"""
@@ -370,21 +374,16 @@ class MonitorAPI:
 
         logger.info("Monitoramento parado")
 
+
     def get_payout_data(self) -> Dict[str, Dict[str, Any]]:
         """Obter dados de payout atual"""
         return self.payout_data
 
-    def get_actives_data(self) -> Dict[str, Dict[str, Any]]:
-        """Obter dados de ativos atual"""
-        return self.actives_data
-
-    def get_tick_data(self) -> Dict[str, float]:
-        """Obter dados de ticks atual"""
-        return self.tick_data
 
     def get_balance_data(self) -> Dict[str, Any]:
         """Obter dados de saldo atual"""
         return self.balance_data
+
 
     def get_monitored_assets(self) -> Set[str]:
         """Obter conjunto de ativos atualmente monitorados"""
