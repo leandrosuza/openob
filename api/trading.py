@@ -166,43 +166,36 @@ class TradingAPI:
 
         self._validate_order_parameters(asset, amount, direction, duration)
 
-        try:
-            order = Order(
-                asset=asset,
-                amount=amount,
-                direction=direction,
-                duration=duration
-            )
+        order = Order(
+            asset=asset,
+            amount=amount,
+            direction=direction,
+            duration=duration
+        )
 
-            direction_value = "call" if direction == OrderDirection.CALL else "put"
-            order_message = self._format_order_message(
-                asset=asset,
-                amount=amount,
-                direction=direction_value,
-                duration=duration,
-                request_id=order.request_id,
-            )
+        direction_value = "call" if direction == OrderDirection.CALL else "put"
+        order_message = self._format_order_message(
+            asset=asset,
+            amount=amount,
+            direction=direction_value,
+            duration=duration,
+            request_id=order.request_id,
+        )
 
-            logger.info(f"Enviando ordem: {asset}, {amount}, {direction}, {duration}s")
+        logger.info(f"Enviando ordem: {asset}, {amount}, {direction}, {duration}s")
 
-            await self.ws_manager.send_message(order_message)
+        await self.ws_manager.send_message(order_message)
 
-            result = OrderResult(
-                order_id=order.request_id,
-                status=OrderStatus.PENDING,
-                profit=0,
-                message="Ordem enviada"
-            )
+        result = OrderResult(
+            order_id=order.request_id,
+            status=OrderStatus.PENDING,
+            profit=0,
+            message="Ordem enviada"
+        )
 
-            self._order_results[order.request_id] = result
+        self._order_results[order.request_id] = result
 
-            return result
-
-        except (ValidationError, OpenOBConnectionError):
-            raise
-        except Exception as e:
-            logger.error(f"Erro ao colocar ordem: {e}")
-            raise TradingError(f"Falha ao colocar ordem: {e}")
+        return result
 
 
     def _validate_order_parameters(self, asset: str, amount: float, direction: OrderDirection, duration: int):
@@ -232,16 +225,10 @@ class TradingAPI:
         if not self.ws_manager.is_connected:
             raise OpenOBConnectionError("WebSocket não está conectado")
 
-        try:
-            message = f'42["closeOrder",{{"id":"{order_id}"}}]'
-            await self.ws_manager.send_message(message)
-            logger.info(f"Solicitação de fechamento enviada para ordem {order_id}")
-            return True
-        except OpenOBConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f"Erro ao fechar ordem: {e}")
-            raise TradingError(f"Falha ao fechar ordem: {e}")
+        message = f'42["closeOrder",{{"id":"{order_id}"}}]'
+        await self.ws_manager.send_message(message)
+        logger.info(f"Solicitação de fechamento enviada para ordem {order_id}")
+        return True
 
 
     def get_open_orders(self) -> list:

@@ -236,42 +236,35 @@ class MarketAPI:
         if timeframe not in TIMEFRAMES:
             raise ValidationError(f"Timeframe inválido: {timeframe}")
 
+        asset_id = ASSETS[asset]
+        timeframe_seconds = TIMEFRAMES[timeframe]
+
+        logger.info(f"Solicitando candles: {asset}, {timeframe}, count={count}")
+
+        candle_future = asyncio.Future()
+        request_id = f"{asset}_{timeframe_seconds}"
+        self._candle_requests[request_id] = candle_future
+
+        message = self._format_candles_message(
+            asset=asset,
+            timeframe=timeframe_seconds,
+            start_time=0,
+            end_time=0,
+            count=count,
+        )
+
+        await self.ws_manager.send_message(message)
+
         try:
-            asset_id = ASSETS[asset]
-            timeframe_seconds = TIMEFRAMES[timeframe]
-
-            logger.info(f"Solicitando candles: {asset}, {timeframe}, count={count}")
-
-            candle_future = asyncio.Future()
-            request_id = f"{asset}_{timeframe_seconds}"
-            self._candle_requests[request_id] = candle_future
-
-            message = self._format_candles_message(
-                asset=asset,
-                timeframe=timeframe_seconds,
-                start_time=0,
-                end_time=0,
-                count=count,
-            )
-
-            await self.ws_manager.send_message(message)
-
-            try:
-                candles = await asyncio.wait_for(candle_future, timeout=10.0)
-                logger.info(f"Candles recebidos: {len(candles)}")
-                return candles
-            except asyncio.TimeoutError:
-                logger.warning("Timeout aguardando candles")
-                return []
-            finally:
-                if request_id in self._candle_requests:
-                    del self._candle_requests[request_id]
-
-        except OpenOBConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f"Erro ao obter candles: {e}")
+            candles = await asyncio.wait_for(candle_future, timeout=10.0)
+            logger.info(f"Candles recebidos: {len(candles)}")
+            return candles
+        except asyncio.TimeoutError:
+            logger.warning("Timeout aguardando candles")
             return []
+        finally:
+            if request_id in self._candle_requests:
+                del self._candle_requests[request_id]
 
 
     def _format_candles_message(self, asset: str, timeframe: int, start_time: int, end_time: int, count: int) -> str:

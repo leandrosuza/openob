@@ -44,24 +44,17 @@ class AuthAPI:
 
     async def authenticate(self) -> bool:
         """Autenticar com SSID"""
+        logger.info("Iniciando autenticação")
+        await self.ws_manager.send_message(self.ssid)
+
         try:
-            logger.info("Iniciando autenticação")
-            await self.ws_manager.send_message(self.ssid)
-
-            try:
-                await asyncio.wait_for(self._authenticated.wait(), timeout=10.0)
-                self._authenticated.clear()
-                logger.info("Autenticação confirmada")
-                return True
-            except asyncio.TimeoutError:
-                logger.warning("Timeout aguardando autenticação - considerando autenticado")
-                return True
-
-        except OpenOBConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f"Erro ao autenticar: {e}")
-            raise AuthenticationError(f"Falha na autenticação: {e}")
+            await asyncio.wait_for(self._authenticated.wait(), timeout=10.0)
+            self._authenticated.clear()
+            logger.info("Autenticação confirmada")
+            return True
+        except asyncio.TimeoutError:
+            logger.warning("Timeout aguardando autenticação - considerando autenticado")
+            return True
 
 
     def is_authenticated(self) -> bool:

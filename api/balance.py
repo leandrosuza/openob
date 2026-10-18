@@ -70,24 +70,17 @@ class BalanceAPI:
         if not self.ws_manager.is_connected:
             raise OpenOBConnectionError("WebSocket não está conectado")
 
+        logger.info("Solicitando saldo")
+        await self.ws_manager.send_message('42["balance/get"]')
+
         try:
-            logger.info("Solicitando saldo")
-            await self.ws_manager.send_message('42["balance/get"]')
-
-            try:
-                await asyncio.wait_for(self._balance_updated.wait(), timeout=5.0)
-                self._balance_updated.clear()
-                if self._balance:
-                    logger.info(f"Saldo obtido: {self._balance.amount} {self._balance.currency}")
-                    return self._balance
-                else:
-                    raise OpenOBConnectionError("Não foi possível obter saldo")
-            except asyncio.TimeoutError:
-                logger.warning("Timeout aguardando saldo")
-                raise OpenOBConnectionError("Timeout ao obter saldo")
-
-        except OpenOBConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f"Erro ao obter saldo: {e}")
-            raise OpenOBConnectionError(f"Falha ao obter saldo: {e}")
+            await asyncio.wait_for(self._balance_updated.wait(), timeout=5.0)
+            self._balance_updated.clear()
+            if self._balance:
+                logger.info(f"Saldo obtido: {self._balance.amount} {self._balance.currency}")
+                return self._balance
+            else:
+                raise OpenOBConnectionError("Não foi possível obter saldo")
+        except asyncio.TimeoutError:
+            logger.warning("Timeout aguardando saldo")
+            raise OpenOBConnectionError("Timeout ao obter saldo")
