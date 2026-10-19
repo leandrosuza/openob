@@ -72,10 +72,26 @@ class MonitorAPI:
         self.actives_ws._emit_event = patched_emit_actives
 
 
+    def _log_to_file(self, filename: str, message: str):
+        """Log para arquivo específico em logs/ws/ apenas em modo DEBUG"""
+        from config.settings import Settings
+
+        if Settings.LOG_LEVEL.upper() != "DEBUG":
+            return
+
+        try:
+            log_path = f"logs/ws/{filename}"
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "a", encoding="utf-8") as f:
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                f.write(f"[{timestamp}] {message}\n")
+        except Exception as e:
+            logger.error(f"Erro ao escrever no arquivo {filename}: {e}")
+
+
     async def _capture_payout_event(self, event: str, data: Any):
         """Capturar eventos de payout do WebSocket"""
         try:
-            # Log de todos os eventos para debug
             self._log_to_file("monitoring_payout.txt", f"Evento recebido: {event} | Tipo: {type(data)}")
 
             if event == "json_data" and isinstance(data, dict):
@@ -107,14 +123,12 @@ class MonitorAPI:
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
 
-            # Processar ticks em formato dict
             if isinstance(data, dict):
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
                 price = data.get("price", data.get("value", data.get("close", data.get("bid", None))))
                 if asset and price:
                     self._log_to_file("monitoring_actives.txt", f"Tick: {asset} = {price}")
 
-                    # Salvar automaticamente no repositório
                     if asset in self.monitored_assets:
                         payout = self.payout_data.get(asset, {}).get("payout")
                         self._log_to_file("monitoring_actives.txt", f"Salvando tick no repositório: {asset} @ {price}")
@@ -124,29 +138,6 @@ class MonitorAPI:
 
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
-
-
-    def _process_stream_data(self, data: List):
-        """Processar dados de stream de preços"""
-        if not isinstance(data, list) or len(data) == 0:
-            return
-
-        for item in data:
-            if not isinstance(item, list) or len(item) < 3:
-                continue
-
-            asset = item[0]
-            timestamp_unix = item[1]
-            price = item[2]
-
-            self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
-
-            # Salvar automaticamente no repositório se ativo monitorado
-            if asset in self.monitored_assets:
-                payout = self.payout_data.get(asset, {}).get("payout")
-                timestamp = datetime.fromtimestamp(timestamp_unix)
-                self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
-                asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
 
 
     def _process_assets_data(self, data: List):
@@ -175,21 +166,26 @@ class MonitorAPI:
             self._log_to_file("monitoring_payout.txt", f"Payout {symbol}: {payout}%")
 
 
-    def _log_to_file(self, filename: str, message: str):
-        """Log para arquivo específico em logs/ws/ apenas em modo DEBUG"""
-        from config.settings import Settings
-
-        if Settings.LOG_LEVEL.upper() != "DEBUG":
+    def _process_stream_data(self, data: List):
+        """Processar dados de stream de preços"""
+        if not isinstance(data, list) or len(data) == 0:
             return
 
-        try:
-            log_path = f"logs/ws/{filename}"
-            os.makedirs(os.path.dirname(log_path), exist_ok=True)
-            with open(log_path, "a", encoding="utf-8") as f:
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                f.write(f"[{timestamp}] {message}\n")
-        except Exception as e:
-            logger.error(f"Erro ao escrever no arquivo {filename}: {e}")
+        for item in data:
+            if not isinstance(item, list) or len(item) < 3:
+                continue
+
+            asset = item[0]
+            timestamp_unix = item[1]
+            price = item[2]
+
+            self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
+
+            if asset in self.monitored_assets:
+                payout = self.payout_data.get(asset, {}).get("payout")
+                timestamp = datetime.fromtimestamp(timestamp_unix)
+                self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
+                asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
 
 
     def get_top_assets_by_payout(self, limit: int = None) -> List[Dict[str, Any]]:
@@ -305,7 +301,6 @@ class MonitorAPI:
                     connected = await self.actives_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
                         self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
-                        # Resetar tabela ticks ao reconectar
                         logger.info("Resetando tabela ticks ao reconectar WebSocket de ativos")
                         await self.tick_repo.reset_all()
                     else:
@@ -319,7 +314,6 @@ class MonitorAPI:
                     self._log_to_file("monitoring_actives.txt", "Solicitação de ativos enviada")
                     await asyncio.sleep(1)
 
-                    # Atualizar dinamicamente os ativos monitorados
                     await self.update_monitored_assets()
 
                 await asyncio.sleep(update_interval)
