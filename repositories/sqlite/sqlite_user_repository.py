@@ -86,11 +86,6 @@ class SQLiteUserRepository(UserRepositoryInterface):
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-    @staticmethod
-    def verify_password(password: str, password_hash: str) -> bool:
-        """Verificar senha usando bcrypt"""
-        return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
-
     async def create(self, user: User) -> User:
         """Criar usuário e retornar com ID"""
         try:
@@ -215,7 +210,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
             row = cursor.fetchone()
             if not row:
                 return False
-            return SQLiteUserRepository.verify_password(password, row[0])
+            password_hash = row[0]
+            return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
 
     async def update_password(self, user_id: int, new_password: str) -> bool:
         """Atualizar senha do usuário"""

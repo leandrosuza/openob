@@ -159,7 +159,7 @@ async def login(
         key="refresh_token",
         value=refresh_token,
         httponly=True,  # Proteção contra XSS
-        secure=True,  # HTTPS apenas (em produção)
+        secure=False,  # False para testes locais, True em produção
         samesite="lax",  # Proteção CSRF
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60  # 7 dias em segundos
     )
@@ -229,7 +229,7 @@ async def refresh_token(
         key="refresh_token",
         value=new_refresh_token,
         httponly=True,  # Proteção contra XSS
-        secure=True,  # HTTPS apenas (em produção)
+        secure=False,  # False para testes locais, True em produção
         samesite="lax",  # Proteção CSRF
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60  # 7 dias em segundos
     )
