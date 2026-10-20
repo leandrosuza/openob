@@ -4,6 +4,7 @@ import os
 import sqlite3
 import asyncio
 import threading
+import bcrypt
 from datetime import datetime, timezone
 from typing import Optional, List
 from repositories.interfaces.user_repository_interface import UserRepositoryInterface
@@ -42,6 +43,7 @@ class SQLiteUserRepository(UserRepositoryInterface):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
                 ssid_demo TEXT NOT NULL UNIQUE,
                 ssid_real TEXT UNIQUE,
                 plan_id INTEGER,
@@ -68,14 +70,26 @@ class SQLiteUserRepository(UserRepositoryInterface):
             id=row[0],
             username=row[1],
             email=row[2],
-            ssid_demo=row[3],
-            ssid_real=row[4],
-            plan_id=row[5],
-            is_active=bool(row[6]),
-            balance=row[7],
-            created_at=datetime.fromisoformat(row[8]) if row[8] else None,
-            updated_at=datetime.fromisoformat(row[9]) if row[9] else None
+            password_hash=row[3],
+            ssid_demo=row[4],
+            ssid_real=row[5],
+            plan_id=row[6],
+            is_active=bool(row[7]),
+            balance=row[8],
+            created_at=datetime.fromisoformat(row[9]) if row[9] else None,
+            updated_at=datetime.fromisoformat(row[10]) if row[10] else None
         )
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Hash de senha usando bcrypt"""
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+    @staticmethod
+    def verify_password(password: str, password_hash: str) -> bool:
+        """Verificar senha usando bcrypt"""
+        return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
 
     async def create(self, user: User) -> User:
         """Criar usuário e retornar com ID"""
@@ -89,8 +103,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
         """Criar usuário (síncrono)"""
         with self._lock:
             cursor = self.conn.execute(
-                "INSERT INTO users (username, email, ssid_demo, ssid_real, plan_id, is_active, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (user.username, user.email, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance)
+                "INSERT INTO users (username, email, password_hash, ssid_demo, ssid_real, plan_id, is_active, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance)
             )
             self.conn.commit()
 
@@ -199,6 +213,7 @@ class SQLiteUserRepository(UserRepositoryInterface):
                 """UPDATE users SET 
                    username = ?, 
                    email = ?, 
+                   password_hash = ?, 
                    ssid_demo = ?, 
                    ssid_real = ?, 
                    plan_id = ?, 
@@ -206,7 +221,7 @@ class SQLiteUserRepository(UserRepositoryInterface):
                    balance = ?, 
                    updated_at = CURRENT_TIMESTAMP 
                    WHERE id = ?""",
-                (user.username, user.email, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance, user.id)
+                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance, user.id)
             )
             self.conn.commit()
             cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user.id,))
