@@ -55,6 +55,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 token_blacklist = set()
 
 
+# Rate limits configuráveis via ENV
+RATE_LIMIT_REGISTER = Settings.RATE_LIMIT_REGISTER
+RATE_LIMIT_LOGIN = Settings.RATE_LIMIT_LOGIN
+RATE_LIMIT_REFRESH = Settings.RATE_LIMIT_REFRESH
+
+
 def get_user_repository():
     """Dependency para obter repositório de usuários"""
     config = Settings.to_dict()
@@ -94,7 +100,7 @@ async def get_current_user(
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/minute")  # Rate limit para registro
+@limiter.limit(RATE_LIMIT_REGISTER)  # Rate limit configurável via ENV
 async def register(
     user_data: UserRegister,
     request: Request,
@@ -152,7 +158,7 @@ async def register(
 
 
 @router.post("/login", response_model=Token)
-@limiter.limit("10/minute")  # Rate limit para login
+@limiter.limit(RATE_LIMIT_LOGIN)  # Rate limit configurável via ENV
 async def login(
     response: Response,
     request: Request,
@@ -220,7 +226,7 @@ async def login(
 
 
 @router.post("/refresh", response_model=Token)
-@limiter.limit("20/minute")  # Rate limit para refresh
+@limiter.limit(RATE_LIMIT_REFRESH)  # Rate limit configurável via ENV
 async def refresh_token(
     request: Request,
     response: Response,

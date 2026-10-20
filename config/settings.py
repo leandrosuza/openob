@@ -24,6 +24,12 @@ class Settings:
     # JWT
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
 
+    # Rate Limiting
+    RATE_LIMIT_REGISTER = os.getenv("RATE_LIMIT_REGISTER", "5/minute")
+    RATE_LIMIT_LOGIN = os.getenv("RATE_LIMIT_LOGIN", "10/minute")
+    RATE_LIMIT_REFRESH = os.getenv("RATE_LIMIT_REFRESH", "20/minute")
+    RATE_LIMIT_HEALTH = os.getenv("RATE_LIMIT_HEALTH", "100/minute")
+
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
@@ -52,6 +58,10 @@ class Settings:
             "MONITOR_TOP_ASSETS": cls.MONITOR_TOP_ASSETS,
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
             "JWT_SECRET_KEY": cls.JWT_SECRET_KEY,
+            "RATE_LIMIT_REGISTER": cls.RATE_LIMIT_REGISTER,
+            "RATE_LIMIT_LOGIN": cls.RATE_LIMIT_LOGIN,
+            "RATE_LIMIT_REFRESH": cls.RATE_LIMIT_REFRESH,
+            "RATE_LIMIT_HEALTH": cls.RATE_LIMIT_HEALTH,
             "LOG_LEVEL": cls.LOG_LEVEL,
         }
 
