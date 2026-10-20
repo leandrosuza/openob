@@ -1,214 +1,199 @@
-[2026-10-19 21:13:57] Solicitação de payout enviada
-[2026-10-19 21:13:57] Evento recebido: updateAssets",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Dados binários de ativos recebidos
-[2026-10-19 21:13:57] Evento recebido: updateAssets",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Payout #AAPL: 50%
-[2026-10-19 21:13:57] Payout #AAPL_otc: 92%
-[2026-10-19 21:13:57] Payout #AXP: 50%
-[2026-10-19 21:13:57] Payout #AXP_otc: 92%
-[2026-10-19 21:13:57] Payout #BA: 50%
-[2026-10-19 21:13:57] Payout #BA_otc: 92%
-[2026-10-19 21:13:57] Payout #CSCO: 45%
-[2026-10-19 21:13:57] Payout #CSCO_otc: 67%
-[2026-10-19 21:13:57] Payout #FB: 50%
-[2026-10-19 21:13:57] Payout #FB_otc: 50%
-[2026-10-19 21:13:57] Payout #INTC: 25%
-[2026-10-19 21:13:57] Payout #INTC_otc: 84%
-[2026-10-19 21:13:57] Payout #JNJ: 50%
-[2026-10-19 21:13:57] Payout #JNJ_otc: 33%
-[2026-10-19 21:13:57] Payout #JPM: 50%
-[2026-10-19 21:13:57] Payout #MCD: 50%
-[2026-10-19 21:13:57] Payout #MCD_otc: 92%
-[2026-10-19 21:13:57] Payout #MSFT: 50%
-[2026-10-19 21:13:57] Payout #MSFT_otc: 58%
-[2026-10-19 21:13:57] Payout #PFE: 50%
-[2026-10-19 21:13:57] Payout #PFE_otc: 92%
-[2026-10-19 21:13:57] Payout #TSLA: 50%
-[2026-10-19 21:13:57] Payout #TSLA_otc: 66%
-[2026-10-19 21:13:57] Payout #XOM: 45%
-[2026-10-19 21:13:57] Payout #XOM_otc: 88%
-[2026-10-19 21:13:57] Payout 100GBP: 45%
-[2026-10-19 21:13:57] Payout 100GBP_otc: 45%
-[2026-10-19 21:13:57] Payout ADA-USD_otc: 92%
-[2026-10-19 21:13:57] Payout AEDCNY_otc: 83%
-[2026-10-19 21:13:57] Payout AEX25: 45%
-[2026-10-19 21:13:57] Payout AMD_otc: 77%
-[2026-10-19 21:13:57] Payout AMZN_otc: 43%
-[2026-10-19 21:13:57] Payout AUDCAD: 50%
-[2026-10-19 21:13:57] Payout AUDCAD_otc: 92%
-[2026-10-19 21:13:57] Payout AUDCHF: 50%
-[2026-10-19 21:13:57] Payout AUDCHF_otc: 92%
-[2026-10-19 21:13:57] Payout AUDJPY: 56%
-[2026-10-19 21:13:57] Payout AUDJPY_otc: 30%
-[2026-10-19 21:13:57] Payout AUDNZD_otc: 63%
-[2026-10-19 21:13:57] Payout AUDUSD: 44%
-[2026-10-19 21:13:57] Payout AUDUSD_otc: 92%
-[2026-10-19 21:13:57] Payout AUS200: 37%
-[2026-10-19 21:13:57] Payout AUS200_otc: 67%
-[2026-10-19 21:13:57] Payout AVAX_otc: 92%
-[2026-10-19 21:13:57] Payout BABA: 50%
-[2026-10-19 21:13:57] Payout BABA_otc: 75%
-[2026-10-19 21:13:57] Payout BCHEUR: 15%
-[2026-10-19 21:13:57] Payout BCHGBP: 15%
-[2026-10-19 21:13:57] Payout BCHJPY: 15%
-[2026-10-19 21:13:57] Payout BHDCNY_otc: 71%
-[2026-10-19 21:13:57] Payout BITB_otc: 92%
-[2026-10-19 21:13:57] Payout BNB-USD_otc: 71%
-[2026-10-19 21:13:57] Payout BTCGBP: 15%
-[2026-10-19 21:13:57] Payout BTCJPY: 15%
-[2026-10-19 21:13:57] Payout BTCUSD: 15%
-[2026-10-19 21:13:57] Payout BTCUSD_otc: 92%
-[2026-10-19 21:13:57] Payout CAC40: 45%
-[2026-10-19 21:13:57] Payout CADCHF: 50%
-[2026-10-19 21:13:57] Payout CADCHF_otc: 92%
-[2026-10-19 21:13:57] Payout CADJPY: 70%
-[2026-10-19 21:13:57] Payout CADJPY_otc: 71%
-[2026-10-19 21:13:57] Payout CHFJPY: 50%
-[2026-10-19 21:13:57] Payout CHFJPY_otc: 90%
-[2026-10-19 21:13:57] Payout CHFNOK_otc: 48%
-[2026-10-19 21:13:57] Payout CITI: 50%
-[2026-10-19 21:13:57] Payout CITI_otc: 47%
-[2026-10-19 21:13:57] Payout COIN_otc: 76%
-[2026-10-19 21:13:57] Payout D30EUR: 45%
-[2026-10-19 21:13:57] Payout D30EUR_otc: 45%
-[2026-10-19 21:13:57] Payout DASH_USD: 25%
-[2026-10-19 21:13:57] Payout DJI30: 45%
-[2026-10-19 21:13:57] Payout DJI30_otc: 45%
-[2026-10-19 21:13:57] Payout DOGE_otc: 79%
-[2026-10-19 21:13:57] Payout DOTUSD_otc: 92%
-[2026-10-19 21:13:57] Payout E35EUR: 45%
-[2026-10-19 21:13:57] Payout E35EUR_otc: 45%
-[2026-10-19 21:13:57] Payout E50EUR: 45%
-[2026-10-19 21:13:57] Payout E50EUR_otc: 45%
-[2026-10-19 21:13:57] Payout ETHUSD: 40%
-[2026-10-19 21:13:57] Payout ETHUSD_otc: 62%
-[2026-10-19 21:13:57] Payout EURAUD: 42%
-[2026-10-19 21:13:57] Payout EURCAD: 56%
-[2026-10-19 21:13:57] Payout EURCHF: 39%
-[2026-10-19 21:13:57] Payout EURCHF_otc: 46%
-[2026-10-19 21:13:57] Payout EURGBP: 50%
-[2026-10-19 21:13:57] Payout EURGBP_otc: 59%
-[2026-10-19 21:13:57] Payout EURHUF_otc: 91%
-[2026-10-19 21:13:57] Payout EURJPY: 50%
-[2026-10-19 21:13:57] Payout EURJPY_otc: 83%
-[2026-10-19 21:13:57] Payout EURNZD_otc: 85%
-[2026-10-19 21:13:57] Payout EURRUB_otc: 78%
-[2026-10-19 21:13:57] Payout EURTRY_otc: 53%
-[2026-10-19 21:13:57] Payout EURUSD: 51%
-[2026-10-19 21:13:57] Payout EURUSD_otc: 77%
-[2026-10-19 21:13:57] Payout F40EUR: 45%
-[2026-10-19 21:13:57] Payout F40EUR_otc: 45%
-[2026-10-19 21:13:57] Payout FDX_otc: 89%
-[2026-10-19 21:13:57] Payout GBPAUD: 50%
-[2026-10-19 21:13:57] Payout GBPAUD_otc: 61%
-[2026-10-19 21:13:57] Payout GBPCAD: 48%
-[2026-10-19 21:13:57] Payout GBPCHF: 50%
-[2026-10-19 21:13:57] Payout GBPJPY: 50%
-[2026-10-19 21:13:57] Payout GBPJPY_otc: 61%
-[2026-10-19 21:13:57] Payout GBPUSD: 50%
-[2026-10-19 21:13:57] Payout GBPUSD_otc: 88%
-[2026-10-19 21:13:57] Payout GME_otc: 92%
-[2026-10-19 21:13:57] Payout H33HKD: 45%
-[2026-10-19 21:13:57] Payout IRRUSD_otc: 73%
-[2026-10-19 21:13:57] Payout JODCNY_otc: 92%
-[2026-10-19 21:13:57] Payout JPN225: 45%
-[2026-10-19 21:13:57] Payout JPN225_otc: 45%
-[2026-10-19 21:13:57] Payout KESUSD_otc: 62%
-[2026-10-19 21:13:57] Payout LBPUSD_otc: 92%
-[2026-10-19 21:13:57] Payout LINK_otc: 59%
-[2026-10-19 21:13:57] Payout LNKUSD: 15%
-[2026-10-19 21:13:57] Payout LTCUSD_otc: 36%
-[2026-10-19 21:13:57] Payout MADUSD_otc: 64%
-[2026-10-19 21:13:57] Payout MARA_otc: 92%
-[2026-10-19 21:13:57] Payout MATIC_otc: 92%
-[2026-10-19 21:13:57] Payout NASUSD: 45%
-[2026-10-19 21:13:57] Payout NASUSD_otc: 45%
-[2026-10-19 21:13:57] Payout NFLX: 50%
-[2026-10-19 21:13:57] Payout NFLX_otc: 83%
-[2026-10-19 21:13:57] Payout NGNUSD_otc: 87%
-[2026-10-19 21:13:57] Payout NZDJPY_otc: 44%
-[2026-10-19 21:13:57] Payout NZDUSD_otc: 73%
-[2026-10-19 21:13:57] Payout OMRCNY_otc: 89%
-[2026-10-19 21:13:57] Payout PLTR_otc: 78%
-[2026-10-19 21:13:57] Payout QARCNY_otc: 92%
-[2026-10-19 21:13:57] Payout SARCNY_otc: 46%
-[2026-10-19 21:13:57] Payout SMI20: 45%
-[2026-10-19 21:13:57] Payout SOL-USD_otc: 92%
-[2026-10-19 21:13:57] Payout SP500: 45%
-[2026-10-19 21:13:57] Payout SP500_otc: 45%
-[2026-10-19 21:13:57] Payout SYPUSD_otc: 74%
-[2026-10-19 21:13:57] Payout TNDUSD_otc: 92%
-[2026-10-19 21:13:57] Payout TON-USD_otc: 66%
-[2026-10-19 21:13:57] Payout TRX-USD_otc: 92%
-[2026-10-19 21:13:57] Payout UAHUSD_otc: 73%
-[2026-10-19 21:13:57] Payout UKBrent: 50%
-[2026-10-19 21:13:57] Payout UKBrent_otc: 80%
-[2026-10-19 21:13:57] Payout USCrude: 50%
-[2026-10-19 21:13:57] Payout USCrude_otc: 80%
-[2026-10-19 21:13:57] Payout USDARS_otc: 82%
-[2026-10-19 21:13:57] Payout USDBDT_otc: 36%
-[2026-10-19 21:13:57] Payout USDBRL_otc: 92%
-[2026-10-19 21:13:57] Payout USDCAD: 50%
-[2026-10-19 21:13:57] Payout USDCAD_otc: 78%
-[2026-10-19 21:13:57] Payout USDCHF: 50%
-[2026-10-19 21:13:57] Payout USDCHF_otc: 35%
-[2026-10-19 21:13:57] Payout USDCLP_otc: 66%
-[2026-10-19 21:13:57] Payout USDCNH_otc: 69%
-[2026-10-19 21:13:57] Payout USDCOP_otc: 83%
-[2026-10-19 21:13:57] Payout USDDZD_otc: 79%
-[2026-10-19 21:13:57] Payout USDEGP_otc: 70%
-[2026-10-19 21:13:57] Payout USDIDR_otc: 72%
-[2026-10-19 21:13:57] Payout USDINR_otc: 92%
-[2026-10-19 21:13:57] Payout USDJPY: 65%
-[2026-10-19 21:13:57] Payout USDJPY_otc: 92%
-[2026-10-19 21:13:57] Payout USDMXN_otc: 61%
-[2026-10-19 21:13:57] Payout USDMYR_otc: 83%
-[2026-10-19 21:13:57] Payout USDPHP_otc: 26%
-[2026-10-19 21:13:57] Payout USDPKR_otc: 71%
-[2026-10-19 21:13:57] Payout USDRUB_otc: 73%
-[2026-10-19 21:13:57] Payout USDSGD_otc: 83%
-[2026-10-19 21:13:57] Payout USDTHB_otc: 59%
-[2026-10-19 21:13:57] Payout USDVND_otc: 63%
-[2026-10-19 21:13:57] Payout VISA_otc: 92%
-[2026-10-19 21:13:57] Payout VIX_otc: 74%
-[2026-10-19 21:13:57] Payout XAGEUR: 50%
-[2026-10-19 21:13:57] Payout XAGUSD: 50%
-[2026-10-19 21:13:57] Payout XAGUSD_otc: 80%
-[2026-10-19 21:13:57] Payout XAUEUR: 50%
-[2026-10-19 21:13:57] Payout XAUUSD: 50%
-[2026-10-19 21:13:57] Payout XAUUSD_otc: 80%
-[2026-10-19 21:13:57] Payout XNGUSD: 45%
-[2026-10-19 21:13:57] Payout XNGUSD_otc: 45%
-[2026-10-19 21:13:57] Payout XPDUSD: 45%
-[2026-10-19 21:13:57] Payout XPDUSD_otc: 45%
-[2026-10-19 21:13:57] Payout XPTUSD: 45%
-[2026-10-19 21:13:57] Payout XPTUSD_otc: 45%
-[2026-10-19 21:13:57] Payout YERUSD_otc: 66%
-[2026-10-19 21:13:57] Payout ZARUSD_otc: 47%
-[2026-10-19 21:13:57] Evento recebido: successauth",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: successupdatePending",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: successupdatePending",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: successupdatePending",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: successupdatePending",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: updateCharts",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateCharts",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: successupdateBalance",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: successupdateBalance",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:13:57] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
-[2026-10-19 21:13:57] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
-[2026-10-19 21:14:03] Solicitação de payout enviada
-[2026-10-19 21:14:09] Solicitação de payout enviada
-[2026-10-19 21:14:15] Solicitação de payout enviada
-[2026-10-19 21:14:21] Solicitação de payout enviada
-[2026-10-19 21:14:27] Solicitação de payout enviada
-[2026-10-19 21:14:33] Solicitação de payout enviada
-[2026-10-19 21:14:39] Solicitação de payout enviada
-[2026-10-19 21:14:45] Solicitação de payout enviada
-[2026-10-19 21:14:51] Solicitação de payout enviada
-[2026-10-19 21:14:57] Solicitação de payout enviada
+[2026-10-19 21:16:23] Solicitação de payout enviada
+[2026-10-19 21:16:23] Evento recebido: updateAssets",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:23] Dados binários de ativos recebidos
+[2026-10-19 21:16:23] Evento recebido: updateAssets",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-19 21:16:23] Payout #AAPL: 50%
+[2026-10-19 21:16:23] Payout #AAPL_otc: 92%
+[2026-10-19 21:16:23] Payout #AXP: 50%
+[2026-10-19 21:16:23] Payout #AXP_otc: 92%
+[2026-10-19 21:16:23] Payout #BA: 50%
+[2026-10-19 21:16:23] Payout #BA_otc: 92%
+[2026-10-19 21:16:23] Payout #CSCO: 45%
+[2026-10-19 21:16:23] Payout #CSCO_otc: 48%
+[2026-10-19 21:16:23] Payout #FB: 50%
+[2026-10-19 21:16:23] Payout #FB_otc: 50%
+[2026-10-19 21:16:23] Payout #INTC: 25%
+[2026-10-19 21:16:23] Payout #INTC_otc: 84%
+[2026-10-19 21:16:23] Payout #JNJ: 50%
+[2026-10-19 21:16:23] Payout #JNJ_otc: 33%
+[2026-10-19 21:16:23] Payout #JPM: 50%
+[2026-10-19 21:16:23] Payout #MCD: 50%
+[2026-10-19 21:16:23] Payout #MCD_otc: 92%
+[2026-10-19 21:16:23] Payout #MSFT: 50%
+[2026-10-19 21:16:23] Payout #MSFT_otc: 63%
+[2026-10-19 21:16:23] Payout #PFE: 50%
+[2026-10-19 21:16:23] Payout #PFE_otc: 92%
+[2026-10-19 21:16:23] Payout #TSLA: 50%
+[2026-10-19 21:16:23] Payout #TSLA_otc: 71%
+[2026-10-19 21:16:23] Payout #XOM: 45%
+[2026-10-19 21:16:23] Payout #XOM_otc: 88%
+[2026-10-19 21:16:23] Payout 100GBP: 45%
+[2026-10-19 21:16:23] Payout 100GBP_otc: 45%
+[2026-10-19 21:16:23] Payout ADA-USD_otc: 92%
+[2026-10-19 21:16:23] Payout AEDCNY_otc: 88%
+[2026-10-19 21:16:23] Payout AEX25: 45%
+[2026-10-19 21:16:23] Payout AMD_otc: 76%
+[2026-10-19 21:16:23] Payout AMZN_otc: 50%
+[2026-10-19 21:16:23] Payout AUDCAD: 50%
+[2026-10-19 21:16:23] Payout AUDCAD_otc: 92%
+[2026-10-19 21:16:23] Payout AUDCHF: 50%
+[2026-10-19 21:16:23] Payout AUDCHF_otc: 92%
+[2026-10-19 21:16:23] Payout AUDJPY: 56%
+[2026-10-19 21:16:23] Payout AUDJPY_otc: 30%
+[2026-10-19 21:16:23] Payout AUDNZD_otc: 60%
+[2026-10-19 21:16:23] Payout AUDUSD: 44%
+[2026-10-19 21:16:23] Payout AUDUSD_otc: 92%
+[2026-10-19 21:16:23] Payout AUS200: 37%
+[2026-10-19 21:16:23] Payout AUS200_otc: 67%
+[2026-10-19 21:16:23] Payout AVAX_otc: 92%
+[2026-10-19 21:16:23] Payout BABA: 50%
+[2026-10-19 21:16:23] Payout BABA_otc: 75%
+[2026-10-19 21:16:23] Payout BCHEUR: 15%
+[2026-10-19 21:16:23] Payout BCHGBP: 15%
+[2026-10-19 21:16:23] Payout BCHJPY: 15%
+[2026-10-19 21:16:23] Payout BHDCNY_otc: 68%
+[2026-10-19 21:16:23] Payout BITB_otc: 92%
+[2026-10-19 21:16:23] Payout BNB-USD_otc: 71%
+[2026-10-19 21:16:23] Payout BTCGBP: 15%
+[2026-10-19 21:16:23] Payout BTCJPY: 15%
+[2026-10-19 21:16:23] Payout BTCUSD: 15%
+[2026-10-19 21:16:23] Payout BTCUSD_otc: 92%
+[2026-10-19 21:16:23] Payout CAC40: 45%
+[2026-10-19 21:16:23] Payout CADCHF: 50%
+[2026-10-19 21:16:23] Payout CADCHF_otc: 92%
+[2026-10-19 21:16:23] Payout CADJPY: 70%
+[2026-10-19 21:16:23] Payout CADJPY_otc: 74%
+[2026-10-19 21:16:23] Payout CHFJPY: 50%
+[2026-10-19 21:16:23] Payout CHFJPY_otc: 88%
+[2026-10-19 21:16:23] Payout CHFNOK_otc: 47%
+[2026-10-19 21:16:23] Payout CITI: 50%
+[2026-10-19 21:16:23] Payout CITI_otc: 44%
+[2026-10-19 21:16:23] Payout COIN_otc: 43%
+[2026-10-19 21:16:23] Payout D30EUR: 45%
+[2026-10-19 21:16:23] Payout D30EUR_otc: 45%
+[2026-10-19 21:16:23] Payout DASH_USD: 25%
+[2026-10-19 21:16:23] Payout DJI30: 45%
+[2026-10-19 21:16:23] Payout DJI30_otc: 45%
+[2026-10-19 21:16:23] Payout DOGE_otc: 78%
+[2026-10-19 21:16:23] Payout DOTUSD_otc: 92%
+[2026-10-19 21:16:23] Payout E35EUR: 45%
+[2026-10-19 21:16:23] Payout E35EUR_otc: 45%
+[2026-10-19 21:16:23] Payout E50EUR: 45%
+[2026-10-19 21:16:23] Payout E50EUR_otc: 45%
+[2026-10-19 21:16:23] Payout ETHUSD: 40%
+[2026-10-19 21:16:23] Payout ETHUSD_otc: 69%
+[2026-10-19 21:16:23] Payout EURAUD: 42%
+[2026-10-19 21:16:23] Payout EURCAD: 56%
+[2026-10-19 21:16:23] Payout EURCHF: 39%
+[2026-10-19 21:16:23] Payout EURCHF_otc: 44%
+[2026-10-19 21:16:23] Payout EURGBP: 50%
+[2026-10-19 21:16:23] Payout EURGBP_otc: 67%
+[2026-10-19 21:16:23] Payout EURHUF_otc: 91%
+[2026-10-19 21:16:23] Payout EURJPY: 50%
+[2026-10-19 21:16:23] Payout EURJPY_otc: 70%
+[2026-10-19 21:16:23] Payout EURNZD_otc: 85%
+[2026-10-19 21:16:23] Payout EURRUB_otc: 80%
+[2026-10-19 21:16:23] Payout EURTRY_otc: 53%
+[2026-10-19 21:16:23] Payout EURUSD: 51%
+[2026-10-19 21:16:23] Payout EURUSD_otc: 67%
+[2026-10-19 21:16:23] Payout F40EUR: 45%
+[2026-10-19 21:16:23] Payout F40EUR_otc: 45%
+[2026-10-19 21:16:23] Payout FDX_otc: 89%
+[2026-10-19 21:16:23] Payout GBPAUD: 50%
+[2026-10-19 21:16:23] Payout GBPAUD_otc: 71%
+[2026-10-19 21:16:23] Payout GBPCAD: 48%
+[2026-10-19 21:16:23] Payout GBPCHF: 50%
+[2026-10-19 21:16:23] Payout GBPJPY: 50%
+[2026-10-19 21:16:23] Payout GBPJPY_otc: 69%
+[2026-10-19 21:16:23] Payout GBPUSD: 50%
+[2026-10-19 21:16:23] Payout GBPUSD_otc: 92%
+[2026-10-19 21:16:23] Payout GME_otc: 92%
+[2026-10-19 21:16:23] Payout H33HKD: 45%
+[2026-10-19 21:16:23] Payout IRRUSD_otc: 82%
+[2026-10-19 21:16:23] Payout JODCNY_otc: 92%
+[2026-10-19 21:16:23] Payout JPN225: 45%
+[2026-10-19 21:16:23] Payout JPN225_otc: 45%
+[2026-10-19 21:16:23] Payout KESUSD_otc: 68%
+[2026-10-19 21:16:23] Payout LBPUSD_otc: 92%
+[2026-10-19 21:16:23] Payout LINK_otc: 60%
+[2026-10-19 21:16:23] Payout LNKUSD: 15%
+[2026-10-19 21:16:23] Payout LTCUSD_otc: 33%
+[2026-10-19 21:16:23] Payout MADUSD_otc: 67%
+[2026-10-19 21:16:23] Payout MARA_otc: 92%
+[2026-10-19 21:16:23] Payout MATIC_otc: 92%
+[2026-10-19 21:16:23] Payout NASUSD: 45%
+[2026-10-19 21:16:23] Payout NASUSD_otc: 45%
+[2026-10-19 21:16:23] Payout NFLX: 50%
+[2026-10-19 21:16:23] Payout NFLX_otc: 83%
+[2026-10-19 21:16:23] Payout NGNUSD_otc: 89%
+[2026-10-19 21:16:23] Payout NZDJPY_otc: 43%
+[2026-10-19 21:16:23] Payout NZDUSD_otc: 75%
+[2026-10-19 21:16:23] Payout OMRCNY_otc: 92%
+[2026-10-19 21:16:23] Payout PLTR_otc: 83%
+[2026-10-19 21:16:23] Payout QARCNY_otc: 92%
+[2026-10-19 21:16:23] Payout SARCNY_otc: 54%
+[2026-10-19 21:16:23] Payout SMI20: 45%
+[2026-10-19 21:16:23] Payout SOL-USD_otc: 92%
+[2026-10-19 21:16:23] Payout SP500: 45%
+[2026-10-19 21:16:23] Payout SP500_otc: 45%
+[2026-10-19 21:16:23] Payout SYPUSD_otc: 80%
+[2026-10-19 21:16:23] Payout TNDUSD_otc: 92%
+[2026-10-19 21:16:23] Payout TON-USD_otc: 66%
+[2026-10-19 21:16:23] Payout TRX-USD_otc: 92%
+[2026-10-19 21:16:23] Payout UAHUSD_otc: 79%
+[2026-10-19 21:16:23] Payout UKBrent: 50%
+[2026-10-19 21:16:23] Payout UKBrent_otc: 80%
+[2026-10-19 21:16:23] Payout USCrude: 50%
+[2026-10-19 21:16:23] Payout USCrude_otc: 80%
+[2026-10-19 21:16:23] Payout USDARS_otc: 83%
+[2026-10-19 21:16:23] Payout USDBDT_otc: 36%
+[2026-10-19 21:16:23] Payout USDBRL_otc: 92%
+[2026-10-19 21:16:23] Payout USDCAD: 54%
+[2026-10-19 21:16:23] Payout USDCAD_otc: 77%
+[2026-10-19 21:16:23] Payout USDCHF: 50%
+[2026-10-19 21:16:23] Payout USDCHF_otc: 32%
+[2026-10-19 21:16:23] Payout USDCLP_otc: 64%
+[2026-10-19 21:16:23] Payout USDCNH_otc: 69%
+[2026-10-19 21:16:23] Payout USDCOP_otc: 87%
+[2026-10-19 21:16:23] Payout USDDZD_otc: 86%
+[2026-10-19 21:16:23] Payout USDEGP_otc: 74%
+[2026-10-19 21:16:23] Payout USDIDR_otc: 72%
+[2026-10-19 21:16:23] Payout USDINR_otc: 92%
+[2026-10-19 21:16:23] Payout USDJPY: 70%
+[2026-10-19 21:16:23] Payout USDJPY_otc: 92%
+[2026-10-19 21:16:23] Payout USDMXN_otc: 53%
+[2026-10-19 21:16:23] Payout USDMYR_otc: 50%
+[2026-10-19 21:16:23] Payout USDPHP_otc: 34%
+[2026-10-19 21:16:23] Payout USDPKR_otc: 76%
+[2026-10-19 21:16:23] Payout USDRUB_otc: 73%
+[2026-10-19 21:16:23] Payout USDSGD_otc: 86%
+[2026-10-19 21:16:23] Payout USDTHB_otc: 59%
+[2026-10-19 21:16:23] Payout USDVND_otc: 44%
+[2026-10-19 21:16:23] Payout VISA_otc: 92%
+[2026-10-19 21:16:23] Payout VIX_otc: 70%
+[2026-10-19 21:16:23] Payout XAGEUR: 50%
+[2026-10-19 21:16:23] Payout XAGUSD: 50%
+[2026-10-19 21:16:23] Payout XAGUSD_otc: 80%
+[2026-10-19 21:16:23] Payout XAUEUR: 50%
+[2026-10-19 21:16:23] Payout XAUUSD: 50%
+[2026-10-19 21:16:23] Payout XAUUSD_otc: 80%
+[2026-10-19 21:16:23] Payout XNGUSD: 45%
+[2026-10-19 21:16:23] Payout XNGUSD_otc: 45%
+[2026-10-19 21:16:24] Payout XPDUSD: 45%
+[2026-10-19 21:16:24] Payout XPDUSD_otc: 45%
+[2026-10-19 21:16:24] Payout XPTUSD: 45%
+[2026-10-19 21:16:24] Payout XPTUSD_otc: 45%
+[2026-10-19 21:16:24] Payout YERUSD_otc: 66%
+[2026-10-19 21:16:24] Payout ZARUSD_otc: 52%
+[2026-10-19 21:16:24] Evento recebido: successauth",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: updateOpenedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-19 21:16:24] Evento recebido: successupdateBalance",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: updateCharts",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: updateCharts",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-19 21:16:24] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-19 21:16:24] Evento recebido: successupdatePending",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: successupdatePending",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-19 21:16:24] Evento recebido: successupdatePending",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-19 21:16:24] Evento recebido: successupdatePending",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>

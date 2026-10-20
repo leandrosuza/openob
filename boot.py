@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 def reset_logs():
-    """Criar pasta logs/ e arquivos se não existirem, resetar apenas em modo DEBUG"""
+    """Gerenciar pasta logs/ conforme LOG_LEVEL"""
     logs_dir = "logs"
     ws_dir = os.path.join(logs_dir, "ws")
 
@@ -31,27 +31,20 @@ def reset_logs():
     ]
 
     try:
-        # Em modo DEBUG, resetar completamente
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            if os.path.exists(logs_dir):
-                shutil.rmtree(logs_dir)
-                logger.info("Pasta logs/ removida")
-
+            # Em modo DEBUG, criar arquivos de log
             os.makedirs(ws_dir, exist_ok=True)
 
             for log_file in log_files:
                 with open(log_file, "w", encoding="utf-8") as f:
                     pass
 
-            logger.info("Arquivos de log recriados")
+            logger.info("Arquivos de log criados (modo DEBUG)")
         else:
-            # Em outros níveis, apenas garantir que os arquivos existem
-            os.makedirs(ws_dir, exist_ok=True)
-            for log_file in log_files:
-                if not os.path.exists(log_file):
-                    with open(log_file, "w", encoding="utf-8") as f:
-                        pass
-            logger.info("Logs não resetados (não está em modo DEBUG)")
+            # Em outros níveis, apagar todo o conteúdo da pasta logs/
+            if os.path.exists(logs_dir):
+                shutil.rmtree(logs_dir)
+                logger.info("Pasta logs/ removida (não está em modo DEBUG)")
 
     except Exception as e:
         logger.error(f"Erro ao configurar logs: {e}")
@@ -67,9 +60,9 @@ async def main():
 
     reset_logs()
     if Settings.LOG_LEVEL.upper() == "DEBUG":
-        print("Logs resetados (modo DEBUG)")
+        print("Logs ativados (modo DEBUG)")
     else:
-        print(f"Logs mantidos (modo {Settings.LOG_LEVEL.upper()})")
+        print(f"Logs desativados (modo {Settings.LOG_LEVEL.upper()})")
 
     monitor = None
 
