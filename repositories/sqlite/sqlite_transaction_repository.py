@@ -14,6 +14,9 @@ from core.logger import get_logger, LoggerConfig
 logger = get_logger(__name__)
 database_logger = LoggerConfig.get_database_logger()
 
+# Lock global compartilhado entre todos os repositórios SQLite para evitar deadlocks
+GLOBAL_DB_LOCK = threading.Lock()
+
 
 class SQLiteTransactionRepository(TransactionRepositoryInterface):
     """Repositório SQLite - Implementação com asyncio.to_thread()"""
@@ -27,7 +30,7 @@ class SQLiteTransactionRepository(TransactionRepositoryInterface):
 
     def _initialize_db_sync(self):
         """Setup inicial do banco (síncrono)"""
-        with self._lock:
+        with GLOBAL_DB_LOCK:
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
