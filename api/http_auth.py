@@ -1,4 +1,18 @@
-"""Router de autenticação"""
+"""Router de autenticação HTTP com JWT
+
+Este módulo implementa endpoints de autenticação HTTP para usuários,
+usando JWT e refresh tokens em cookies HttpOnly.
+
+Separado de api/auth.py que é autenticação WebSocket com PocketOption.
+
+Endpoints:
+- POST /api/auth/register - Registro de usuário
+- POST /api/auth/login - Login (retorna access token + refresh token em cookie)
+- POST /api/auth/refresh - Renovar access token com refresh token
+- GET /api/auth/me - Obter usuário atual
+- POST /api/auth/change-password - Trocar senha
+- POST /api/auth/logout - Logout
+"""
 
 from fastapi import APIRouter, HTTPException, status, Depends, Response, Cookie, Request
 from fastapi.security import OAuth2PasswordRequestForm

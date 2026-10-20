@@ -1,11 +1,20 @@
-"""API FastAPI principal para OpenOB"""
+"""API FastAPI principal para OpenOB (HTTP REST)
+
+Este módulo implementa a API HTTP REST para autenticação de usuários,
+separada da comunicação WebSocket com PocketOption (api/auth.py).
+
+Sistemas separados:
+- api/http_auth.py: Autenticação HTTP com JWT (usuários, login, refresh tokens)
+- api/auth.py: Autenticação WebSocket com PocketOption (SSID)
+- boot.py: Monitoramento WebSocket PocketOption (payout, ticks)
+"""
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from core.logger import get_logger
-from api.auth_router import router as auth_router
+from api.http_auth import router as auth_router
 
 
 logger = get_logger(__name__)
