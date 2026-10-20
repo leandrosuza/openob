@@ -30,8 +30,13 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_ssid(self, ssid: str) -> Optional[User]:
-        """Obter usuário por SSID"""
+    async def get_by_ssid_demo(self, ssid_demo: str) -> Optional[User]:
+        """Obter usuário por SSID Demo"""
+        pass
+
+    @abstractmethod
+    async def get_by_ssid_real(self, ssid_real: str) -> Optional[User]:
+        """Obter usuário por SSID Real"""
         pass
 
     @abstractmethod

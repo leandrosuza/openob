@@ -1,2 +1,2 @@
-[2026-10-19 21:16:23] Ativos: Conectado com sucesso
-[2026-10-19 21:16:23] Payout: Conectado com sucesso
+[2026-10-19 22:25:11] Payout: Conectado com sucesso
+[2026-10-19 22:25:12] Ativos: Conectado com sucesso

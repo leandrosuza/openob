@@ -42,7 +42,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL UNIQUE,
-                ssid TEXT NOT NULL UNIQUE,
+                ssid_demo TEXT NOT NULL UNIQUE,
+                ssid_real TEXT UNIQUE,
                 plan_id INTEGER,
                 is_active BOOLEAN DEFAULT 1,
                 balance REAL DEFAULT 0.0,
@@ -53,7 +54,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
 
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_username ON users(username)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_email ON users(email)")
-            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ssid ON users(ssid)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ssid_demo ON users(ssid_demo)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ssid_real ON users(ssid_real)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_plan_id ON users(plan_id)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_is_active ON users(is_active)")
 
@@ -66,12 +68,13 @@ class SQLiteUserRepository(UserRepositoryInterface):
             id=row[0],
             username=row[1],
             email=row[2],
-            ssid=row[3],
-            plan_id=row[4],
-            is_active=bool(row[5]),
-            balance=row[6],
-            created_at=datetime.fromisoformat(row[7]) if row[7] else None,
-            updated_at=datetime.fromisoformat(row[8]) if row[8] else None
+            ssid_demo=row[3],
+            ssid_real=row[4],
+            plan_id=row[5],
+            is_active=bool(row[6]),
+            balance=row[7],
+            created_at=datetime.fromisoformat(row[8]) if row[8] else None,
+            updated_at=datetime.fromisoformat(row[9]) if row[9] else None
         )
 
     async def create(self, user: User) -> User:
@@ -86,8 +89,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
         """Criar usuário (síncrono)"""
         with self._lock:
             cursor = self.conn.execute(
-                "INSERT INTO users (username, email, ssid, plan_id, is_active, balance) VALUES (?, ?, ?, ?, ?, ?)",
-                (user.username, user.email, user.ssid, user.plan_id, user.is_active, user.balance)
+                "INSERT INTO users (username, email, ssid_demo, ssid_real, plan_id, is_active, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (user.username, user.email, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance)
             )
             self.conn.commit()
 
@@ -147,19 +150,36 @@ class SQLiteUserRepository(UserRepositoryInterface):
             row = cursor.fetchone()
             return self._user_from_row(row) if row else None
 
-    async def get_by_ssid(self, ssid: str) -> Optional[User]:
-        """Obter usuário por SSID"""
+    async def get_by_ssid_demo(self, ssid_demo: str) -> Optional[User]:
+        """Obter usuário por SSID Demo"""
         try:
-            return await asyncio.to_thread(self._get_by_ssid_sync, ssid)
+            return await asyncio.to_thread(self._get_by_ssid_demo_sync, ssid_demo)
         except Exception as e:
-            logger.error(f"Erro ao buscar usuário por SSID: {e}")
+            logger.error(f"Erro ao buscar usuário por SSID Demo: {e}")
             raise DatabaseError(f"Falha ao buscar usuário: {e}")
 
-    def _get_by_ssid_sync(self, ssid: str) -> Optional[User]:
-        """Obter usuário por SSID (síncrono)"""
+    def _get_by_ssid_demo_sync(self, ssid_demo: str) -> Optional[User]:
+        """Obter usuário por SSID Demo (síncrono)"""
         with self._lock:
             cursor = self.conn.execute(
-                "SELECT * FROM users WHERE ssid = ?", (ssid,)
+                "SELECT * FROM users WHERE ssid_demo = ?", (ssid_demo,)
+            )
+            row = cursor.fetchone()
+            return self._user_from_row(row) if row else None
+
+    async def get_by_ssid_real(self, ssid_real: str) -> Optional[User]:
+        """Obter usuário por SSID Real"""
+        try:
+            return await asyncio.to_thread(self._get_by_ssid_real_sync, ssid_real)
+        except Exception as e:
+            logger.error(f"Erro ao buscar usuário por SSID Real: {e}")
+            raise DatabaseError(f"Falha ao buscar usuário: {e}")
+
+    def _get_by_ssid_real_sync(self, ssid_real: str) -> Optional[User]:
+        """Obter usuário por SSID Real (síncrono)"""
+        with self._lock:
+            cursor = self.conn.execute(
+                "SELECT * FROM users WHERE ssid_real = ?", (ssid_real,)
             )
             row = cursor.fetchone()
             return self._user_from_row(row) if row else None
@@ -179,13 +199,14 @@ class SQLiteUserRepository(UserRepositoryInterface):
                 """UPDATE users SET 
                    username = ?, 
                    email = ?, 
-                   ssid = ?, 
+                   ssid_demo = ?, 
+                   ssid_real = ?, 
                    plan_id = ?, 
                    is_active = ?, 
                    balance = ?, 
                    updated_at = CURRENT_TIMESTAMP 
                    WHERE id = ?""",
-                (user.username, user.email, user.ssid, user.plan_id, user.is_active, user.balance, user.id)
+                (user.username, user.email, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance, user.id)
             )
             self.conn.commit()
             cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user.id,))
