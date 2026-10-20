@@ -174,8 +174,24 @@ def start_api():
 
 
 
+async def init_database():
+    """Inicializar banco de dados e criar planos padrão"""
+    from repositories.repository_factory import RepositoryFactory
+
+    config = Settings.to_dict()
+    db_type = config.get("DATABASE_TYPE", "sqlite")
+
+    # Inicializar plan repository (cria tabela e planos padrão)
+    plan_repo = RepositoryFactory.create_plan_repository(config)
+    await plan_repo._initialize_db()
+    logger.info("Banco de dados inicializado com sucesso")
+
+
 async def main():
     """Função principal - decide entre monitoramento ou API"""
+    # Inicializar banco de dados antes de tudo
+    await init_database()
+
     # Verificar argumentos
     mode = sys.argv[1] if len(sys.argv) > 1 else "monitor"
 
