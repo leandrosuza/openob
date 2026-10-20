@@ -67,9 +67,6 @@ class SubscriptionManager:
                 subscription_logger.info(f"Subscription {sub.id} marcada para renovação automática: user={sub.user_id}")
                 renew_count += 1
             
-            await subscription_repo.close()
-            await user_repo.close()
-            
             logger.info(f"Verificação concluída: verificados={total_verified}, grace_period={grace_count}, expirados={expired_count}, auto_renew={renew_count}")
             
         except Exception as e:
@@ -112,9 +109,6 @@ class SubscriptionManager:
                           current_subscription_id=None, plan_expires_at=None, id=sub.user_id)
                 )
                 subscription_logger.warning(f"Subscription {sub.id} expirou no startup: user={sub.user_id} voltou para FREE")
-            
-            await subscription_repo.close()
-            await user_repo.close()
             
             logger.info(f"Verificação no startup concluída: grace_period={len(expired_subs)}, expirados={len(grace_subs)}")
             

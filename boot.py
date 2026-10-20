@@ -64,7 +64,7 @@ def check_dependencies():
             print("Execute manualmente: python depen.py")
             sys.exit(1)
     else:
-        print("✅ Todas as dependências estão instaladas.")
+        print("[OK] Todas as dependencias estao instaladas.")
 
 
 check_dependencies()
