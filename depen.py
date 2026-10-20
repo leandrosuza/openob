@@ -32,6 +32,8 @@ def install_from_pyproject(dev: bool = False, upgrade: bool = False):
         "slowapi>=0.1.9",
         "pydantic-settings>=2.0.0",
         "aiosqlite>=0.19.0",
+        "asyncpg>=0.29.0",  # PostgreSQL async driver
+        "psycopg2-binary>=2.9.0",  # PostgreSQL sync driver
     ]
 
     if dev:
@@ -49,21 +51,21 @@ def install_from_pyproject(dev: bool = False, upgrade: bool = False):
         cmd.append("--upgrade")
     cmd.extend(packages)
 
-    print(f"\n📦 Instalando: {len(packages)} pacotes")
+    print(f"\nInstalando: {len(packages)} pacotes")
     if upgrade:
         print("   (modo upgrade)")
 
     try:
         subprocess.check_call(cmd)
         print("\n" + "="*60)
-        print("✅ Instalação concluída com sucesso!")
+        print("Instalacao concluida com sucesso!")
         print("="*60)
         print("\nPara usar o projeto:")
         print("  python boot.py          # Monitoramento WebSocket")
         print("  python boot.py api      # Servidor API HTTP")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Erro ao instalar dependências: {e}")
+        print(f"\nErro ao instalar dependencias: {e}")
         return False
 
 
@@ -74,7 +76,7 @@ def main():
 
     # Verificar se pyproject.toml existe
     if not os.path.exists("pyproject.toml"):
-        print("❌ pyproject.toml não encontrado no diretório atual")
+        print("pyproject.toml nao encontrado no diretorio atual")
         print("Execute este script na raiz do projeto")
         sys.exit(1)
 

@@ -14,6 +14,11 @@ class Settings:
     # Database
     DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite")
     SQLITE_PATH = os.getenv("SQLITE_PATH", "data/openob.db")
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+    POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
+    POSTGRES_DB = os.getenv("POSTGRES_DB", "openob")
+    POSTGRES_USER = os.getenv("POSTGRES_USER", "openob_user")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
 
     # Monitor
     MONITOR_TOP_ASSETS = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
@@ -75,6 +80,11 @@ class Settings:
         return {
             "DATABASE_TYPE": cls.DATABASE_TYPE,
             "SQLITE_PATH": cls.SQLITE_PATH,
+            "POSTGRES_HOST": cls.POSTGRES_HOST,
+            "POSTGRES_PORT": cls.POSTGRES_PORT,
+            "POSTGRES_DB": cls.POSTGRES_DB,
+            "POSTGRES_USER": cls.POSTGRES_USER,
+            "POSTGRES_PASSWORD": cls.POSTGRES_PASSWORD,
             "MONITOR_TOP_ASSETS": cls.MONITOR_TOP_ASSETS,
             "MONITOR_PAYOUT_INTERVAL": cls.MONITOR_PAYOUT_INTERVAL,
             "MONITOR_ASSETS_UPDATE_INTERVAL": cls.MONITOR_ASSETS_UPDATE_INTERVAL,
@@ -122,8 +132,18 @@ class Settings:
         if not cls.CORS_ORIGINS:
             errors.append("CORS_ORIGINS não definido")
 
-        if cls.DATABASE_TYPE not in ["sqlite"]:
+        if cls.DATABASE_TYPE not in ["sqlite", "postgresql"]:
             errors.append(f"DATABASE_TYPE inválido: {cls.DATABASE_TYPE}")
+
+        if cls.DATABASE_TYPE == "postgresql":
+            if not cls.POSTGRES_HOST:
+                errors.append("POSTGRES_HOST não definido")
+            if not cls.POSTGRES_DB:
+                errors.append("POSTGRES_DB não definido")
+            if not cls.POSTGRES_USER:
+                errors.append("POSTGRES_USER não definido")
+            if not cls.POSTGRES_PASSWORD:
+                errors.append("POSTGRES_PASSWORD não definido")
 
         if cls.MONITOR_TOP_ASSETS < 1 or cls.MONITOR_TOP_ASSETS > 50:
             errors.append(f"MONITOR_TOP_ASSETS deve estar entre 1 e 50")

@@ -180,11 +180,14 @@ async def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "monitor"
 
     if mode == "api":
-        # Modo API
+        # Modo API - inicializar subscriptions
+        subscription_manager = SubscriptionManager()
+        await subscription_manager.check_expired_on_startup()
+        asyncio.create_task(subscription_manager.expiration_check_loop())
         start_api()
         return
 
-    # Modo monitoramento (padrão)
+    # Modo monitoramento (padrão) - inicializar subscriptions também
     print("="*60)
     print("OpenOB - Iniciando Monitoramento")
     print("="*60)
@@ -240,7 +243,7 @@ async def main():
                 await subscription_manager.stop()
             except Exception as e:
                 logger.error(f"Erro ao parar subscription manager: {e}")
-        
+
         if monitor:
             try:
                 await monitor.stop()
