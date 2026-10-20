@@ -262,12 +262,15 @@ class MonitorAPI:
             raise
 
 
-    async def start_payout_monitoring(self, payout_interval: int = 5):
+    async def start_payout_monitoring(self, payout_interval: int = None):
         """Iniciar monitoramento de payout (reconexão periódica)
 
         Reconecta a cada payout_interval segundos para obter dados de payout
         atualizados. O servidor envia os dados de payout na conexão inicial.
         """
+        if payout_interval is None:
+            payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
+
         self.payout_running = True
         logger.info("Payout monitoring: iniciado")
         logger.info(f"Reconectando a cada {payout_interval}s para obter payout atualizado")
@@ -299,13 +302,17 @@ class MonitorAPI:
                 await asyncio.sleep(payout_interval)
 
 
-    async def start_actives_monitoring(self, update_interval: int = 30):
+    async def start_actives_monitoring(self, update_interval: int = None):
         """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica
 
         Este monitor usa os dados de payout atualizados pelo monitor de payout
         para escolher dinamicamente os melhores ativos para monitorar.
         """
+        if update_interval is None:
+            update_interval = Settings.MONITOR_ASSETS_UPDATE_INTERVAL
+
         self.actives_running = True
+        logger.info(f"Ativos monitoring: iniciado (atualização a cada {update_interval}s)")
 
         while self.actives_running:
             try:
@@ -326,6 +333,7 @@ class MonitorAPI:
                     # Os dados de payout são atualizados pelo monitor de payout
                     await self.update_monitored_assets()
 
+                logger.debug(f"Ativos monitoring: aguardando {update_interval}s antes da próxima atualização")
                 await asyncio.sleep(update_interval)
 
             except Exception as e:

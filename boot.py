@@ -89,7 +89,9 @@ async def main():
     try:
         monitor = MonitorAPI()
 
-        await monitor.start(payout_interval=5, update_interval=30)
+        payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
+        update_interval = Settings.MONITOR_ASSETS_UPDATE_INTERVAL
+        await monitor.start(payout_interval=payout_interval, update_interval=update_interval)
 
         print("\n" + "="*60)
         print("Sistema Online - Mantendo conexão")
