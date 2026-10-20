@@ -2,9 +2,8 @@
 
 import asyncpg
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import List, Dict, Optional
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
-from models.tick import Tick
 from core.logger import get_logger
 
 logger = get_logger(__name__)
@@ -66,20 +65,20 @@ class PostgresTickRepository(TickRepositoryInterface):
 
         self._initialized = True
 
-    async def add_tick(self, tick: Tick) -> Tick:
-        """Adicionar tick"""
+    async def save(self, asset: str, price: float, payout: Optional[float] = None, timestamp: Optional[datetime] = None) -> int:
+        """Salvar tick e retornar ID"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
                 """INSERT INTO ticks (asset, price, payout, timestamp)
-                VALUES ($1, $2, $3, $4) RETURNING *""",
-                tick.asset, tick.price, tick.payout, tick.timestamp
+                VALUES ($1, $2, $3, COALESCE($4, NOW())) RETURNING id""",
+                asset, price, payout, timestamp
             )
-            return self._tick_from_row(row)
+            return row['id']
 
-    async def get_ticks_by_asset(self, asset: str, limit: int = 100) -> List[Tick]:
-        """Obter ticks por asset"""
+    async def get_recent(self, asset: str, limit: int = 100) -> List[Dict]:
+        """Obter ticks recentes de um ativo"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
@@ -88,21 +87,34 @@ class PostgresTickRepository(TickRepositoryInterface):
                 ORDER BY timestamp DESC LIMIT $2""",
                 asset, limit
             )
-            return [self._tick_from_row(row) for row in rows]
+            return [dict(row) for row in rows]
 
-    async def get_latest_ticks(self, limit: int = 100) -> List[Tick]:
-        """Obter últimos ticks"""
+    async def get_by_sequence(self, asset: str, start: int, end: int) -> List[Dict]:
+        """Obter ticks por range de ID"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             rows = await conn.fetch(
-                """SELECT * FROM ticks ORDER BY timestamp DESC LIMIT $1""",
-                limit
+                """SELECT * FROM ticks WHERE asset = $1 AND id >= $2 AND id <= $3
+                ORDER BY id""",
+                asset, start, end
             )
-            return [self._tick_from_row(row) for row in rows]
+            return [dict(row) for row in rows]
 
-    async def reset_ticks(self):
-        """Resetar tabela ticks"""
+    async def get_stats(self) -> Dict:
+        """Obter estatísticas do banco"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            total_ticks = await conn.fetchval("SELECT COUNT(*) FROM ticks")
+            assets_count = await conn.fetchval("SELECT COUNT(DISTINCT asset) FROM ticks")
+            return {
+                "total_ticks": total_ticks,
+                "assets_count": assets_count
+            }
+
+    async def reset_all(self):
+        """Resetar todos os dados da tabela ticks"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
@@ -156,18 +168,6 @@ class PostgresTickRepository(TickRepositoryInterface):
                 }
                 for row in rows
             ]
-
-    def _tick_from_row(self, row) -> Tick:
-        """Converter row do banco para objeto Tick"""
-        if not row:
-            return None
-        return Tick(
-            id=row['id'],
-            asset=row['asset'],
-            price=float(row['price']),
-            payout=float(row['payout']) if row['payout'] else None,
-            timestamp=row['timestamp']
-        )
 
     async def close(self):
         """Fechar pool de conexões"""

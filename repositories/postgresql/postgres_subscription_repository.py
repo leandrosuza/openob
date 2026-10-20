@@ -146,42 +146,100 @@ class PostgresSubscriptionRepository(SubscriptionRepositoryInterface):
             )
             return [self._subscription_from_row(row) for row in rows]
 
-    async def update_status(self, subscription_id: int, status: str) -> Subscription:
+    async def get_history(self, user_id: int, limit: int = 100, offset: int = 0) -> List[Subscription]:
+        """Obter histórico de subscriptions do usuário"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """SELECT * FROM subscriptions WHERE user_id = $1
+                ORDER BY created_at DESC LIMIT $2 OFFSET $3""",
+                user_id, limit, offset
+            )
+            return [self._subscription_from_row(row) for row in rows]
+
+    async def get_by_status(self, status: str) -> List[Subscription]:
+        """Obter subscriptions por status"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT * FROM subscriptions WHERE status = $1 ORDER BY created_at DESC",
+                status
+            )
+            return [self._subscription_from_row(row) for row in rows]
+
+    async def update(self, subscription: Subscription) -> Subscription:
+        """Atualizar subscription"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """UPDATE subscriptions SET user_id = $1, plan_id = $2, start_date = $3,
+                end_date = $4, status = $5, payment_method = $6, payment_id = $7,
+                auto_renew = $8, cancelled_at = $9, expired_at = $10 WHERE id = $11 RETURNING *""",
+                subscription.user_id, subscription.plan_id, subscription.start_date,
+                subscription.end_date, subscription.status, subscription.payment_method,
+                subscription.payment_id, subscription.auto_renew, subscription.cancelled_at,
+                subscription.expired_at, subscription.id
+            )
+            database_logger.info(f"Subscription atualizada: id={subscription.id}")
+            return self._subscription_from_row(row)
+
+    async def update_status(self, subscription_id: int, status: str) -> bool:
         """Atualizar status da subscription"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
-            row = await conn.fetchrow(
-                "UPDATE subscriptions SET status = $1 WHERE id = $2 RETURNING *",
+            result = await conn.execute(
+                "UPDATE subscriptions SET status = $1 WHERE id = $2",
                 status, subscription_id
             )
             database_logger.warning(f"Subscription status atualizado: id={subscription_id}, status={status}")
-            return self._subscription_from_row(row)
+            return result == "UPDATE 1"
 
-    async def expire_subscription(self, subscription_id: int) -> Subscription:
-        """Expirar subscription (marcar como expired, NÃO deletar)"""
-        await self._initialize_db()
-        pool = await self._get_pool()
-        async with pool.acquire() as conn:
-            row = await conn.fetchrow(
-                """UPDATE subscriptions SET status = 'expired', expired_at = NOW()
-                WHERE id = $1 RETURNING *""",
-                subscription_id
-            )
-            database_logger.warning(f"Subscription expirada: id={subscription_id}")
-            return self._subscription_from_row(row)
-
-    async def cancel_subscription(self, subscription_id: int) -> Subscription:
+    async def cancel(self, subscription_id: int) -> bool:
         """Cancelar subscription"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
-            row = await conn.fetchrow(
+            result = await conn.execute(
                 """UPDATE subscriptions SET status = 'cancelled', cancelled_at = NOW()
-                WHERE id = $1 RETURNING *""",
+                WHERE id = $1""",
                 subscription_id
             )
             database_logger.warning(f"Subscription cancelada: id={subscription_id}")
+            return result == "UPDATE 1"
+
+    async def expire_subscription(self, subscription_id: int) -> bool:
+        """Expirar subscription (marcar como expired, NÃO deletar)"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            result = await conn.execute(
+                """UPDATE subscriptions SET status = 'expired', expired_at = NOW()
+                WHERE id = $1""",
+                subscription_id
+            )
+            database_logger.warning(f"Subscription expirada: id={subscription_id}")
+            return result == "UPDATE 1"
+
+    async def create_for_user(self, user_id: int, plan_id: int, start_date, end_date,
+                            payment_method: Optional[str] = None,
+                            payment_id: Optional[str] = None,
+                            auto_renew: bool = False) -> Subscription:
+        """Criar subscription para um usuário"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """INSERT INTO subscriptions (user_id, plan_id, start_date, end_date,
+                payment_method, payment_id, auto_renew)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING *""",
+                user_id, plan_id, start_date, end_date, payment_method, payment_id, auto_renew
+            )
+            database_logger.info(f"Subscription criada para user: id={row['id']}, user_id={user_id}")
             return self._subscription_from_row(row)
 
     def _subscription_from_row(self, row) -> Subscription:
