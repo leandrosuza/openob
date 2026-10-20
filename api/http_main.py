@@ -11,7 +11,6 @@ Sistemas separados:
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from core.logger import get_logger
 from api.http_auth import router as auth_router
@@ -76,8 +75,3 @@ async def root():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
