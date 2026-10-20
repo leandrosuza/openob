@@ -40,6 +40,16 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
+    async def verify_password(self, username: str, password: str) -> bool:
+        """Verificar senha do usuário"""
+        pass
+
+    @abstractmethod
+    async def update_password(self, user_id: int, new_password: str) -> bool:
+        """Atualizar senha do usuário"""
+        pass
+
+    @abstractmethod
     async def update(self, user: User) -> User:
         """Atualizar usuário"""
         pass

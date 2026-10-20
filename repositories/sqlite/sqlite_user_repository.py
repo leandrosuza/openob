@@ -198,6 +198,44 @@ class SQLiteUserRepository(UserRepositoryInterface):
             row = cursor.fetchone()
             return self._user_from_row(row) if row else None
 
+    async def verify_password(self, username: str, password: str) -> bool:
+        """Verificar senha do usuário"""
+        try:
+            return await asyncio.to_thread(self._verify_password_sync, username, password)
+        except Exception as e:
+            logger.error(f"Erro ao verificar senha: {e}")
+            raise DatabaseError(f"Falha ao verificar senha: {e}")
+
+    def _verify_password_sync(self, username: str, password: str) -> bool:
+        """Verificar senha (síncrono)"""
+        with self._lock:
+            cursor = self.conn.execute(
+                "SELECT password_hash FROM users WHERE username = ?", (username,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                return False
+            return SQLiteUserRepository.verify_password(password, row[0])
+
+    async def update_password(self, user_id: int, new_password: str) -> bool:
+        """Atualizar senha do usuário"""
+        try:
+            await asyncio.to_thread(self._update_password_sync, user_id, new_password)
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao atualizar senha: {e}")
+            raise DatabaseError(f"Falha ao atualizar senha: {e}")
+
+    def _update_password_sync(self, user_id: int, new_password: str):
+        """Atualizar senha (síncrono)"""
+        with self._lock:
+            password_hash = SQLiteUserRepository.hash_password(new_password)
+            self.conn.execute(
+                "UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (password_hash, user_id)
+            )
+            self.conn.commit()
+
     async def update(self, user: User) -> User:
         """Atualizar usuário"""
         try:
