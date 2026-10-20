@@ -112,16 +112,6 @@ def reset_logs():
     plans_dir = os.path.join(logs_dir, "plans")
     os.makedirs(plans_dir, exist_ok=True)
 
-    # Criar arquivos de subscription, payment e security
-    subscription_log = os.path.join(plans_dir, "subscriptions.txt")
-    payment_log = os.path.join(plans_dir, "payments.txt")
-    security_log = os.path.join(logs_dir, "security.txt")
-    
-    for log_file in [subscription_log, payment_log, security_log]:
-        if not os.path.exists(log_file):
-            with open(log_file, 'w') as f:
-                f.write("")  # Criar arquivo vazio
-
     log_files = [
         os.path.join(logs_dir, "error.txt"),
         os.path.join(logs_dir, "info.txt"),
@@ -130,6 +120,9 @@ def reset_logs():
         os.path.join(ws_dir, "connection.txt"),
         os.path.join(ws_dir, "monitoring_payout.txt"),
         os.path.join(ws_dir, "monitoring_actives.txt"),
+        os.path.join(plans_dir, "subscriptions.txt"),
+        os.path.join(plans_dir, "payments.txt"),
+        os.path.join(logs_dir, "security.txt"),
     ]
 
     try:
