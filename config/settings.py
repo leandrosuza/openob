@@ -21,6 +21,9 @@ class Settings:
     # PocketOption
     POCKETOPTION_MONITOR_SSID = os.getenv("POCKETOPTION_MONITOR_SSID")
 
+    # JWT
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
+
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
@@ -48,6 +51,7 @@ class Settings:
             "SQLITE_PATH": cls.SQLITE_PATH,
             "MONITOR_TOP_ASSETS": cls.MONITOR_TOP_ASSETS,
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
+            "JWT_SECRET_KEY": cls.JWT_SECRET_KEY,
             "LOG_LEVEL": cls.LOG_LEVEL,
         }
 
@@ -61,6 +65,9 @@ class Settings:
 
         if not cls.POCKETOPTION_MONITOR_SSID:
             errors.append("POCKETOPTION_MONITOR_SSID não definido")
+
+        if not cls.JWT_SECRET_KEY or cls.JWT_SECRET_KEY == "change-this-secret-key-in-production":
+            errors.append("JWT_SECRET_KEY não definido ou é valor padrão - MUDAR EM PRODUÇÃO")
 
         if cls.DATABASE_TYPE not in ["sqlite"]:
             errors.append(f"DATABASE_TYPE inválido: {cls.DATABASE_TYPE}")

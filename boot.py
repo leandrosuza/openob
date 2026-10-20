@@ -11,6 +11,7 @@ from core.monitor import MonitorAPI
 from core.logger import get_logger, LoggerConfig
 from config.settings import Settings
 
+# Configurar logger
 LoggerConfig.setup(level=Settings.get_log_level())
 logger = get_logger(__name__)
 
@@ -57,6 +58,15 @@ async def main():
     print("="*60)
     print("OpenOB - Iniciando Ambiente")
     print("="*60)
+
+    # Validar configurações
+    errors = Settings.validate()
+    if errors:
+        print("ERROS DE CONFIGURAÇÃO:")
+        for error in errors:
+            print(f"  - {error}")
+        print("\nCorrija o arquivo .env antes de continuar")
+        sys.exit(1)
 
     reset_logs()
     if Settings.LOG_LEVEL.upper() == "DEBUG":
