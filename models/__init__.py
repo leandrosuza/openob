@@ -1,1 +1,1 @@
-__all__ = ["OrderDirection", "OrderStatus", "OrderResult", "Order", "Balance", "Candle"]
+__all__ = ["OrderDirection", "OrderStatus", "OrderResult", "Order", "Balance", "Candle", "User"]

@@ -14,6 +14,7 @@ class Settings:
     # Database
     DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite")
     SQLITE_PATH = os.getenv("SQLITE_PATH", "data/openob_ticks.db")
+    SQLITE_USERS_PATH = os.getenv("SQLITE_USERS_PATH", "data/openob_users.db")
 
     # Monitor
     MONITOR_TOP_ASSETS = int(os.getenv("MONITOR_TOP_ASSETS", "5"))
@@ -46,6 +47,7 @@ class Settings:
         return {
             "DATABASE_TYPE": cls.DATABASE_TYPE,
             "SQLITE_PATH": cls.SQLITE_PATH,
+            "SQLITE_USERS_PATH": cls.SQLITE_USERS_PATH,
             "MONITOR_TOP_ASSETS": cls.MONITOR_TOP_ASSETS,
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
             "LOG_LEVEL": cls.LOG_LEVEL,

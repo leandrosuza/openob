@@ -2,7 +2,9 @@
 
 from typing import Dict
 from repositories.interfaces.tick_repository_interface import TickRepositoryInterface
+from repositories.interfaces.user_repository_interface import UserRepositoryInterface
 from repositories.sqlite.sqlite_tick_repository import SQLiteTickRepository
+from repositories.sqlite.sqlite_user_repository import SQLiteUserRepository
 
 
 class RepositoryFactory:
@@ -16,13 +18,16 @@ class RepositoryFactory:
         if db_type == "sqlite":
             return SQLiteTickRepository(config.get("SQLITE_PATH", "data/openob_ticks.db"))
 
-        # Futuro:
-        # elif db_type == "redis":
-        #     from repositories.redis.redis_tick_repository import RedisTickRepository
-        #     return RedisTickRepository(config["REDIS_HOST"])
-        # elif db_type == "influxdb":
-        #     from repositories.influxdb.influx_tick_repository import InfluxTickRepository
-        #     return InfluxTickRepository(config["INFLUX_URL"], config["INFLUX_TOKEN"])
+        else:
+            raise ValueError(f"Database type not supported: {db_type}")
+
+    @staticmethod
+    def create_user_repository(config: Dict) -> UserRepositoryInterface:
+        """Criar repositório de usuários baseado em config"""
+        db_type = config.get("DATABASE_TYPE", "sqlite")
+
+        if db_type == "sqlite":
+            return SQLiteUserRepository(config.get("SQLITE_USERS_PATH", "data/openob_users.db"))
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
