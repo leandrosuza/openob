@@ -8,11 +8,11 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from repositories.interfaces.transaction_repository_interface import TransactionRepositoryInterface
 from models.transaction import Transaction
-from core.logger import get_logger
-from core.exceptions import DatabaseError
+from core.logger import get_logger, LoggerConfig
 
 
 logger = get_logger(__name__)
+database_logger = LoggerConfig.get_database_logger()
 
 
 class SQLiteTransactionRepository(TransactionRepositoryInterface):
@@ -62,6 +62,7 @@ class SQLiteTransactionRepository(TransactionRepositoryInterface):
 
             self.conn.commit()
             logger.info("Tabela transactions criada com sucesso")
+            database_logger.info("Tabela transactions criada")
 
     def _transaction_from_row(self, row: tuple) -> Transaction:
         """Converter row do banco para modelo Transaction"""

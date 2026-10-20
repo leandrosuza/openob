@@ -13,6 +13,7 @@ class LoggerConfig:
     _subscription_logger = None
     _payment_logger = None
     _security_logger = None
+    _database_logger = None
 
 
     @classmethod
@@ -128,6 +129,30 @@ class LoggerConfig:
         if not cls._security_logger:
             cls.setup_security_logger()
         return cls._security_logger
+
+    @classmethod
+    def setup_database_logger(cls, log_file: str = "logs/database.txt"):
+        """Configurar logger específico para database"""
+        if cls._database_logger:
+            return cls._database_logger
+
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        cls._database_logger = logging.getLogger("database")
+        cls._database_logger.setLevel(logging.INFO)
+        database_handler = logging.FileHandler(log_file)
+        database_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        cls._database_logger.addHandler(database_handler)
+
+        return cls._database_logger
+
+    @classmethod
+    def get_database_logger(cls) -> logging.Logger:
+        """Obter logger de database"""
+        if not cls._database_logger:
+            cls.setup_database_logger()
+        return cls._database_logger
 
 
 

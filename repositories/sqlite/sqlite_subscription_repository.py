@@ -8,11 +8,11 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from repositories.interfaces.subscription_repository_interface import SubscriptionRepositoryInterface
 from models.subscription import Subscription
-from core.logger import get_logger
-from core.exceptions import DatabaseError
+from core.logger import get_logger, LoggerConfig
 
 
 logger = get_logger(__name__)
+database_logger = LoggerConfig.get_database_logger()
 
 
 class SQLiteSubscriptionRepository(SubscriptionRepositoryInterface):
@@ -63,6 +63,7 @@ class SQLiteSubscriptionRepository(SubscriptionRepositoryInterface):
 
             self.conn.commit()
             logger.info("Tabela subscriptions criada com sucesso")
+            database_logger.info("Tabela subscriptions criada")
 
     def _subscription_from_row(self, row: tuple) -> Subscription:
         """Converter row do banco para modelo Subscription"""
@@ -105,6 +106,7 @@ class SQLiteSubscriptionRepository(SubscriptionRepositoryInterface):
             subscription_id = cursor.lastrowid
             cursor = self.conn.execute("SELECT * FROM subscriptions WHERE id = ?", (subscription_id,))
             row = cursor.fetchone()
+            database_logger.info(f"Subscription criada: id={subscription_id}, user_id={subscription.user_id}, plan_id={subscription.plan_id}")
             return self._subscription_from_row(row)
 
     async def get_by_id(self, subscription_id: int) -> Optional[Subscription]:
@@ -375,6 +377,7 @@ class SQLiteSubscriptionRepository(SubscriptionRepositoryInterface):
                 (datetime.now(timezone.utc).isoformat(), subscription_id)
             )
             self.conn.commit()
+            database_logger.warning(f"Subscription expirada: id={subscription_id}")
 
     async def create_for_user(self, user_id: int, plan_id: int, start_date, end_date, 
                             payment_method: Optional[str] = None, 

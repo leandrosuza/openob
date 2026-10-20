@@ -8,11 +8,11 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from repositories.interfaces.plan_repository_interface import PlanRepositoryInterface
 from models.plan import Plan
-from core.logger import get_logger
-from core.exceptions import DatabaseError
+from core.logger import get_logger, LoggerConfig
 
 
 logger = get_logger(__name__)
+database_logger = LoggerConfig.get_database_logger()
 
 
 class SQLitePlanRepository(PlanRepositoryInterface):
@@ -55,6 +55,7 @@ class SQLitePlanRepository(PlanRepositoryInterface):
 
             self.conn.commit()
             logger.info("Tabela plans criada com sucesso")
+            database_logger.info("Tabela plans criada")
 
             self._insert_default_plans()
 

@@ -9,11 +9,11 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from repositories.interfaces.user_repository_interface import UserRepositoryInterface
 from models.user import User
-from core.logger import get_logger
-from core.exceptions import DatabaseError
+from core.logger import get_logger, LoggerConfig
 
 
 logger = get_logger(__name__)
+database_logger = LoggerConfig.get_database_logger()
 
 
 class SQLiteUserRepository(UserRepositoryInterface):
@@ -66,6 +66,7 @@ class SQLiteUserRepository(UserRepositoryInterface):
 
             self.conn.commit()
             logger.info("Tabela users criada com sucesso")
+            database_logger.info("Tabela users criada")
 
             self._migrate_table()
 

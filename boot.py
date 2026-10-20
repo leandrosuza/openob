@@ -82,6 +82,7 @@ logger = get_logger(__name__)
 LoggerConfig.setup_subscription_logger()
 LoggerConfig.setup_payment_logger()
 LoggerConfig.setup_security_logger()
+LoggerConfig.setup_database_logger()
 
 
 def reset_logs():
@@ -101,7 +102,17 @@ def reset_logs():
         with open(auth_log, 'w') as f:
             f.write("")  # Criar arquivo vazio
 
-    # Criar arquivos de subscription, payment e security sempre
+    # Criar arquivo de database sempre
+    database_log = os.path.join(logs_dir, "database.txt")
+    if not os.path.exists(database_log):
+        with open(database_log, 'w') as f:
+            f.write("")  # Criar arquivo vazio
+
+    # Criar diretório e arquivos de plans
+    plans_dir = os.path.join(logs_dir, "plans")
+    os.makedirs(plans_dir, exist_ok=True)
+
+    # Criar arquivos de subscription, payment e security
     subscription_log = os.path.join(plans_dir, "subscriptions.txt")
     payment_log = os.path.join(plans_dir, "payments.txt")
     security_log = os.path.join(logs_dir, "security.txt")
