@@ -1,11 +1,73 @@
-"""Boot script - Inicia ambiente e mantém conexão payout + actives"""
+"""Boot script - Inicia ambiente (monitoramento ou API)
+
+Uso:
+    python boot.py              # Inicia monitoramento WebSocket (padrão)
+    python boot.py monitor      # Inicia monitoramento WebSocket
+    python boot.py api          # Inicia servidor API HTTP
+"""
 
 import sys
 import asyncio
 import os
 import shutil
+import subprocess
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+def check_dependencies():
+    """Verifica se as dependências estão instaladas"""
+    # Mapeamento: nome de importação -> nome do pacote pip
+    required_modules = {
+        "dotenv": "python-dotenv",
+        "fastapi": "fastapi",
+        "uvicorn": "uvicorn",
+        "websockets": "websockets",
+        "pydantic": "pydantic",
+        "jose": "python-jose",
+        "slowapi": "slowapi",
+        "passlib": "passlib",
+        "aiosqlite": "aiosqlite",
+    }
+
+    missing = []
+    for import_name, pip_name in required_modules.items():
+        try:
+            __import__(import_name)
+        except ImportError:
+            missing.append(pip_name)
+
+    if missing:
+        print("="*60)
+        print("⚠️  Dependências faltando:")
+        for module in missing:
+            print(f"  - {module}")
+        print("="*60)
+        print("\n📦 Instalando dependências automaticamente...")
+        print("="*60)
+
+        try:
+            result = subprocess.run([sys.executable, "depen.py"], capture_output=True, text=True)
+            print(result.stdout)
+            if result.returncode != 0:
+                print(result.stderr)
+                print("\n❌ Erro ao instalar dependências automaticamente")
+                print("Execute manualmente: python depen.py")
+                sys.exit(1)
+            
+            print("\n✅ Dependências instaladas com sucesso!")
+            print("🔄 Reiniciando...")
+            # Reiniciar o script com os mesmos argumentos
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as e:
+            print(f"\n❌ Erro ao instalar dependências: {e}")
+            print("Execute manualmente: python depen.py")
+            sys.exit(1)
+    else:
+        print("✅ Todas as dependências estão instaladas.")
+
+
+check_dependencies()
 
 from core.monitor import MonitorAPI
 from core.logger import get_logger, LoggerConfig
@@ -43,30 +105,59 @@ def reset_logs():
 
     try:
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            # Em modo DEBUG, criar arquivos de log
-            os.makedirs(ws_dir, exist_ok=True)
-
+            # Em modo DEBUG, criar/limpar arquivos de log
             for log_file in log_files:
                 with open(log_file, "w", encoding="utf-8") as f:
-                    pass
+                    pass  # Limpar arquivo
 
             logger.info("Arquivos de log criados (modo DEBUG)")
         else:
-            # Em outros níveis, apagar todo o conteúdo da pasta logs/
-            if os.path.exists(logs_dir):
-                shutil.rmtree(logs_dir)
-                logger.info("Pasta logs/ removida (não está em modo DEBUG)")
+            # Em outros níveis, manter apenas auth.txt
+            for log_file in log_files:
+                if os.path.exists(log_file):
+                    os.remove(log_file)
+            logger.info(f"Logs detalhados desativados (modo {Settings.LOG_LEVEL.upper()})")
 
     except Exception as e:
         logger.error(f"Erro ao configurar logs: {e}")
 
 
+def start_api():
+    """Iniciar servidor API HTTP"""
+    import uvicorn
+    from api.rest.main import app
+
+    print("=" * 60)
+    print("OpenOB API HTTP Server")
+    print("=" * 60)
+    print("Iniciando servidor em http://0.0.0.0:8000")
+    print("Documentação: http://localhost:8000/docs")
+    print("Pressione Ctrl+C para encerrar")
+    print("=" * 60)
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
+
+
 
 
 async def main():
-    """Função principal - conecta payout e actives, permanece online"""
+    """Função principal - decide entre monitoramento ou API"""
+    # Verificar argumentos
+    mode = sys.argv[1] if len(sys.argv) > 1 else "monitor"
+
+    if mode == "api":
+        # Modo API
+        start_api()
+        return
+
+    # Modo monitoramento (padrão)
     print("="*60)
-    print("OpenOB - Iniciando Ambiente")
+    print("OpenOB - Iniciando Monitoramento")
     print("="*60)
 
     # Validar configurações

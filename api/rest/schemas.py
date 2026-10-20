@@ -22,7 +22,7 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     """Modelo para resposta de token"""
     access_token: str
-    refresh_token: Optional[str] = None  # Opcional, pois principal está no cookie HttpOnly
+    refresh_token: str
     token_type: str = "bearer"
 
 

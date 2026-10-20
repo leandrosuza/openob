@@ -25,6 +25,11 @@ class Settings:
 
     # JWT
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
+    # CORS
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")
 
     # Rate Limiting
     RATE_LIMIT_REGISTER = os.getenv("RATE_LIMIT_REGISTER", "5/minute")
@@ -62,6 +67,9 @@ class Settings:
             "MONITOR_ASSETS_UPDATE_INTERVAL": cls.MONITOR_ASSETS_UPDATE_INTERVAL,
             "POCKETOPTION_MONITOR_SSID": cls.POCKETOPTION_MONITOR_SSID,
             "JWT_SECRET_KEY": cls.JWT_SECRET_KEY,
+            "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": cls.JWT_ACCESS_TOKEN_EXPIRE_MINUTES,
+            "JWT_REFRESH_TOKEN_EXPIRE_DAYS": cls.JWT_REFRESH_TOKEN_EXPIRE_DAYS,
+            "CORS_ORIGINS": cls.CORS_ORIGINS,
             "RATE_LIMIT_REGISTER": cls.RATE_LIMIT_REGISTER,
             "RATE_LIMIT_LOGIN": cls.RATE_LIMIT_LOGIN,
             "RATE_LIMIT_REFRESH": cls.RATE_LIMIT_REFRESH,
@@ -82,6 +90,15 @@ class Settings:
 
         if not cls.JWT_SECRET_KEY or cls.JWT_SECRET_KEY == "change-this-secret-key-in-production":
             errors.append("JWT_SECRET_KEY não definido ou é valor padrão - MUDAR EM PRODUÇÃO")
+
+        if cls.JWT_ACCESS_TOKEN_EXPIRE_MINUTES < 1 or cls.JWT_ACCESS_TOKEN_EXPIRE_MINUTES > 1440:
+            errors.append(f"JWT_ACCESS_TOKEN_EXPIRE_MINUTES deve estar entre 1 e 1440")
+
+        if cls.JWT_REFRESH_TOKEN_EXPIRE_DAYS < 1 or cls.JWT_REFRESH_TOKEN_EXPIRE_DAYS > 365:
+            errors.append(f"JWT_REFRESH_TOKEN_EXPIRE_DAYS deve estar entre 1 e 365")
+
+        if not cls.CORS_ORIGINS:
+            errors.append("CORS_ORIGINS não definido")
 
         if cls.DATABASE_TYPE not in ["sqlite"]:
             errors.append(f"DATABASE_TYPE inválido: {cls.DATABASE_TYPE}")

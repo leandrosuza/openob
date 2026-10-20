@@ -1,17 +1,17 @@
 """Configurações de segurança JWT"""
 
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from config.settings import Settings
 
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
+SECRET_KEY = Settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+ACCESS_TOKEN_EXPIRE_MINUTES = Settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS = Settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")

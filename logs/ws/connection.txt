@@ -1,2 +1,13 @@
-[2026-10-19 22:25:11] Payout: Conectado com sucesso
-[2026-10-19 22:25:12] Ativos: Conectado com sucesso
+[2026-10-20 18:47:06] Payout: Desconectado
+[2026-10-20 18:47:07] Ativos: Conectado com sucesso
+[2026-10-20 18:47:07] Payout: Reconectado com sucesso
+[2026-10-20 18:47:13] Payout: Desconectado
+[2026-10-20 18:47:14] Payout: Reconectado com sucesso
+[2026-10-20 18:47:19] Payout: Desconectado
+[2026-10-20 18:47:20] Payout: Reconectado com sucesso
+[2026-10-20 18:47:26] Payout: Desconectado
+[2026-10-20 18:47:27] Payout: Reconectado com sucesso
+[2026-10-20 18:47:33] Payout: Desconectado
+[2026-10-20 18:47:34] Payout: Reconectado com sucesso
+[2026-10-20 18:47:39] Payout: Desconectado
+[2026-10-20 18:47:40] Payout: Reconectado com sucesso
