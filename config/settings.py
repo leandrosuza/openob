@@ -36,6 +36,19 @@ class Settings:
     RATE_LIMIT_LOGIN = os.getenv("RATE_LIMIT_LOGIN", "10/minute")
     RATE_LIMIT_REFRESH = os.getenv("RATE_LIMIT_REFRESH", "20/minute")
     RATE_LIMIT_HEALTH = os.getenv("RATE_LIMIT_HEALTH", "100/minute")
+    RATE_LIMIT_SUBSCRIPTION = os.getenv("RATE_LIMIT_SUBSCRIPTION", "10/minute")
+    RATE_LIMIT_PAYMENT = os.getenv("RATE_LIMIT_PAYMENT", "5/minute")
+
+    # Subscription
+    PLAN_DAILY_PRICE = float(os.getenv("PLAN_DAILY_PRICE", "5.00"))
+    PLAN_WEEKLY_PRICE = float(os.getenv("PLAN_WEEKLY_PRICE", "25.00"))
+    PLAN_MONTHLY_PRICE = float(os.getenv("PLAN_MONTHLY_PRICE", "80.00"))
+    GRACE_PERIOD_DAYS = int(os.getenv("GRACE_PERIOD_DAYS", "3"))
+    SUBSCRIPTION_CHECK_INTERVAL_HOURS = int(os.getenv("SUBSCRIPTION_CHECK_INTERVAL_HOURS", "1"))
+
+    # Webhook
+    WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
+    WEBHOOK_TOLERANCE_SECONDS = int(os.getenv("WEBHOOK_TOLERANCE_SECONDS", "300"))
 
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
@@ -74,6 +87,15 @@ class Settings:
             "RATE_LIMIT_LOGIN": cls.RATE_LIMIT_LOGIN,
             "RATE_LIMIT_REFRESH": cls.RATE_LIMIT_REFRESH,
             "RATE_LIMIT_HEALTH": cls.RATE_LIMIT_HEALTH,
+            "RATE_LIMIT_SUBSCRIPTION": cls.RATE_LIMIT_SUBSCRIPTION,
+            "RATE_LIMIT_PAYMENT": cls.RATE_LIMIT_PAYMENT,
+            "PLAN_DAILY_PRICE": cls.PLAN_DAILY_PRICE,
+            "PLAN_WEEKLY_PRICE": cls.PLAN_WEEKLY_PRICE,
+            "PLAN_MONTHLY_PRICE": cls.PLAN_MONTHLY_PRICE,
+            "GRACE_PERIOD_DAYS": cls.GRACE_PERIOD_DAYS,
+            "SUBSCRIPTION_CHECK_INTERVAL_HOURS": cls.SUBSCRIPTION_CHECK_INTERVAL_HOURS,
+            "WEBHOOK_SECRET": cls.WEBHOOK_SECRET,
+            "WEBHOOK_TOLERANCE_SECONDS": cls.WEBHOOK_TOLERANCE_SECONDS,
             "LOG_LEVEL": cls.LOG_LEVEL,
         }
 
@@ -108,5 +130,23 @@ class Settings:
 
         if cls.LOG_LEVEL.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             errors.append(f"LOG_LEVEL inválido: {cls.LOG_LEVEL}")
+
+        if cls.PLAN_DAILY_PRICE < 0:
+            errors.append(f"PLAN_DAILY_PRICE deve ser >= 0")
+
+        if cls.PLAN_WEEKLY_PRICE < 0:
+            errors.append(f"PLAN_WEEKLY_PRICE deve ser >= 0")
+
+        if cls.PLAN_MONTHLY_PRICE < 0:
+            errors.append(f"PLAN_MONTHLY_PRICE deve ser >= 0")
+
+        if cls.GRACE_PERIOD_DAYS < 0:
+            errors.append(f"GRACE_PERIOD_DAYS deve ser >= 0")
+
+        if cls.SUBSCRIPTION_CHECK_INTERVAL_HOURS < 1:
+            errors.append(f"SUBSCRIPTION_CHECK_INTERVAL_HOURS deve ser >= 1")
+
+        if cls.WEBHOOK_TOLERANCE_SECONDS < 0:
+            errors.append(f"WEBHOOK_TOLERANCE_SECONDS deve ser >= 0")
 
         return errors

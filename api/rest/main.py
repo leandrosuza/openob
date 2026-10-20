@@ -6,8 +6,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
-from core.logger import get_logger
-from api.rest import auth_router
+from core.logger import get_logger, LoggerConfig
+from api.rest import auth_router, plan_router, subscription_router, transaction_router
 from config.settings import Settings
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -15,15 +15,7 @@ from slowapi.errors import RateLimitExceeded
 
 
 logger = get_logger(__name__)
-
-
-# Configurar logger de segurança dedicado
-security_logger = logging.getLogger("security")
-security_logger.setLevel(logging.INFO)
-os.makedirs("logs", exist_ok=True)
-security_handler = logging.FileHandler("logs/auth.txt")
-security_handler.setFormatter(logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s'))
-security_logger.addHandler(security_handler)
+security_logger = LoggerConfig.get_security_logger()
 
 
 # Rate limiting
@@ -97,6 +89,9 @@ async def log_security_requests(request: Request, call_next):
 
 # Include routers
 app.include_router(auth_router.router)
+app.include_router(plan_router.router)
+app.include_router(subscription_router.router)
+app.include_router(transaction_router.router)
 
 
 @app.get("/")

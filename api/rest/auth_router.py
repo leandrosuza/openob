@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, status, Depends, Response, Cookie, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from typing import Optional
 
 from models.user import User
@@ -18,9 +18,11 @@ from api.rest.security import (
 )
 from api.rest.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
 from core.logger import get_logger
+from core.logger import LoggerConfig
 
 
 logger = get_logger(__name__)
+subscription_logger = LoggerConfig.get_subscription_logger()
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
@@ -95,6 +97,8 @@ async def register(
         ssid_demo=user_data.ssid_demo,
         ssid_real=user_data.ssid_real,
         plan_id=None,
+        current_subscription_id=None,
+        plan_expires_at=None,
         is_active=True,
         balance=0.0
     )
@@ -102,11 +106,46 @@ async def register(
     created_user = await user_repo.create(user)
     logger.info(f"Usuário registrado: {created_user.username}")
     
+    # Criar subscription free automaticamente
+    config = Settings.to_dict()
+    subscription_repo = RepositoryFactory.create_subscription_repository(config)
+    plan_repo = RepositoryFactory.create_plan_repository(config)
+    
+    # Obter plano free
+    free_plan = await plan_repo.get_by_type("free")
+    await plan_repo.close()
+    
+    if free_plan:
+        # Criar subscription free
+        start_date = datetime.now(timezone.utc)
+        end_date = None  # Free não expira
+        
+        subscription = await subscription_repo.create_for_user(
+            user_id=created_user.id,
+            plan_id=free_plan.id,
+            start_date=start_date,
+            end_date=end_date,
+            payment_method=None,
+            payment_id=None,
+            auto_renew=False
+        )
+        
+        # Atualizar user com subscription_id
+        created_user.current_subscription_id = subscription.id
+        created_user.plan_expires_at = None
+        await user_repo.update(created_user)
+        
+        subscription_logger.info(f"Subscription free criada para user {created_user.id}, subscription_id={subscription.id}")
+    
+    await subscription_repo.close()
+    
     return UserResponse(
         id=created_user.id,
         username=created_user.username,
         email=created_user.email,
         plan_id=created_user.plan_id,
+        current_subscription_id=created_user.current_subscription_id,
+        plan_expires_at=created_user.plan_expires_at,
         is_active=created_user.is_active,
         balance=created_user.balance
     )
@@ -210,6 +249,8 @@ async def get_me(current_user: User = Depends(get_current_user)):
         username=current_user.username,
         email=current_user.email,
         plan_id=current_user.plan_id,
+        current_subscription_id=current_user.current_subscription_id,
+        plan_expires_at=current_user.plan_expires_at,
         is_active=current_user.is_active,
         balance=current_user.balance
     )

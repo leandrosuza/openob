@@ -72,10 +72,16 @@ check_dependencies()
 from core.monitor import MonitorAPI
 from core.logger import get_logger, LoggerConfig
 from config.settings import Settings
+from core.subscription_manager import SubscriptionManager
 
 # Configurar logger
 LoggerConfig.setup(level=Settings.get_log_level())
 logger = get_logger(__name__)
+
+# Configurar loggers específicos
+LoggerConfig.setup_subscription_logger()
+LoggerConfig.setup_payment_logger()
+LoggerConfig.setup_security_logger()
 
 
 def reset_logs():
@@ -92,6 +98,16 @@ def reset_logs():
     if not os.path.exists(auth_log):
         with open(auth_log, 'w') as f:
             f.write("")  # Criar arquivo vazio
+
+    # Criar arquivos de subscription, payment e security sempre
+    subscription_log = os.path.join(logs_dir, "subscriptions.txt")
+    payment_log = os.path.join(logs_dir, "payments.txt")
+    security_log = os.path.join(logs_dir, "security.txt")
+    
+    for log_file in [subscription_log, payment_log, security_log]:
+        if not os.path.exists(log_file):
+            with open(log_file, 'w') as f:
+                f.write("")  # Criar arquivo vazio
 
     log_files = [
         os.path.join(logs_dir, "error.txt"),
@@ -112,7 +128,7 @@ def reset_logs():
 
             logger.info("Arquivos de log criados (modo DEBUG)")
         else:
-            # Em outros níveis, manter apenas auth.txt
+            # Em outros níveis, manter apenas auth.txt, subscriptions.txt, payments.txt, security.txt
             for log_file in log_files:
                 if os.path.exists(log_file):
                     os.remove(log_file)
@@ -176,8 +192,16 @@ async def main():
         print(f"Logs desativados (modo {Settings.LOG_LEVEL.upper()})")
 
     monitor = None
+    subscription_manager = None
 
     try:
+        # Verificar subscriptions expiradas no startup
+        subscription_manager = SubscriptionManager()
+        await subscription_manager.check_expired_on_startup()
+
+        # Iniciar task de verificação periódica
+        subscription_task = asyncio.create_task(subscription_manager.expiration_check_loop())
+
         monitor = MonitorAPI()
 
         payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
@@ -198,6 +222,12 @@ async def main():
         print("\n\nInterrompido pelo usuário")
 
     finally:
+        if subscription_manager:
+            try:
+                await subscription_manager.stop()
+            except Exception as e:
+                logger.error(f"Erro ao parar subscription manager: {e}")
+        
         if monitor:
             try:
                 await monitor.stop()

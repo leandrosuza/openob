@@ -47,6 +47,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
                 ssid_demo TEXT NOT NULL UNIQUE,
                 ssid_real TEXT UNIQUE,
                 plan_id INTEGER,
+                current_subscription_id INTEGER,
+                plan_expires_at DATETIME,
                 is_active BOOLEAN DEFAULT 1,
                 balance REAL DEFAULT 0.0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -59,10 +61,30 @@ class SQLiteUserRepository(UserRepositoryInterface):
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ssid_demo ON users(ssid_demo)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ssid_real ON users(ssid_real)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_plan_id ON users(plan_id)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_current_subscription ON users(current_subscription_id)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_is_active ON users(is_active)")
 
             self.conn.commit()
             logger.info("Tabela users criada com sucesso")
+
+            self._migrate_table()
+
+    def _migrate_table(self):
+        """Migrar tabela adicionando colunas novas se não existirem"""
+        with self._lock:
+            try:
+                self.conn.execute("ALTER TABLE users ADD COLUMN current_subscription_id INTEGER")
+                logger.info("Migração: coluna current_subscription_id adicionada")
+            except sqlite3.OperationalError:
+                pass
+
+            try:
+                self.conn.execute("ALTER TABLE users ADD COLUMN plan_expires_at DATETIME")
+                logger.info("Migração: coluna plan_expires_at adicionada")
+            except sqlite3.OperationalError:
+                pass
+
+            self.conn.commit()
 
     def _user_from_row(self, row: tuple) -> User:
         """Converter row do banco para modelo User"""
@@ -74,10 +96,12 @@ class SQLiteUserRepository(UserRepositoryInterface):
             ssid_demo=row[4],
             ssid_real=row[5],
             plan_id=row[6],
-            is_active=bool(row[7]),
-            balance=row[8],
-            created_at=datetime.fromisoformat(row[9]) if row[9] else None,
-            updated_at=datetime.fromisoformat(row[10]) if row[10] else None
+            current_subscription_id=row[7] if len(row) > 7 else None,
+            plan_expires_at=datetime.fromisoformat(row[8]) if len(row) > 8 and row[8] else None,
+            is_active=bool(row[9] if len(row) > 9 else row[7]),
+            balance=row[10] if len(row) > 10 else row[8],
+            created_at=datetime.fromisoformat(row[11] if len(row) > 11 else row[9]) if len(row) > 11 and row[11] else None,
+            updated_at=datetime.fromisoformat(row[12] if len(row) > 12 else row[10]) if len(row) > 12 and row[12] else None
         )
 
     @staticmethod
@@ -98,8 +122,8 @@ class SQLiteUserRepository(UserRepositoryInterface):
         """Criar usuário (síncrono)"""
         with self._lock:
             cursor = self.conn.execute(
-                "INSERT INTO users (username, email, password_hash, ssid_demo, ssid_real, plan_id, is_active, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance)
+                "INSERT INTO users (username, email, password_hash, ssid_demo, ssid_real, plan_id, current_subscription_id, plan_expires_at, is_active, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.current_subscription_id, user.plan_expires_at.isoformat() if user.plan_expires_at else None, user.is_active, user.balance)
             )
             self.conn.commit()
 
@@ -251,11 +275,13 @@ class SQLiteUserRepository(UserRepositoryInterface):
                    ssid_demo = ?, 
                    ssid_real = ?, 
                    plan_id = ?, 
+                   current_subscription_id = ?, 
+                   plan_expires_at = ?, 
                    is_active = ?, 
                    balance = ?, 
                    updated_at = CURRENT_TIMESTAMP 
                    WHERE id = ?""",
-                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.is_active, user.balance, user.id)
+                (user.username, user.email, user.password_hash, user.ssid_demo, user.ssid_real, user.plan_id, user.current_subscription_id, user.plan_expires_at.isoformat() if user.plan_expires_at else None, user.is_active, user.balance, user.id)
             )
             self.conn.commit()
             cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user.id,))
