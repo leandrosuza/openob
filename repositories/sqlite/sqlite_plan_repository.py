@@ -31,7 +31,7 @@ class SQLitePlanRepository(PlanRepositoryInterface):
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.execute("PRAGMA journal_mode=DELETE")
             self.conn.execute("PRAGMA synchronous=NORMAL")
             self.conn.execute("PRAGMA cache_size=-64000")
             self.conn.execute("PRAGMA temp_store=MEMORY")
