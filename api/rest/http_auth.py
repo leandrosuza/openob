@@ -5,19 +5,27 @@ usando JWT e refresh tokens em cookies HttpOnly.
 
 Separado de api/auth.py que é autenticação WebSocket com PocketOption.
 
-Endpoints:
-- POST /api/auth/register - Registro de usuário
-- POST /api/auth/login - Login (retorna access token + refresh token em cookie)
-- POST /api/auth/refresh - Renovar access token com refresh token
-- GET /api/auth/me - Obter usuário atual
-- POST /api/auth/change-password - Trocar senha
-- POST /api/auth/logout - Logout
+Endpoints (v1):
+- POST /v1/auth/register - Registro de usuário
+- POST /v1/auth/login - Login (retorna access token + refresh token em cookie)
+- POST /v1/auth/refresh - Renovar access token com refresh token
+- GET /v1/auth/me - Obter usuário atual
+- POST /v1/auth/change-password - Trocar senha
+- POST /v1/auth/logout - Logout
+
+Segurança:
+- Logs de segurança dedicados (logs/auth.txt)
+- Rate limiting
+- Validação de entradas
+- Ocultação de dados sensíveis
+- Invalidação de tokens no logout
 """
 
 from fastapi import APIRouter, HTTPException, status, Depends, Response, Cookie, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from typing import Optional
+import logging
 
 from models.user import User
 from repositories.repository_factory import RepositoryFactory
@@ -33,10 +41,18 @@ from api.rest.security import (
 )
 from api.rest.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
 from core.logger import get_logger
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 
 logger = get_logger(__name__)
-router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+security_logger = logging.getLogger("security")
+limiter = Limiter(key_func=get_remote_address)
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+# Blacklist simples de tokens (em produção, usar Redis)
+token_blacklist = set()
 
 
 def get_user_repository():
@@ -78,14 +94,20 @@ async def get_current_user(
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")  # Rate limit para registro
 async def register(
     user_data: UserRegister,
+    request: Request,
     user_repo = Depends(get_user_repository)
 ):
     """Registrar novo usuário"""
+    # Log de segurança
+    security_logger.info(f"Registro tentado: username={user_data.username}, email={user_data.email}, ip={request.client.host if request.client else 'unknown'}")
+    
     # Verificar se username já existe
     existing_user = await user_repo.get_by_username(user_data.username)
     if existing_user:
+        security_logger.warning(f"Falha registro: username já existe - {user_data.username}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Nome de usuário já existe"
@@ -94,6 +116,7 @@ async def register(
     # Verificar se email já existe
     existing_email = await user_repo.get_by_email(user_data.email)
     if existing_email:
+        security_logger.warning(f"Falha registro: email já existe - {user_data.email}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email já cadastrado"
@@ -116,6 +139,7 @@ async def register(
     
     created_user = await user_repo.create(user)
     logger.info(f"Usuário registrado: {created_user.username}")
+    security_logger.info(f"Registro sucesso: username={created_user.username}, id={created_user.id}")
     
     return UserResponse(
         id=created_user.id,
@@ -128,15 +152,21 @@ async def register(
 
 
 @router.post("/login", response_model=Token)
+@limiter.limit("10/minute")  # Rate limit para login
 async def login(
     response: Response,
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     user_repo = Depends(get_user_repository)
 ):
     """Login de usuário"""
+    # Log de segurança (sem senha)
+    security_logger.info(f"Login tentado: username={form_data.username}, ip={request.client.host if request.client else 'unknown'}")
+    
     # Buscar usuário
     user = await user_repo.get_by_username(form_data.username)
     if not user:
+        security_logger.warning(f"Falha login: usuário não encontrado - {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciais inválidas",
@@ -146,6 +176,7 @@ async def login(
     # Verificar senha
     is_valid = await user_repo.verify_password(form_data.username, form_data.password)
     if not is_valid:
+        security_logger.warning(f"Falha login: senha incorreta - {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciais inválidas",
@@ -153,6 +184,7 @@ async def login(
         )
     
     if not user.is_active:
+        security_logger.warning(f"Falha login: usuário inativo - {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuário inativo"
@@ -179,6 +211,7 @@ async def login(
     )
     
     logger.info(f"Usuário logado: {user.username}")
+    security_logger.info(f"Login sucesso: username={user.username}, id={user.id}")
     
     # Retornar apenas access token (refresh token está no cookie HttpOnly)
     return Token(
@@ -187,6 +220,7 @@ async def login(
 
 
 @router.post("/refresh", response_model=Token)
+@limiter.limit("20/minute")  # Rate limit para refresh
 async def refresh_token(
     request: Request,
     response: Response,
@@ -196,10 +230,19 @@ async def refresh_token(
     # Obter refresh token do cookie HttpOnly
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
+        security_logger.warning(f"Falha refresh: token não encontrado, ip={request.client.host if request.client else 'unknown'}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token não encontrado",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Verificar se token está na blacklist
+    if refresh_token in token_blacklist:
+        security_logger.warning(f"Falha refresh: token na blacklist, ip={request.client.host if request.client else 'unknown'}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token inválido"
         )
     
     # Decodificar refresh token
@@ -213,6 +256,7 @@ async def refresh_token(
                 detail="Refresh token inválido"
             )
     except HTTPException:
+        security_logger.warning(f"Falha refresh: token inválido, ip={request.client.host if request.client else 'unknown'}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token inválido ou expirado"
@@ -221,6 +265,7 @@ async def refresh_token(
     # Verificar se usuário existe
     user = await user_repo.get_by_id(user_id)
     if not user or not user.is_active:
+        security_logger.warning(f"Falha refresh: usuário inválido/inativo - user_id={user_id}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário inválido ou inativo"
@@ -238,6 +283,9 @@ async def refresh_token(
         data={"sub": user.username, "user_id": user.id}
     )
     
+    # Adicionar antigo refresh token à blacklist
+    token_blacklist.add(refresh_token)
+    
     # Atualizar cookie com novo refresh token
     response.set_cookie(
         key="refresh_token",
@@ -249,6 +297,7 @@ async def refresh_token(
     )
     
     logger.info(f"Token renovado para: {user.username}")
+    security_logger.info(f"Refresh sucesso: username={user.username}")
     
     # Retornar apenas access token (refresh token está no cookie HttpOnly)
     return Token(
@@ -292,10 +341,24 @@ async def change_password(
 
 
 @router.post("/logout")
-async def logout(response: Response):
-    """Logout do usuário"""
-    # Em uma implementação completa, adicionaria o refresh token a uma blacklist
-    # Por enquanto, apenas removemos os cookies do cliente
+async def logout(
+    response: Response,
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """Logout do usuário - Invalida refresh token"""
+    # Log de segurança
+    security_logger.info(f"Logout: username={current_user.username}, id={current_user.id}, ip={request.client.host if request.client else 'unknown'}")
+    
+    # Adicionar refresh token à blacklist
+    refresh_token = request.cookies.get("refresh_token")
+    if refresh_token:
+        token_blacklist.add(refresh_token)
+        security_logger.info(f"Refresh token invalidado: user_id={current_user.id}")
+    
+    # Remover cookie
     response.delete_cookie(key="refresh_token")
-    logger.info("Usuário fez logout")
+    logger.info(f"Usuário fez logout: {current_user.username}")
+    security_logger.info(f"Logout sucesso: username={current_user.username}")
+    
     return {"message": "Logout realizado com sucesso"}

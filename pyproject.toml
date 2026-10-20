@@ -18,6 +18,8 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "python-multipart>=0.0.9",
     "email-validator>=2.0.0",
+    "slowapi>=0.1.9",  # Rate limiting
+    "pydantic-settings>=2.0.0",  # Settings management
 ]
 
 [tool.setuptools.packages.find]

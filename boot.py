@@ -21,6 +21,16 @@ def reset_logs():
     logs_dir = "logs"
     ws_dir = os.path.join(logs_dir, "ws")
 
+    # Criar diretório logs/ sempre (necessário para logs de segurança)
+    os.makedirs(logs_dir, exist_ok=True)
+    os.makedirs(ws_dir, exist_ok=True)
+
+    # Criar arquivo de segurança sempre (independente de LOG_LEVEL)
+    auth_log = os.path.join(logs_dir, "auth.txt")
+    if not os.path.exists(auth_log):
+        with open(auth_log, 'w') as f:
+            f.write("")  # Criar arquivo vazio
+
     log_files = [
         os.path.join(logs_dir, "error.txt"),
         os.path.join(logs_dir, "info.txt"),
