@@ -127,6 +127,21 @@ class PostgresPlanRepository(PlanRepositoryInterface):
             rows = await conn.fetch("SELECT * FROM plans WHERE is_active = TRUE ORDER BY price")
             return [self._plan_from_row(row) for row in rows]
 
+    async def list_all(self, limit: int = 100, offset: int = 0) -> List[Plan]:
+        """Listar todos os planos"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT * FROM plans ORDER BY price LIMIT $1 OFFSET $2",
+                limit, offset
+            )
+            return [self._plan_from_row(row) for row in rows]
+
+    async def get_active_plans(self) -> List[Plan]:
+        """Listar apenas planos ativos"""
+        return await self.get_all()
+
     async def update(self, plan: Plan) -> Plan:
         """Atualizar plano"""
         await self._initialize_db()

@@ -107,6 +107,18 @@ class PostgresTransactionRepository(TransactionRepositoryInterface):
             )
             return [self._transaction_from_row(row) for row in rows]
 
+    async def get_user_transactions(self, user_id: int, limit: int = 100, offset: int = 0) -> List[Transaction]:
+        """Obter transações do usuário"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """SELECT * FROM transactions WHERE user_id = $1
+                ORDER BY created_at DESC LIMIT $2 OFFSET $3""",
+                user_id, limit, offset
+            )
+            return [self._transaction_from_row(row) for row in rows]
+
     async def update_status(self, transaction_id: int, status: str) -> Transaction:
         """Atualizar status da transaction"""
         await self._initialize_db()
@@ -117,6 +129,22 @@ class PostgresTransactionRepository(TransactionRepositoryInterface):
                 status, transaction_id
             )
             database_logger.info(f"Transaction status atualizado: id={transaction_id}, status={status}")
+            return self._transaction_from_row(row)
+
+    async def update(self, transaction: Transaction) -> Transaction:
+        """Atualizar transaction"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """UPDATE transactions SET user_id = $1, subscription_id = $2, plan_id = $3,
+                amount = $4, currency = $5, status = $6, payment_method = $7, payment_id = $8
+                WHERE id = $9 RETURNING *""",
+                transaction.user_id, transaction.subscription_id, transaction.plan_id,
+                transaction.amount, transaction.currency, transaction.status,
+                transaction.payment_method, transaction.payment_id, transaction.id
+            )
+            database_logger.info(f"Transaction atualizada: id={transaction.id}")
             return self._transaction_from_row(row)
 
     def _transaction_from_row(self, row) -> Transaction:
