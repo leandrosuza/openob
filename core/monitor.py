@@ -263,33 +263,34 @@ class MonitorAPI:
 
 
     async def start_payout_monitoring(self, payout_interval: int = 5):
-        """Iniciar monitoramento de payout (conexão permanente com requisições periódicas)"""
+        """Iniciar monitoramento de payout (reconexão periódica)
+
+        Reconecta a cada payout_interval segundos para obter dados de payout
+        atualizados. O servidor envia os dados de payout na conexão inicial.
+        """
         self.payout_running = True
         logger.info("Payout monitoring: iniciado")
+        logger.info(f"Reconectando a cada {payout_interval}s para obter payout atualizado")
 
         while self.payout_running:
             try:
-                logger.debug(f"Payout monitoring: payout_running={self.payout_running}, is_connected={self.payout_ws.is_connected}")
+                logger.info("Payout monitoring: desconectando para reconectar...")
+                await self.payout_ws.disconnect()
+                self._log_to_file("connection.txt", "Payout: Desconectado")
 
-                if not self.payout_ws.is_connected:
-                    logger.info("Payout monitoring: tentando conectar...")
-                    connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=True)
-                    if connected:
-                        self._log_to_file("connection.txt", "Payout: Conectado com sucesso")
-                        logger.info("Payout monitoring: conectado com sucesso")
-                    else:
-                        self._log_to_file("connection.txt", "Payout: Falha ao conectar")
-                        logger.error("MONITOR DE PAYOUT | FALHA AO CONECTAR")
-                        await asyncio.sleep(5)
-                        continue
+                logger.info("Payout monitoring: reconectando...")
+                connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=False)
+                if connected:
+                    self._log_to_file("connection.txt", "Payout: Reconectado com sucesso")
+                    logger.info("Payout monitoring: conectado com sucesso")
+                    # O servidor envia dados de payout automaticamente na conexão
+                else:
+                    self._log_to_file("connection.txt", "Payout: Falha ao reconectar")
+                    logger.error("MONITOR DE PAYOUT | FALHA AO RECONECTAR")
+                    await asyncio.sleep(5)
+                    continue
 
-                if self.payout_ws.is_connected:
-                    logger.debug("Payout monitoring: enviando solicitação de actives")
-                    await self.payout_ws.send_message('42["actives/get"]')
-                    self._log_to_file("monitoring_payout.txt", "Solicitação de payout enviada")
-                    await asyncio.sleep(1)
-
-                logger.debug(f"Payout monitoring: aguardando {payout_interval}s antes da próxima requisição")
+                logger.debug(f"Payout monitoring: aguardando {payout_interval}s antes da próxima reconexão")
                 await asyncio.sleep(payout_interval)
 
             except Exception as e:
