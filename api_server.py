@@ -13,7 +13,7 @@ Ou com uvicorn diretamente:
 import sys
 sys.path.insert(0, '.')
 
-from api.http_main import app
+from api.rest.http_main import app
 import uvicorn
 
 

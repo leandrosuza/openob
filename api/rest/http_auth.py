@@ -23,7 +23,7 @@ from models.user import User
 from repositories.repository_factory import RepositoryFactory
 from repositories.sqlite.sqlite_user_repository import SQLiteUserRepository
 from config.settings import Settings
-from api.security import (
+from api.rest.security import (
     create_access_token,
     create_refresh_token,
     verify_token,
@@ -31,7 +31,7 @@ from api.security import (
     REFRESH_TOKEN_EXPIRE_DAYS,
     oauth2_scheme
 )
-from api.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
+from api.rest.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
 from core.logger import get_logger
 
 

@@ -1,9 +1,9 @@
 """PocketOption Client - Facade principal"""
 
 from connection.websocket import WebSocketManager
-from api.auth import AuthAPI
-from api.balance import BalanceAPI
-from api.trading import TradingAPI
+from api.pocketoption.auth import AuthAPI
+from api.pocketoption.balance import BalanceAPI
+from api.pocketoption.trading import TradingAPI
 from core.logger import get_logger, LoggerConfig
 from config.settings import Settings
 

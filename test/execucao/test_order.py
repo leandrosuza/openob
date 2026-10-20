@@ -7,8 +7,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from connection.websocket import WebSocketManager
-from api.auth import AuthAPI
-from api.trading import TradingAPI
+from api.pocketoption.auth import AuthAPI
+from api.pocketoption.trading import TradingAPI
 from models.trading import OrderDirection
 
 
