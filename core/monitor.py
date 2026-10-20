@@ -26,10 +26,10 @@ class MonitorAPI:
 
     def __init__(self):
         self.region = "DEMO"
-        self.ssid = Settings.POCKETOPTION_MONITOR_SSID
+        self.ssid = Settings.get_monitor_ssid()
 
         if not self.ssid:
-            raise ConfigurationError("POCKETOPTION_MONITOR_SSID não definido no .env")
+            raise ConfigurationError(f"SSID não definido para ambiente {Settings.POCKETOPTION_ENV}")
 
         self.top_assets_count = Settings.MONITOR_TOP_ASSETS
 
