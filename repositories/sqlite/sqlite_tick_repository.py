@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class SQLiteTickRepository(TickRepositoryInterface):
     """Repositório SQLite - Implementação com asyncio.to_thread()"""
 
-    def __init__(self, db_path: str = "data/openob_ticks.db"):
+    def __init__(self, db_path: str = "data/openob.db"):
         self.db_path = db_path
         self.conn = None
         self._pending_ticks = []
