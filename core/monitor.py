@@ -198,7 +198,11 @@ class MonitorAPI:
             if data.get("payout", 0) > 0
         ]
 
-        sorted_assets = sorted(valid_assets, key=lambda x: x[1]["payout"], reverse=True)
+        # Ordenar por payout (descendente) e depois por símbolo (ascendente) para desempate
+        sorted_assets = sorted(
+            valid_assets,
+            key=lambda x: (-x[1]["payout"], x[0])
+        )
         top_assets = [data for symbol, data in sorted_assets[:limit]]
 
         logger.debug(f"Top {limit} ativos por payout: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
@@ -218,11 +222,14 @@ class MonitorAPI:
         to_remove = self.monitored_assets - new_monitored
 
         # Log detalhado para debug
-        logger.info(f"Top ativos: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
-        logger.info(f"Ativos monitorados: {self.monitored_assets}")
-        logger.info(f"Novos ativos: {new_monitored}")
-        logger.info(f"Para adicionar: {to_add}")
-        logger.info(f"Para remover: {to_remove}")
+        logger.info(f"Top {len(top_assets)} ativos por payout (ordenado):")
+        for i, asset in enumerate(top_assets, 1):
+            logger.info(f"  {i}. {asset['symbol']} - {asset['payout']}%")
+
+        logger.info(f"Ativos monitorados ({len(self.monitored_assets)}): {sorted(self.monitored_assets)}")
+        logger.info(f"Novos ativos ({len(new_monitored)}): {sorted(new_monitored)}")
+        logger.info(f"Para adicionar ({len(to_add)}): {sorted(to_add) if to_add else 'Nenhum'}")
+        logger.info(f"Para remover ({len(to_remove)}): {sorted(to_remove) if to_remove else 'Nenhum'}")
 
         if to_add:
             logger.info(f"Adicionando ativos ao monitoramento: {to_add}")
