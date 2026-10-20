@@ -217,8 +217,15 @@ class MonitorAPI:
         to_add = new_monitored - self.monitored_assets
         to_remove = self.monitored_assets - new_monitored
 
+        # Log detalhado para debug
+        logger.info(f"Top ativos: {[a['symbol'] + '(' + str(a['payout']) + '%)' for a in top_assets]}")
+        logger.info(f"Ativos monitorados: {self.monitored_assets}")
+        logger.info(f"Novos ativos: {new_monitored}")
+        logger.info(f"Para adicionar: {to_add}")
+        logger.info(f"Para remover: {to_remove}")
+
         if to_add:
-            logger.debug(f"Adicionando ativos ao monitoramento: {to_add}")
+            logger.info(f"Adicionando ativos ao monitoramento: {to_add}")
             for i, symbol in enumerate(to_add):
                 await self.subscribe_asset(symbol, period=1)
                 self.monitored_assets.add(symbol)
@@ -226,7 +233,7 @@ class MonitorAPI:
                     await asyncio.sleep(0.5)
 
         if to_remove:
-            logger.debug(f"Removendo ativos do monitoramento: {to_remove}")
+            logger.info(f"Removendo ativos do monitoramento: {to_remove}")
             for symbol in to_remove:
                 self.monitored_assets.discard(symbol)
                 self._log_to_file("monitoring_actives.txt", f"Ativo removido do monitoramento: {symbol}")
@@ -292,7 +299,11 @@ class MonitorAPI:
 
 
     async def start_actives_monitoring(self, update_interval: int = 30):
-        """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica"""
+        """Iniciar monitoramento de ativos (conexão permanente) com atualização dinâmica
+
+        Este monitor usa os dados de payout atualizados pelo monitor de payout
+        para escolher dinamicamente os melhores ativos para monitorar.
+        """
         self.actives_running = True
 
         while self.actives_running:
@@ -310,10 +321,8 @@ class MonitorAPI:
                         continue
 
                 if self.actives_ws.is_connected:
-                    await self.actives_ws.send_message('42["assets/get"]')
-                    self._log_to_file("monitoring_actives.txt", "Solicitação de ativos enviada")
-                    await asyncio.sleep(1)
-
+                    # Atualizar ativos monitorados baseado nos dados de payout
+                    # Os dados de payout são atualizados pelo monitor de payout
                     await self.update_monitored_assets()
 
                 await asyncio.sleep(update_interval)
