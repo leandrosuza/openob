@@ -11,3 +11,8 @@
 [2026-10-20 18:47:34] Payout: Reconectado com sucesso
 [2026-10-20 18:47:39] Payout: Desconectado
 [2026-10-20 18:47:40] Payout: Reconectado com sucesso
+[2026-10-20 18:47:46] Payout: Desconectado
+[2026-10-20 18:47:51] Payout: Reconectado com sucesso
+[2026-10-20 18:48:00] Payout: Desconectado
+[2026-10-20 18:48:06] Payout: Reconectado com sucesso
+[2026-10-20 18:48:14] Payout: Desconectado

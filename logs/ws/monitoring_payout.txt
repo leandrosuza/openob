@@ -1174,3 +1174,7 @@
 [2026-10-20 18:47:41] Evento recebido: updateCharts",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
 [2026-10-20 18:47:41] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
 [2026-10-20 18:47:41] Evento recebido: updateClosedDeals",{"_placeholder":true,"num":0}_data | Tipo: <class 'list'>
+[2026-10-20 18:47:51] Evento recebido: updateAssets",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-20 18:47:51] Dados binários de ativos recebidos
+[2026-10-20 18:48:06] Evento recebido: updateAssets",{"_placeholder":true,"num":0} | Tipo: <class 'dict'>
+[2026-10-20 18:48:06] Dados binários de ativos recebidos

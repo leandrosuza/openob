@@ -821,3 +821,916 @@
 [2026-10-20 18:47:44] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540064.676, 90.644]]
 [2026-10-20 18:47:44] Stream: #INTC_otc = 90.644 @ 1792540064.676
 [2026-10-20 18:47:44] Salvando tick stream no repositório: #INTC_otc @ 90.644
+[2026-10-20 18:47:44] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:44] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540065.175, 340.113]]
+[2026-10-20 18:47:45] Stream: #AAPL_otc = 340.113 @ 1792540065.175
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #AAPL_otc @ 340.113
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540065.175, 694.46]]
+[2026-10-20 18:47:45] Stream: #FB_otc = 694.46 @ 1792540065.175
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #FB_otc @ 694.46
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540065.175, 90.642]]
+[2026-10-20 18:47:45] Stream: #INTC_otc = 90.642 @ 1792540065.175
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #INTC_otc @ 90.642
+[2026-10-20 18:47:45] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 95], ['#FB_otc', 60], ['#INTC_otc', 13]]
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540065.675, 340.116]]
+[2026-10-20 18:47:45] Stream: #AAPL_otc = 340.116 @ 1792540065.675
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #AAPL_otc @ 340.116
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540065.675, 694.45]]
+[2026-10-20 18:47:45] Stream: #FB_otc = 694.45 @ 1792540065.675
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #FB_otc @ 694.45
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540065.675, 90.638]]
+[2026-10-20 18:47:45] Stream: #INTC_otc = 90.638 @ 1792540065.675
+[2026-10-20 18:47:45] Salvando tick stream no repositório: #INTC_otc @ 90.638
+[2026-10-20 18:47:45] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:45] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540066.176, 340.107]]
+[2026-10-20 18:47:46] Stream: #AAPL_otc = 340.107 @ 1792540066.176
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #AAPL_otc @ 340.107
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540066.176, 694.47]]
+[2026-10-20 18:47:46] Stream: #FB_otc = 694.47 @ 1792540066.176
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #FB_otc @ 694.47
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540066.176, 90.636]]
+[2026-10-20 18:47:46] Stream: #INTC_otc = 90.636 @ 1792540066.176
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #INTC_otc @ 90.636
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540066.677, 340.115]]
+[2026-10-20 18:47:46] Stream: #AAPL_otc = 340.115 @ 1792540066.677
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #AAPL_otc @ 340.115
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540066.677, 694.48]]
+[2026-10-20 18:47:46] Stream: #FB_otc = 694.48 @ 1792540066.677
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #FB_otc @ 694.48
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540066.677, 90.638]]
+[2026-10-20 18:47:46] Stream: #INTC_otc = 90.638 @ 1792540066.677
+[2026-10-20 18:47:46] Salvando tick stream no repositório: #INTC_otc @ 90.638
+[2026-10-20 18:47:46] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:46] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540067.139, 340.115]]
+[2026-10-20 18:47:47] Stream: #AAPL_otc = 340.115 @ 1792540067.139
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #AAPL_otc @ 340.115
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540067.139, 694.48]]
+[2026-10-20 18:47:47] Stream: #FB_otc = 694.48 @ 1792540067.139
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #FB_otc @ 694.48
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540067.139, 90.638]]
+[2026-10-20 18:47:47] Stream: #INTC_otc = 90.638 @ 1792540067.139
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #INTC_otc @ 90.638
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540067.678, 340.133]]
+[2026-10-20 18:47:47] Stream: #AAPL_otc = 340.133 @ 1792540067.678
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #AAPL_otc @ 340.133
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540067.678, 694.49]]
+[2026-10-20 18:47:47] Stream: #FB_otc = 694.49 @ 1792540067.678
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #FB_otc @ 694.49
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540067.678, 90.631]]
+[2026-10-20 18:47:47] Stream: #INTC_otc = 90.631 @ 1792540067.678
+[2026-10-20 18:47:47] Salvando tick stream no repositório: #INTC_otc @ 90.631
+[2026-10-20 18:47:47] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:47] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540068.178, 340.131]]
+[2026-10-20 18:47:48] Stream: #AAPL_otc = 340.131 @ 1792540068.178
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #AAPL_otc @ 340.131
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540068.178, 694.5]]
+[2026-10-20 18:47:48] Stream: #FB_otc = 694.5 @ 1792540068.178
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #FB_otc @ 694.5
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540068.178, 90.63]]
+[2026-10-20 18:47:48] Stream: #INTC_otc = 90.63 @ 1792540068.178
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #INTC_otc @ 90.63
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540068.678, 340.127]]
+[2026-10-20 18:47:48] Stream: #AAPL_otc = 340.127 @ 1792540068.678
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #AAPL_otc @ 340.127
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540068.678, 694.51]]
+[2026-10-20 18:47:48] Stream: #FB_otc = 694.51 @ 1792540068.678
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540068.678, 90.629]]
+[2026-10-20 18:47:48] Stream: #INTC_otc = 90.629 @ 1792540068.678
+[2026-10-20 18:47:48] Salvando tick stream no repositório: #INTC_otc @ 90.629
+[2026-10-20 18:47:48] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:48] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540069.178, 340.131]]
+[2026-10-20 18:47:49] Stream: #AAPL_otc = 340.131 @ 1792540069.178
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #AAPL_otc @ 340.131
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540069.178, 694.51]]
+[2026-10-20 18:47:49] Stream: #FB_otc = 694.51 @ 1792540069.178
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540069.178, 90.631]]
+[2026-10-20 18:47:49] Stream: #INTC_otc = 90.631 @ 1792540069.178
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #INTC_otc @ 90.631
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540069.678, 340.14]]
+[2026-10-20 18:47:49] Stream: #AAPL_otc = 340.14 @ 1792540069.678
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #AAPL_otc @ 340.14
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540069.678, 694.5]]
+[2026-10-20 18:47:49] Stream: #FB_otc = 694.5 @ 1792540069.678
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #FB_otc @ 694.5
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540069.678, 90.629]]
+[2026-10-20 18:47:49] Stream: #INTC_otc = 90.629 @ 1792540069.678
+[2026-10-20 18:47:49] Salvando tick stream no repositório: #INTC_otc @ 90.629
+[2026-10-20 18:47:49] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:49] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540070.139, 340.14]]
+[2026-10-20 18:47:50] Stream: #AAPL_otc = 340.14 @ 1792540070.139
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #AAPL_otc @ 340.14
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540070.139, 694.5]]
+[2026-10-20 18:47:50] Stream: #FB_otc = 694.5 @ 1792540070.139
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #FB_otc @ 694.5
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540070.139, 90.629]]
+[2026-10-20 18:47:50] Stream: #INTC_otc = 90.629 @ 1792540070.139
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #INTC_otc @ 90.629
+[2026-10-20 18:47:50] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 91], ['#FB_otc', 47], ['#INTC_otc', 13]]
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540070.694, 340.147]]
+[2026-10-20 18:47:50] Stream: #AAPL_otc = 340.147 @ 1792540070.694
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #AAPL_otc @ 340.147
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540070.694, 694.5]]
+[2026-10-20 18:47:50] Stream: #FB_otc = 694.5 @ 1792540070.694
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #FB_otc @ 694.5
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540070.694, 90.622]]
+[2026-10-20 18:47:50] Stream: #INTC_otc = 90.622 @ 1792540070.694
+[2026-10-20 18:47:50] Salvando tick stream no repositório: #INTC_otc @ 90.622
+[2026-10-20 18:47:50] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:50] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540071.194, 340.143]]
+[2026-10-20 18:47:51] Stream: #AAPL_otc = 340.143 @ 1792540071.194
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #AAPL_otc @ 340.143
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540071.194, 694.55]]
+[2026-10-20 18:47:51] Stream: #FB_otc = 694.55 @ 1792540071.194
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #FB_otc @ 694.55
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540071.194, 90.624]]
+[2026-10-20 18:47:51] Stream: #INTC_otc = 90.624 @ 1792540071.194
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #INTC_otc @ 90.624
+[2026-10-20 18:47:51] Evento: updateOpenedDeals",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Evento: updateOpenedDeals",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540071.695, 340.145]]
+[2026-10-20 18:47:51] Stream: #AAPL_otc = 340.145 @ 1792540071.695
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #AAPL_otc @ 340.145
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540071.695, 694.54]]
+[2026-10-20 18:47:51] Stream: #FB_otc = 694.54 @ 1792540071.695
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #FB_otc @ 694.54
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Dados binários de stream recebidos
+[2026-10-20 18:47:51] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540071.695, 90.621]]
+[2026-10-20 18:47:51] Stream: #INTC_otc = 90.621 @ 1792540071.695
+[2026-10-20 18:47:51] Salvando tick stream no repositório: #INTC_otc @ 90.621
+[2026-10-20 18:47:51] Evento: successupdateBalance",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Evento: updateClosedDeals",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Evento: updateClosedDeals",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:47:51] Evento: successupdatePending",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:51] Evento: successupdatePending",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540072.197, 340.148]]
+[2026-10-20 18:47:52] Stream: #AAPL_otc = 340.148 @ 1792540072.197
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #AAPL_otc @ 340.148
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540072.197, 694.55]]
+[2026-10-20 18:47:52] Stream: #FB_otc = 694.55 @ 1792540072.197
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #FB_otc @ 694.55
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540072.197, 90.619]]
+[2026-10-20 18:47:52] Stream: #INTC_otc = 90.619 @ 1792540072.197
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #INTC_otc @ 90.619
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540072.696, 340.153]]
+[2026-10-20 18:47:52] Stream: #AAPL_otc = 340.153 @ 1792540072.696
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #AAPL_otc @ 340.153
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540072.696, 694.54]]
+[2026-10-20 18:47:52] Stream: #FB_otc = 694.54 @ 1792540072.696
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #FB_otc @ 694.54
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540072.696, 90.617]]
+[2026-10-20 18:47:52] Stream: #INTC_otc = 90.617 @ 1792540072.696
+[2026-10-20 18:47:52] Salvando tick stream no repositório: #INTC_otc @ 90.617
+[2026-10-20 18:47:52] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:52] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540073.14, 340.153]]
+[2026-10-20 18:47:53] Stream: #AAPL_otc = 340.153 @ 1792540073.14
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #AAPL_otc @ 340.153
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540073.14, 694.54]]
+[2026-10-20 18:47:53] Stream: #FB_otc = 694.54 @ 1792540073.14
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #FB_otc @ 694.54
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540073.14, 90.617]]
+[2026-10-20 18:47:53] Stream: #INTC_otc = 90.617 @ 1792540073.14
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #INTC_otc @ 90.617
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540073.695, 340.154]]
+[2026-10-20 18:47:53] Stream: #AAPL_otc = 340.154 @ 1792540073.695
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #AAPL_otc @ 340.154
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540073.695, 694.52]]
+[2026-10-20 18:47:53] Stream: #FB_otc = 694.52 @ 1792540073.695
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #FB_otc @ 694.52
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540073.695, 90.617]]
+[2026-10-20 18:47:53] Stream: #INTC_otc = 90.617 @ 1792540073.695
+[2026-10-20 18:47:53] Salvando tick stream no repositório: #INTC_otc @ 90.617
+[2026-10-20 18:47:53] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:53] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540074.196, 340.158]]
+[2026-10-20 18:47:54] Stream: #AAPL_otc = 340.158 @ 1792540074.196
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #AAPL_otc @ 340.158
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540074.196, 694.51]]
+[2026-10-20 18:47:54] Stream: #FB_otc = 694.51 @ 1792540074.196
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540074.196, 90.612]]
+[2026-10-20 18:47:54] Stream: #INTC_otc = 90.612 @ 1792540074.196
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #INTC_otc @ 90.612
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540074.713, 340.173]]
+[2026-10-20 18:47:54] Stream: #AAPL_otc = 340.173 @ 1792540074.713
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #AAPL_otc @ 340.173
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540074.713, 694.51]]
+[2026-10-20 18:47:54] Stream: #FB_otc = 694.51 @ 1792540074.713
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540074.713, 90.613]]
+[2026-10-20 18:47:54] Stream: #INTC_otc = 90.613 @ 1792540074.713
+[2026-10-20 18:47:54] Salvando tick stream no repositório: #INTC_otc @ 90.613
+[2026-10-20 18:47:54] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:54] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540075.211, 340.168]]
+[2026-10-20 18:47:55] Stream: #AAPL_otc = 340.168 @ 1792540075.211
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #AAPL_otc @ 340.168
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540075.211, 694.53]]
+[2026-10-20 18:47:55] Stream: #FB_otc = 694.53 @ 1792540075.211
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #FB_otc @ 694.53
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540075.211, 90.61]]
+[2026-10-20 18:47:55] Stream: #INTC_otc = 90.61 @ 1792540075.211
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #INTC_otc @ 90.61
+[2026-10-20 18:47:55] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 47], ['#FB_otc', 50], ['#INTC_otc', 13]]
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540075.712, 340.17]]
+[2026-10-20 18:47:55] Stream: #AAPL_otc = 340.17 @ 1792540075.712
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #AAPL_otc @ 340.17
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540075.712, 694.52]]
+[2026-10-20 18:47:55] Stream: #FB_otc = 694.52 @ 1792540075.712
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #FB_otc @ 694.52
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540075.712, 90.612]]
+[2026-10-20 18:47:55] Stream: #INTC_otc = 90.612 @ 1792540075.712
+[2026-10-20 18:47:55] Salvando tick stream no repositório: #INTC_otc @ 90.612
+[2026-10-20 18:47:55] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:55] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540076.14, 340.17]]
+[2026-10-20 18:47:56] Stream: #AAPL_otc = 340.17 @ 1792540076.14
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #AAPL_otc @ 340.17
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:56] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540076.14, 694.52]]
+[2026-10-20 18:47:56] Stream: #FB_otc = 694.52 @ 1792540076.14
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #FB_otc @ 694.52
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:56] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540076.14, 90.612]]
+[2026-10-20 18:47:56] Stream: #INTC_otc = 90.612 @ 1792540076.14
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #INTC_otc @ 90.612
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:56] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540076.714, 340.166]]
+[2026-10-20 18:47:56] Stream: #AAPL_otc = 340.166 @ 1792540076.714
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #AAPL_otc @ 340.166
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:56] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540076.714, 694.55]]
+[2026-10-20 18:47:56] Stream: #FB_otc = 694.55 @ 1792540076.714
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #FB_otc @ 694.55
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:56] Dados binários de stream recebidos
+[2026-10-20 18:47:56] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540076.714, 90.611]]
+[2026-10-20 18:47:56] Stream: #INTC_otc = 90.611 @ 1792540076.714
+[2026-10-20 18:47:56] Salvando tick stream no repositório: #INTC_otc @ 90.611
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540077.217, 340.17]]
+[2026-10-20 18:47:57] Stream: #AAPL_otc = 340.17 @ 1792540077.217
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #AAPL_otc @ 340.17
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540077.217, 694.57]]
+[2026-10-20 18:47:57] Stream: #FB_otc = 694.57 @ 1792540077.217
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540077.217, 90.607]]
+[2026-10-20 18:47:57] Stream: #INTC_otc = 90.607 @ 1792540077.217
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #INTC_otc @ 90.607
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540077.715, 340.175]]
+[2026-10-20 18:47:57] Stream: #AAPL_otc = 340.175 @ 1792540077.715
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #AAPL_otc @ 340.175
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540077.715, 694.56]]
+[2026-10-20 18:47:57] Stream: #FB_otc = 694.56 @ 1792540077.715
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #FB_otc @ 694.56
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540077.715, 90.604]]
+[2026-10-20 18:47:57] Stream: #INTC_otc = 90.604 @ 1792540077.715
+[2026-10-20 18:47:57] Salvando tick stream no repositório: #INTC_otc @ 90.604
+[2026-10-20 18:47:57] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:57] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540078.234, 340.175]]
+[2026-10-20 18:47:58] Stream: #AAPL_otc = 340.175 @ 1792540078.234
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #AAPL_otc @ 340.175
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540078.234, 694.57]]
+[2026-10-20 18:47:58] Stream: #FB_otc = 694.57 @ 1792540078.234
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540078.234, 90.606]]
+[2026-10-20 18:47:58] Stream: #INTC_otc = 90.606 @ 1792540078.234
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #INTC_otc @ 90.606
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540078.734, 340.182]]
+[2026-10-20 18:47:58] Stream: #AAPL_otc = 340.182 @ 1792540078.734
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #AAPL_otc @ 340.182
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540078.734, 694.57]]
+[2026-10-20 18:47:58] Stream: #FB_otc = 694.57 @ 1792540078.734
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540078.734, 90.602]]
+[2026-10-20 18:47:58] Stream: #INTC_otc = 90.602 @ 1792540078.734
+[2026-10-20 18:47:58] Salvando tick stream no repositório: #INTC_otc @ 90.602
+[2026-10-20 18:47:58] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:58] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540079.141, 340.182]]
+[2026-10-20 18:47:59] Stream: #AAPL_otc = 340.182 @ 1792540079.141
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #AAPL_otc @ 340.182
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:59] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540079.141, 694.57]]
+[2026-10-20 18:47:59] Stream: #FB_otc = 694.57 @ 1792540079.141
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:59] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540079.141, 90.602]]
+[2026-10-20 18:47:59] Stream: #INTC_otc = 90.602 @ 1792540079.141
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #INTC_otc @ 90.602
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:59] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540079.747, 340.215]]
+[2026-10-20 18:47:59] Stream: #AAPL_otc = 340.215 @ 1792540079.747
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #AAPL_otc @ 340.215
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:59] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540079.747, 694.57]]
+[2026-10-20 18:47:59] Stream: #FB_otc = 694.57 @ 1792540079.747
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:47:59] Dados binários de stream recebidos
+[2026-10-20 18:47:59] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540079.747, 90.602]]
+[2026-10-20 18:47:59] Stream: #INTC_otc = 90.602 @ 1792540079.747
+[2026-10-20 18:47:59] Salvando tick stream no repositório: #INTC_otc @ 90.602
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540080.25, 340.218]]
+[2026-10-20 18:48:00] Stream: #AAPL_otc = 340.218 @ 1792540080.25
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #AAPL_otc @ 340.218
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540080.25, 694.57]]
+[2026-10-20 18:48:00] Stream: #FB_otc = 694.57 @ 1792540080.25
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540080.25, 90.6]]
+[2026-10-20 18:48:00] Stream: #INTC_otc = 90.6 @ 1792540080.25
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #INTC_otc @ 90.6
+[2026-10-20 18:48:00] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 96], ['#FB_otc', 61], ['#INTC_otc', 17]]
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540080.764, 340.215]]
+[2026-10-20 18:48:00] Stream: #AAPL_otc = 340.215 @ 1792540080.764
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #AAPL_otc @ 340.215
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540080.764, 694.58]]
+[2026-10-20 18:48:00] Stream: #FB_otc = 694.58 @ 1792540080.764
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #FB_otc @ 694.58
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:00] Dados binários de stream recebidos
+[2026-10-20 18:48:00] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540080.764, 90.606]]
+[2026-10-20 18:48:00] Stream: #INTC_otc = 90.606 @ 1792540080.764
+[2026-10-20 18:48:00] Salvando tick stream no repositório: #INTC_otc @ 90.606
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540081.262, 340.215]]
+[2026-10-20 18:48:01] Stream: #AAPL_otc = 340.215 @ 1792540081.262
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #AAPL_otc @ 340.215
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540081.262, 694.57]]
+[2026-10-20 18:48:01] Stream: #FB_otc = 694.57 @ 1792540081.262
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #FB_otc @ 694.57
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540081.262, 90.604]]
+[2026-10-20 18:48:01] Stream: #INTC_otc = 90.604 @ 1792540081.262
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #INTC_otc @ 90.604
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540081.763, 340.219]]
+[2026-10-20 18:48:01] Stream: #AAPL_otc = 340.219 @ 1792540081.763
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #AAPL_otc @ 340.219
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540081.763, 694.61]]
+[2026-10-20 18:48:01] Stream: #FB_otc = 694.61 @ 1792540081.763
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #FB_otc @ 694.61
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:01] Dados binários de stream recebidos
+[2026-10-20 18:48:01] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540081.763, 90.607]]
+[2026-10-20 18:48:01] Stream: #INTC_otc = 90.607 @ 1792540081.763
+[2026-10-20 18:48:01] Salvando tick stream no repositório: #INTC_otc @ 90.607
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540082.142, 340.219]]
+[2026-10-20 18:48:02] Stream: #AAPL_otc = 340.219 @ 1792540082.142
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #AAPL_otc @ 340.219
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540082.142, 694.61]]
+[2026-10-20 18:48:02] Stream: #FB_otc = 694.61 @ 1792540082.142
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #FB_otc @ 694.61
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540082.142, 90.607]]
+[2026-10-20 18:48:02] Stream: #INTC_otc = 90.607 @ 1792540082.142
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #INTC_otc @ 90.607
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540082.765, 340.219]]
+[2026-10-20 18:48:02] Stream: #AAPL_otc = 340.219 @ 1792540082.765
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #AAPL_otc @ 340.219
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540082.765, 694.59]]
+[2026-10-20 18:48:02] Stream: #FB_otc = 694.59 @ 1792540082.765
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #FB_otc @ 694.59
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:02] Dados binários de stream recebidos
+[2026-10-20 18:48:02] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540082.765, 90.607]]
+[2026-10-20 18:48:02] Stream: #INTC_otc = 90.607 @ 1792540082.765
+[2026-10-20 18:48:02] Salvando tick stream no repositório: #INTC_otc @ 90.607
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540083.268, 340.213]]
+[2026-10-20 18:48:03] Stream: #AAPL_otc = 340.213 @ 1792540083.268
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #AAPL_otc @ 340.213
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540083.268, 694.6]]
+[2026-10-20 18:48:03] Stream: #FB_otc = 694.6 @ 1792540083.268
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #FB_otc @ 694.6
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540083.268, 90.604]]
+[2026-10-20 18:48:03] Stream: #INTC_otc = 90.604 @ 1792540083.268
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #INTC_otc @ 90.604
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540083.767, 340.211]]
+[2026-10-20 18:48:03] Stream: #AAPL_otc = 340.211 @ 1792540083.767
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #AAPL_otc @ 340.211
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540083.767, 694.59]]
+[2026-10-20 18:48:03] Stream: #FB_otc = 694.59 @ 1792540083.767
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #FB_otc @ 694.59
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:03] Dados binários de stream recebidos
+[2026-10-20 18:48:03] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540083.767, 90.606]]
+[2026-10-20 18:48:03] Stream: #INTC_otc = 90.606 @ 1792540083.767
+[2026-10-20 18:48:03] Salvando tick stream no repositório: #INTC_otc @ 90.606
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540084.273, 340.209]]
+[2026-10-20 18:48:04] Stream: #AAPL_otc = 340.209 @ 1792540084.273
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #AAPL_otc @ 340.209
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540084.273, 694.6]]
+[2026-10-20 18:48:04] Stream: #FB_otc = 694.6 @ 1792540084.273
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #FB_otc @ 694.6
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540084.273, 90.604]]
+[2026-10-20 18:48:04] Stream: #INTC_otc = 90.604 @ 1792540084.273
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #INTC_otc @ 90.604
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540084.768, 340.205]]
+[2026-10-20 18:48:04] Stream: #AAPL_otc = 340.205 @ 1792540084.768
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #AAPL_otc @ 340.205
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540084.768, 694.59]]
+[2026-10-20 18:48:04] Stream: #FB_otc = 694.59 @ 1792540084.768
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #FB_otc @ 694.59
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540084.768, 90.595]]
+[2026-10-20 18:48:04] Stream: #INTC_otc = 90.595 @ 1792540084.768
+[2026-10-20 18:48:04] Salvando tick stream no repositório: #INTC_otc @ 90.595
+[2026-10-20 18:48:04] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:04] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540085.143, 340.205]]
+[2026-10-20 18:48:05] Stream: #AAPL_otc = 340.205 @ 1792540085.143
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #AAPL_otc @ 340.205
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540085.143, 694.59]]
+[2026-10-20 18:48:05] Stream: #FB_otc = 694.59 @ 1792540085.143
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #FB_otc @ 694.59
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540085.143, 90.595]]
+[2026-10-20 18:48:05] Stream: #INTC_otc = 90.595 @ 1792540085.143
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #INTC_otc @ 90.595
+[2026-10-20 18:48:05] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 81], ['#FB_otc', 97], ['#INTC_otc', 53]]
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540085.767, 340.211]]
+[2026-10-20 18:48:05] Stream: #AAPL_otc = 340.211 @ 1792540085.767
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #AAPL_otc @ 340.211
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540085.767, 694.61]]
+[2026-10-20 18:48:05] Stream: #FB_otc = 694.61 @ 1792540085.767
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #FB_otc @ 694.61
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:05] Dados binários de stream recebidos
+[2026-10-20 18:48:05] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540085.767, 90.587]]
+[2026-10-20 18:48:05] Stream: #INTC_otc = 90.587 @ 1792540085.767
+[2026-10-20 18:48:05] Salvando tick stream no repositório: #INTC_otc @ 90.587
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540086.266, 340.215]]
+[2026-10-20 18:48:06] Stream: #AAPL_otc = 340.215 @ 1792540086.266
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #AAPL_otc @ 340.215
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540086.266, 694.59]]
+[2026-10-20 18:48:06] Stream: #FB_otc = 694.59 @ 1792540086.266
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #FB_otc @ 694.59
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540086.266, 90.581]]
+[2026-10-20 18:48:06] Stream: #INTC_otc = 90.581 @ 1792540086.266
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #INTC_otc @ 90.581
+[2026-10-20 18:48:06] Evento: updateOpenedDeals",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Evento: updateOpenedDeals",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:48:06] Evento: successupdatePending",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Evento: successupdatePending",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:48:06] Evento: updateCharts",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Evento: updateCharts",{"_placeholder":true,"num":0}_data | Dados: [{'chart_id': 'chart-1', 'settings': '{"chartId":"chart-1","chartType":1,"chartPeriod":4,"candlesTimer":false,"symbol":"EURUSD_otc","demoDealAmount":10,"liveDealAmount":1,"enabledTradeMonitor":false,"enabledRatingWidget":true,"isVisible":true,"fastTimeframe":3,"enabledAutoscroll":true,"enabledGridSnap":true,"minimizedTradePanel":false,"fastCloseAt":0,"enableQuickAutoOffset":true,"quickAutoOffsetValue":30,"showArea":true,"percentAmount":1,"aiStrategyStrategy":"fixed","aiStrategyStartAmount":2,"aiStrategyDealsCount":10}'}]
+[2026-10-20 18:48:06] Evento: successupdateBalance",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Evento: updateClosedDeals",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Evento: updateClosedDeals",{"_placeholder":true,"num":0}_data | Dados: []
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540086.77, 340.218]]
+[2026-10-20 18:48:06] Stream: #AAPL_otc = 340.218 @ 1792540086.77
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #AAPL_otc @ 340.218
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540086.77, 694.6]]
+[2026-10-20 18:48:06] Stream: #FB_otc = 694.6 @ 1792540086.77
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #FB_otc @ 694.6
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:06] Dados binários de stream recebidos
+[2026-10-20 18:48:06] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540086.77, 90.583]]
+[2026-10-20 18:48:06] Stream: #INTC_otc = 90.583 @ 1792540086.77
+[2026-10-20 18:48:06] Salvando tick stream no repositório: #INTC_otc @ 90.583
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540087.27, 340.22]]
+[2026-10-20 18:48:07] Stream: #AAPL_otc = 340.22 @ 1792540087.27
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #AAPL_otc @ 340.22
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540087.27, 694.61]]
+[2026-10-20 18:48:07] Stream: #FB_otc = 694.61 @ 1792540087.27
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #FB_otc @ 694.61
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540087.27, 90.58]]
+[2026-10-20 18:48:07] Stream: #INTC_otc = 90.58 @ 1792540087.27
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #INTC_otc @ 90.58
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540087.773, 340.218]]
+[2026-10-20 18:48:07] Stream: #AAPL_otc = 340.218 @ 1792540087.773
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #AAPL_otc @ 340.218
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540087.773, 694.64]]
+[2026-10-20 18:48:07] Stream: #FB_otc = 694.64 @ 1792540087.773
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #FB_otc @ 694.64
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540087.773, 90.582]]
+[2026-10-20 18:48:07] Stream: #INTC_otc = 90.582 @ 1792540087.773
+[2026-10-20 18:48:07] Salvando tick stream no repositório: #INTC_otc @ 90.582
+[2026-10-20 18:48:07] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:07] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540088.144, 340.218]]
+[2026-10-20 18:48:08] Stream: #AAPL_otc = 340.218 @ 1792540088.144
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #AAPL_otc @ 340.218
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:08] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540088.144, 694.64]]
+[2026-10-20 18:48:08] Stream: #FB_otc = 694.64 @ 1792540088.144
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #FB_otc @ 694.64
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:08] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540088.144, 90.582]]
+[2026-10-20 18:48:08] Stream: #INTC_otc = 90.582 @ 1792540088.144
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #INTC_otc @ 90.582
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:08] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540088.771, 340.225]]
+[2026-10-20 18:48:08] Stream: #AAPL_otc = 340.225 @ 1792540088.771
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #AAPL_otc @ 340.225
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:08] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540088.771, 694.65]]
+[2026-10-20 18:48:08] Stream: #FB_otc = 694.65 @ 1792540088.771
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #FB_otc @ 694.65
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:08] Dados binários de stream recebidos
+[2026-10-20 18:48:08] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540088.771, 90.577]]
+[2026-10-20 18:48:08] Stream: #INTC_otc = 90.577 @ 1792540088.771
+[2026-10-20 18:48:08] Salvando tick stream no repositório: #INTC_otc @ 90.577
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540089.271, 340.222]]
+[2026-10-20 18:48:09] Stream: #AAPL_otc = 340.222 @ 1792540089.271
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #AAPL_otc @ 340.222
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540089.271, 694.64]]
+[2026-10-20 18:48:09] Stream: #FB_otc = 694.64 @ 1792540089.271
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #FB_otc @ 694.64
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540089.271, 90.582]]
+[2026-10-20 18:48:09] Stream: #INTC_otc = 90.582 @ 1792540089.271
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #INTC_otc @ 90.582
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540089.771, 340.231]]
+[2026-10-20 18:48:09] Stream: #AAPL_otc = 340.231 @ 1792540089.771
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #AAPL_otc @ 340.231
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540089.771, 694.63]]
+[2026-10-20 18:48:09] Stream: #FB_otc = 694.63 @ 1792540089.771
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #FB_otc @ 694.63
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:09] Dados binários de stream recebidos
+[2026-10-20 18:48:09] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540089.771, 90.586]]
+[2026-10-20 18:48:09] Stream: #INTC_otc = 90.586 @ 1792540089.771
+[2026-10-20 18:48:09] Salvando tick stream no repositório: #INTC_otc @ 90.586
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540090.271, 340.224]]
+[2026-10-20 18:48:10] Stream: #AAPL_otc = 340.224 @ 1792540090.271
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #AAPL_otc @ 340.224
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540090.271, 694.63]]
+[2026-10-20 18:48:10] Stream: #FB_otc = 694.63 @ 1792540090.271
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #FB_otc @ 694.63
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540090.271, 90.584]]
+[2026-10-20 18:48:10] Stream: #INTC_otc = 90.584 @ 1792540090.271
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #INTC_otc @ 90.584
+[2026-10-20 18:48:10] Evento: chafor",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Evento: chafor",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 76], ['#FB_otc', 85], ['#INTC_otc', 41]]
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540090.771, 340.227]]
+[2026-10-20 18:48:10] Stream: #AAPL_otc = 340.227 @ 1792540090.771
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #AAPL_otc @ 340.227
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540090.771, 694.63]]
+[2026-10-20 18:48:10] Stream: #FB_otc = 694.63 @ 1792540090.771
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #FB_otc @ 694.63
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540090.771, 90.581]]
+[2026-10-20 18:48:10] Stream: #INTC_otc = 90.581 @ 1792540090.771
+[2026-10-20 18:48:10] Salvando tick stream no repositório: #INTC_otc @ 90.581
+[2026-10-20 18:48:10] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:10] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540091.146, 340.227]]
+[2026-10-20 18:48:11] Stream: #AAPL_otc = 340.227 @ 1792540091.146
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #AAPL_otc @ 340.227
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:11] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540091.146, 694.63]]
+[2026-10-20 18:48:11] Stream: #FB_otc = 694.63 @ 1792540091.146
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #FB_otc @ 694.63
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:11] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540091.146, 90.581]]
+[2026-10-20 18:48:11] Stream: #INTC_otc = 90.581 @ 1792540091.146
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #INTC_otc @ 90.581
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:11] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540091.773, 340.222]]
+[2026-10-20 18:48:11] Stream: #AAPL_otc = 340.222 @ 1792540091.773
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #AAPL_otc @ 340.222
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:11] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540091.773, 694.54]]
+[2026-10-20 18:48:11] Stream: #FB_otc = 694.54 @ 1792540091.773
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #FB_otc @ 694.54
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:11] Dados binários de stream recebidos
+[2026-10-20 18:48:11] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540091.773, 90.586]]
+[2026-10-20 18:48:11] Stream: #INTC_otc = 90.586 @ 1792540091.773
+[2026-10-20 18:48:11] Salvando tick stream no repositório: #INTC_otc @ 90.586
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540092.274, 340.219]]
+[2026-10-20 18:48:12] Stream: #AAPL_otc = 340.219 @ 1792540092.274
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #AAPL_otc @ 340.219
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540092.274, 694.55]]
+[2026-10-20 18:48:12] Stream: #FB_otc = 694.55 @ 1792540092.274
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #FB_otc @ 694.55
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540092.274, 90.584]]
+[2026-10-20 18:48:12] Stream: #INTC_otc = 90.584 @ 1792540092.274
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #INTC_otc @ 90.584
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540092.756, 340.216]]
+[2026-10-20 18:48:12] Stream: #AAPL_otc = 340.216 @ 1792540092.756
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #AAPL_otc @ 340.216
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540092.756, 694.54]]
+[2026-10-20 18:48:12] Stream: #FB_otc = 694.54 @ 1792540092.756
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #FB_otc @ 694.54
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:12] Dados binários de stream recebidos
+[2026-10-20 18:48:12] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540092.756, 90.59]]
+[2026-10-20 18:48:12] Stream: #INTC_otc = 90.59 @ 1792540092.756
+[2026-10-20 18:48:12] Salvando tick stream no repositório: #INTC_otc @ 90.59
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540093.257, 340.221]]
+[2026-10-20 18:48:13] Stream: #AAPL_otc = 340.221 @ 1792540093.257
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #AAPL_otc @ 340.221
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540093.257, 694.5]]
+[2026-10-20 18:48:13] Stream: #FB_otc = 694.5 @ 1792540093.257
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #FB_otc @ 694.5
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540093.257, 90.592]]
+[2026-10-20 18:48:13] Stream: #INTC_otc = 90.592 @ 1792540093.257
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #INTC_otc @ 90.592
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540093.757, 340.211]]
+[2026-10-20 18:48:13] Stream: #AAPL_otc = 340.211 @ 1792540093.757
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #AAPL_otc @ 340.211
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540093.757, 694.51]]
+[2026-10-20 18:48:13] Stream: #FB_otc = 694.51 @ 1792540093.757
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540093.757, 90.589]]
+[2026-10-20 18:48:13] Stream: #INTC_otc = 90.589 @ 1792540093.757
+[2026-10-20 18:48:13] Salvando tick stream no repositório: #INTC_otc @ 90.589
+[2026-10-20 18:48:13] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:13] Dados binários de stream recebidos
+[2026-10-20 18:48:14] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#AAPL_otc', 1792540094.147, 340.211]]
+[2026-10-20 18:48:14] Stream: #AAPL_otc = 340.211 @ 1792540094.147
+[2026-10-20 18:48:14] Salvando tick stream no repositório: #AAPL_otc @ 340.211
+[2026-10-20 18:48:14] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:14] Dados binários de stream recebidos
+[2026-10-20 18:48:14] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#FB_otc', 1792540094.147, 694.51]]
+[2026-10-20 18:48:14] Stream: #FB_otc = 694.51 @ 1792540094.147
+[2026-10-20 18:48:14] Salvando tick stream no repositório: #FB_otc @ 694.51
+[2026-10-20 18:48:14] Evento: updateStream",{"_placeholder":true,"num":0} | Dados: {'_placeholder': True, 'num': 0}
+[2026-10-20 18:48:14] Dados binários de stream recebidos
+[2026-10-20 18:48:14] Evento: updateStream",{"_placeholder":true,"num":0}_data | Dados: [['#INTC_otc', 1792540094.147, 90.589]]
+[2026-10-20 18:48:14] Stream: #INTC_otc = 90.589 @ 1792540094.147
+[2026-10-20 18:48:14] Salvando tick stream no repositório: #INTC_otc @ 90.589

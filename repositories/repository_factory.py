@@ -16,7 +16,7 @@ class RepositoryFactory:
         db_type = config.get("DATABASE_TYPE", "sqlite")
 
         if db_type == "sqlite":
-            return SQLiteTickRepository(config.get("SQLITE_PATH", "data/openob_ticks.db"))
+            return SQLiteTickRepository(config.get("SQLITE_PATH", "data/openob.db"))
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
