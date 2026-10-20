@@ -88,10 +88,12 @@ def reset_logs():
     """Gerenciar pasta logs/ conforme LOG_LEVEL"""
     logs_dir = "logs"
     ws_dir = os.path.join(logs_dir, "ws")
+    plans_dir = os.path.join(logs_dir, "plans")
 
-    # Criar diretório logs/ sempre (necessário para logs de segurança)
+    # Criar diretórios sempre
     os.makedirs(logs_dir, exist_ok=True)
     os.makedirs(ws_dir, exist_ok=True)
+    os.makedirs(plans_dir, exist_ok=True)
 
     # Criar arquivo de segurança sempre (independente de LOG_LEVEL)
     auth_log = os.path.join(logs_dir, "auth.txt")
@@ -100,8 +102,8 @@ def reset_logs():
             f.write("")  # Criar arquivo vazio
 
     # Criar arquivos de subscription, payment e security sempre
-    subscription_log = os.path.join(logs_dir, "subscriptions.txt")
-    payment_log = os.path.join(logs_dir, "payments.txt")
+    subscription_log = os.path.join(plans_dir, "subscriptions.txt")
+    payment_log = os.path.join(plans_dir, "payments.txt")
     security_log = os.path.join(logs_dir, "security.txt")
     
     for log_file in [subscription_log, payment_log, security_log]:

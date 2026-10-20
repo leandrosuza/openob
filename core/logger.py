@@ -58,7 +58,7 @@ class LoggerConfig:
         cls._configured = True
 
     @classmethod
-    def setup_subscription_logger(cls, log_file: str = "logs/subscriptions.txt"):
+    def setup_subscription_logger(cls, log_file: str = "logs/plans/subscriptions.txt"):
         """Configurar logger específico para subscriptions"""
         if cls._subscription_logger:
             return cls._subscription_logger
@@ -75,7 +75,7 @@ class LoggerConfig:
         return cls._subscription_logger
 
     @classmethod
-    def setup_payment_logger(cls, log_file: str = "logs/payments.txt"):
+    def setup_payment_logger(cls, log_file: str = "logs/plans/payments.txt"):
         """Configurar logger específico para pagamentos"""
         if cls._payment_logger:
             return cls._payment_logger
