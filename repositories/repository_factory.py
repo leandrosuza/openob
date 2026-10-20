@@ -14,59 +14,81 @@ from repositories.sqlite.sqlite_transaction_repository import SQLiteTransactionR
 
 
 class RepositoryFactory:
-    """Fábrica de repositórios"""
+    """Fábrica de repositórios com singleton para evitar conflitos de lock"""
+
+    _instances: Dict[str, any] = {}
 
     @staticmethod
     def create_tick_repository(config: Dict) -> TickRepositoryInterface:
-        """Criar repositório de ticks baseado em config"""
+        """Criar repositório de ticks baseado em config (singleton)"""
         db_type = config.get("DATABASE_TYPE", "sqlite")
+        db_path = config.get("SQLITE_PATH", "data/openob.db")
+        cache_key = f"tick_{db_path}"
 
         if db_type == "sqlite":
-            return SQLiteTickRepository(config.get("SQLITE_PATH", "data/openob.db"))
+            if cache_key not in RepositoryFactory._instances:
+                RepositoryFactory._instances[cache_key] = SQLiteTickRepository(db_path)
+            return RepositoryFactory._instances[cache_key]
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
 
     @staticmethod
     def create_user_repository(config: Dict) -> UserRepositoryInterface:
-        """Criar repositório de usuários baseado em config"""
+        """Criar repositório de usuários baseado em config (singleton)"""
         db_type = config.get("DATABASE_TYPE", "sqlite")
+        db_path = config.get("SQLITE_PATH", "data/openob.db")
+        cache_key = f"user_{db_path}"
 
         if db_type == "sqlite":
-            return SQLiteUserRepository(config.get("SQLITE_PATH", "data/openob.db"))
+            if cache_key not in RepositoryFactory._instances:
+                RepositoryFactory._instances[cache_key] = SQLiteUserRepository(db_path)
+            return RepositoryFactory._instances[cache_key]
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
 
     @staticmethod
     def create_plan_repository(config: Dict) -> PlanRepositoryInterface:
-        """Criar repositório de planos baseado em config"""
+        """Criar repositório de planos baseado em config (singleton)"""
         db_type = config.get("DATABASE_TYPE", "sqlite")
+        db_path = config.get("SQLITE_PATH", "data/openob.db")
+        cache_key = f"plan_{db_path}"
 
         if db_type == "sqlite":
-            return SQLitePlanRepository(config.get("SQLITE_PATH", "data/openob.db"))
+            if cache_key not in RepositoryFactory._instances:
+                RepositoryFactory._instances[cache_key] = SQLitePlanRepository(db_path)
+            return RepositoryFactory._instances[cache_key]
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
 
     @staticmethod
     def create_subscription_repository(config: Dict) -> SubscriptionRepositoryInterface:
-        """Criar repositório de subscriptions baseado em config"""
+        """Criar repositório de subscriptions baseado em config (singleton)"""
         db_type = config.get("DATABASE_TYPE", "sqlite")
+        db_path = config.get("SQLITE_PATH", "data/openob.db")
+        cache_key = f"subscription_{db_path}"
 
         if db_type == "sqlite":
-            return SQLiteSubscriptionRepository(config.get("SQLITE_PATH", "data/openob.db"))
+            if cache_key not in RepositoryFactory._instances:
+                RepositoryFactory._instances[cache_key] = SQLiteSubscriptionRepository(db_path)
+            return RepositoryFactory._instances[cache_key]
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
 
     @staticmethod
     def create_transaction_repository(config: Dict) -> TransactionRepositoryInterface:
-        """Criar repositório de transações baseado em config"""
+        """Criar repositório de transações baseado em config (singleton)"""
         db_type = config.get("DATABASE_TYPE", "sqlite")
+        db_path = config.get("SQLITE_PATH", "data/openob.db")
+        cache_key = f"transaction_{db_path}"
 
         if db_type == "sqlite":
-            return SQLiteTransactionRepository(config.get("SQLITE_PATH", "data/openob.db"))
+            if cache_key not in RepositoryFactory._instances:
+                RepositoryFactory._instances[cache_key] = SQLiteTransactionRepository(db_path)
+            return RepositoryFactory._instances[cache_key]
 
         else:
             raise ValueError(f"Database type not supported: {db_type}")
