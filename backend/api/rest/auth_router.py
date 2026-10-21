@@ -80,12 +80,13 @@ async def register(
 
     # Obter plano free
     free_plan = await plan_repo.get_by_type("free")
-    await plan_repo.close()
 
     if free_plan:
         # Criar subscription free
         start_date = datetime.now(timezone.utc)
-        end_date = None  # Free não expira
+        # Free não expira - usar data muito distante no futuro
+        from datetime import timedelta
+        end_date = start_date + timedelta(days=365 * 100)  # 100 anos
 
         subscription = await subscription_repo.create_for_user(
             user_id=created_user.id,
@@ -103,8 +104,6 @@ async def register(
         await user_repo.update(created_user)
 
         subscription_logger.info(f"Subscription free criada para user {created_user.id}, subscription_id={subscription.id}")
-
-    await subscription_repo.close()
 
     return UserResponse(
         id=created_user.id,

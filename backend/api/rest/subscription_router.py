@@ -20,11 +20,10 @@ async def get_my_subscription(current_user: User = Depends(get_current_user)):
         config = Settings.to_dict()
         subscription_repo = RepositoryFactory.create_subscription_repository(config)
         subscription = await subscription_repo.get_active_by_user(current_user.id)
-        await subscription_repo.close()
-        
+
         if not subscription:
             raise HTTPException(status_code=404, detail="Nenhuma subscription ativa encontrada")
-        
+
         return subscription
     except HTTPException:
         raise
@@ -40,7 +39,6 @@ async def get_subscription_history(current_user: User = Depends(get_current_user
         config = Settings.to_dict()
         subscription_repo = RepositoryFactory.create_subscription_repository(config)
         subscriptions = await subscription_repo.get_history(current_user.id, limit, offset)
-        await subscription_repo.close()
         return subscriptions
     except Exception as e:
         logger.error(f"Erro ao buscar histórico: {e}")
@@ -54,14 +52,13 @@ async def get_subscription(subscription_id: int, current_user: User = Depends(ge
         config = Settings.to_dict()
         subscription_repo = RepositoryFactory.create_subscription_repository(config)
         subscription = await subscription_repo.get_by_id(subscription_id)
-        await subscription_repo.close()
-        
+
         if not subscription:
             raise HTTPException(status_code=404, detail="Subscription não encontrada")
-        
+
         if subscription.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Acesso não autorizado")
-        
+
         return subscription
     except HTTPException:
         raise
@@ -77,13 +74,12 @@ async def cancel_subscription(current_user: User = Depends(get_current_user)):
         config = Settings.to_dict()
         subscription_repo = RepositoryFactory.create_subscription_repository(config)
         subscription = await subscription_repo.get_active_by_user(current_user.id)
-        
+
         if not subscription:
             raise HTTPException(status_code=404, detail="Nenhuma subscription ativa encontrada")
-        
+
         await subscription_repo.cancel(subscription.id)
-        await subscription_repo.close()
-        
+
         logger.info(f"Subscription cancelada: user={current_user.id}, subscription_id={subscription.id}")
         return {"message": "Subscription cancelada com sucesso"}
     except HTTPException:
@@ -102,8 +98,7 @@ async def manual_upgrade(request: SubscriptionRequest, current_user: User = Depe
         subscription_repo = RepositoryFactory.create_subscription_repository(config)
         
         plan = await plan_repo.get_by_id(request.plan_id)
-        await plan_repo.close()
-        
+
         if not plan:
             raise HTTPException(status_code=404, detail="Plano não encontrado")
         
@@ -120,8 +115,7 @@ async def manual_upgrade(request: SubscriptionRequest, current_user: User = Depe
             payment_id="manual",
             auto_renew=False
         )
-        await subscription_repo.close()
-        
+
         logger.info(f"Upgrade manual: user={current_user.id}, plano={plan.name}, subscription_id={subscription.id}")
         return subscription
     except HTTPException:

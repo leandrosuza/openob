@@ -17,7 +17,6 @@ async def list_plans():
         config = Settings.to_dict()
         plan_repo = RepositoryFactory.create_plan_repository(config)
         plans = await plan_repo.get_active_plans()
-        await plan_repo.close()
         return plans
     except Exception as e:
         logger.error(f"Erro ao listar planos: {e}")
@@ -31,11 +30,10 @@ async def get_plan(plan_id: int):
         config = Settings.to_dict()
         plan_repo = RepositoryFactory.create_plan_repository(config)
         plan = await plan_repo.get_by_id(plan_id)
-        await plan_repo.close()
-        
+
         if not plan:
             raise HTTPException(status_code=404, detail="Plano não encontrado")
-        
+
         return plan
     except HTTPException:
         raise
