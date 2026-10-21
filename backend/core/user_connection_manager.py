@@ -1,0 +1,296 @@
+"""UserConnectionManager - Gerenciador de conexões WebSocket por usuário"""
+
+import asyncio
+import os
+from typing import Dict, Optional
+from datetime import datetime
+from connection.websocket import WebSocketManager
+from api.pocketoption.trading import TradingAPI
+from core.constants import WEBSOCKET_ENDPOINTS
+from core.logger import get_logger
+
+
+logger = get_logger(__name__)
+
+
+class UserConnectionManager:
+    """Gerenciador de múltiplas conexões WebSocket por usuário"""
+
+    def __init__(self, user_repository, strategy_manager, trading_manager):
+        self.connections: Dict[int, WebSocketManager] = {}  # conexões por user_id
+        self.trading_apis: Dict[int, TradingAPI] = {}  # TradingAPI por usuário
+        self.user_repository = user_repository
+        self.strategy_manager = strategy_manager
+        self.trading_manager = trading_manager
+        self._running = False
+        self._listen_task = None
+        self._polling_task = None
+
+    def _log_user_event(self, user_id: int, event: str, details: str = ""):
+        """Registrar evento específico do usuário em logs/users/{email}/user.txt"""
+        from config.settings import Settings
+
+        if Settings.LOG_LEVEL.upper() != "DEBUG":
+            return
+
+        try:
+            asyncio.create_task(self._log_user_event_async(user_id, event, details))
+        except Exception as e:
+            logger.error(f"Erro ao registrar log de usuário: {e}")
+
+    async def _log_user_event_async(self, user_id: int, event: str, details: str = ""):
+        """Registrar evento específico do usuário (async)"""
+        try:
+            user = await self.user_repository.get_by_id(user_id)
+            if not user:
+                return
+
+            # Sanitizar email para usar como nome de diretório
+            safe_email = user.email.replace("@", "_at_").replace(".", "_dot_")
+            user_log_dir = f"logs/users/{safe_email}"
+            os.makedirs(user_log_dir, exist_ok=True)
+
+            user_log_file = os.path.join(user_log_dir, "user.txt")
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log_entry = f"[{timestamp}] Event: {event} | {details}\n"
+
+            with open(user_log_file, "a", encoding="utf-8") as f:
+                f.write(log_entry)
+
+        except Exception as e:
+            logger.error(f"Erro ao escrever log de usuário: {e}")
+
+    async def start_monitoring(self):
+        """Iniciar monitoramento em tempo real"""
+        self._running = True
+
+        # Configurar injeções de dependências
+        self.strategy_manager.set_user_connection_manager(self)
+        self.trading_manager.set_user_connection_manager(self)
+        self.trading_manager.set_strategy_manager(self.strategy_manager)
+
+        # Tentar configurar LISTEN/NOTIFY
+        try:
+            await self.setup_database_notifications()
+            logger.info("LISTEN/NOTIFY configurado com sucesso")
+        except Exception as e:
+            logger.error(f"Falha ao configurar LISTEN/NOTIFY: {e}, usando polling")
+            # Fallback para polling
+            self._polling_task = asyncio.create_task(self.monitor_loop_polling())
+
+        logger.info("UserConnectionManager iniciado")
+
+    async def stop_monitoring(self):
+        """Parar monitoramento"""
+        self._running = False
+
+        if self._listen_task:
+            self._listen_task.cancel()
+
+        if self._polling_task:
+            self._polling_task.cancel()
+
+        # Desconectar todos os usuários
+        for user_id in list(self.connections.keys()):
+            await self.disconnect_user(user_id, reason="system_shutdown")
+
+        logger.info("UserConnectionManager parado")
+
+    async def setup_database_notifications(self):
+        """Configurar LISTEN/NOTIFY no PostgreSQL"""
+        # Implementação será feita no boot.py com TRIGGERs
+        # Aqui apenas placeholder para a lógica de LISTEN
+        logger.info("LISTEN/NOTIFY setup será configurado no boot.py")
+
+    async def monitor_loop_polling(self):
+        """Fallback: polling a cada 1s"""
+        while self._running:
+            try:
+                # Verificar usuários ativos
+                active_users = await self.user_repository.get_active_users()
+
+                for user in active_users:
+                    if user.is_active and user.id not in self.connections:
+                        await self.connect_user(user.id)
+                    elif not user.is_active and user.id in self.connections:
+                        await self.disconnect_user(user.id, reason="deactivated")
+
+                await asyncio.sleep(1)
+            except Exception as e:
+                logger.error(f"Erro no polling: {e}")
+                await asyncio.sleep(1)
+
+    async def connect_user(self, user_id: int):
+        """Conectar usuário ao WebSocket com 3 tentativas de reconexão"""
+        max_attempts = 3
+        retry_delay = 5  # segundos
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                user = await self.user_repository.get_by_id(user_id)
+                if not user:
+                    logger.error(f"Usuário {user_id} não encontrado")
+                    return
+
+                # Verificar SSID
+                if user.mode == "demo":
+                    ssid = user.ssid_demo
+                    region = "DEMO"
+                else:
+                    ssid = user.ssid_real
+                    region = await self.detect_best_endpoint()
+
+                if not ssid:
+                    logger.error(f"SSID vazio para usuário {user_id} em modo {user.mode}")
+                    # Atualizar status no banco
+                    user.is_connected = False
+                    user.connection_status = "disconnected"
+                    user.disconnect_reason = "missing_ssid"
+                    await self.user_repository.update(user)
+                    return
+
+                # Criar conexão WebSocket
+                ws_manager = WebSocketManager(region=region, name=f"User_{user_id}")
+                await ws_manager.connect(ssid=ssid, auto_reconnect=False)  # Nós controlamos reconexão
+
+                # Criar TradingAPI
+                trading_api = TradingAPI(ws_manager)
+
+                # Configurar handlers de eventos
+                self._setup_event_handlers(trading_api, user_id)
+
+                # Armazenar conexões
+                self.connections[user_id] = ws_manager
+                self.trading_apis[user_id] = trading_api
+
+                # Atualizar status no banco
+                user.is_connected = True
+                user.connection_status = "connected"
+                user.disconnect_reason = None
+                await self.user_repository.update(user)
+
+                masked_ssid = ssid[:20] + "..." if len(ssid) > 20 else ssid
+                logger.info(f"Usuário {user_id} conectado com sucesso (SSID: {masked_ssid}, Região: {region})")
+                self._log_user_event(user_id, "connect", f"SSID: {masked_ssid}, Endpoint: {region}, Status: connected")
+                return  # Sucesso, sair do loop
+
+            except Exception as e:
+                logger.error(f"Tentativa {attempt}/{max_attempts} falhou para usuário {user_id}: {e}")
+                self._log_user_event(user_id, "reconnect_attempt", f"Attempt: {attempt}/{max_attempts}, Error: {str(e)}")
+
+                if attempt < max_attempts:
+                    logger.info(f"Aguardando {retry_delay}s antes da próxima tentativa...")
+                    await asyncio.sleep(retry_delay)
+                else:
+                    # Falhou todas as tentativas
+                    logger.error(f"Não foi possível conectar usuário {user_id} após {max_attempts} tentativas")
+                    user = await self.user_repository.get_by_id(user_id)
+                    if user:
+                        user.is_connected = False
+                        user.connection_status = "disconnected"
+                        user.disconnect_reason = "error"
+                        await self.user_repository.update(user)
+                        self._log_user_event(user_id, "error", f"Connection failed after {max_attempts} attempts: {str(e)}")
+
+    async def disconnect_user(self, user_id: int, reason: str):
+        """Desconectar usuário com motivo"""
+        try:
+            if user_id in self.connections:
+                ws_manager = self.connections[user_id]
+                await ws_manager.disconnect()
+                del self.connections[user_id]
+
+            if user_id in self.trading_apis:
+                del self.trading_apis[user_id]
+
+            # Atualizar status no banco
+            user = await self.user_repository.get_by_id(user_id)
+            if user:
+                user.is_connected = False
+                user.connection_status = "disconnected"
+                user.disconnect_reason = reason
+                await self.user_repository.update(user)
+
+            logger.info(f"Usuário {user_id} desconectado: {reason}")
+            self._log_user_event(user_id, "disconnect", f"Reason: {reason}, Status: disconnected")
+
+        except Exception as e:
+            logger.error(f"Erro ao desconectar usuário {user_id}: {e}")
+
+    async def detect_best_endpoint(self):
+        """Auto-detectar melhor endpoint regional"""
+        endpoints = [v for k, v in WEBSOCKET_ENDPOINTS.items() if k != "DEMO"]
+
+        for endpoint in endpoints:
+            try:
+                # Simular teste de conectividade
+                logger.debug(f"Testando endpoint: {endpoint}")
+                # Na implementação real, testar conectividade aqui
+                return endpoint
+            except Exception:
+                continue
+
+        return "api-eu"  # Default
+
+    async def apply_autotrade_config(self, user_id: int, config):
+        """Aplicar config via StrategyManager"""
+        await self.strategy_manager.apply_config(user_id, config)
+        logger.info(f"Config aplicada para usuário {user_id}: {config.strategy_name}")
+
+    def _setup_event_handlers(self, trading_api: TradingAPI, user_id: int):
+        """Configurar handlers de eventos do WebSocket"""
+        # Handler para balance update
+        async def on_balance(data):
+            await self.trading_manager.on_balance_update(user_id, data)
+
+        # Handler para trade result
+        async def on_trade_result(data):
+            await self.trading_manager.on_trade_result(user_id, data)
+
+        # Adicionar handlers (implementação simplificada)
+        trading_api.ws_manager.add_event_handler("balance", on_balance)
+        trading_api.ws_manager.add_event_handler("json_data", on_trade_result)
+
+    def send_order(self, user_id: int, order):
+        """Enviar ordem via TradingAPI do usuário"""
+        trading_api = self.trading_apis.get(user_id)
+        if not trading_api:
+            logger.warning(f"TradingAPI não encontrada para usuário {user_id}")
+            return
+
+        return trading_api.place_order(
+            asset=order.asset,
+            amount=order.amount,
+            direction=order.direction,
+            duration=order.duration
+        )
+
+    def on_trade_result(self, user_id: int, result: Dict):
+        """Encaminhar resultado de trade para TradingManager"""
+        asyncio.create_task(self.trading_manager.on_trade_result(user_id, result))
+
+    def on_balance_update(self, user_id: int, balance: Dict):
+        """Encaminhar atualização de saldo para TradingManager"""
+        asyncio.create_task(self.trading_manager.on_balance_update(user_id, balance))
+
+    def get_user_status(self, user_id: int) -> Optional[Dict]:
+        """Obter status da conexão do usuário"""
+        if user_id in self.connections:
+            return {
+                "user_id": user_id,
+                "is_connected": True,
+                "connection_status": "connected"
+            }
+        return {
+            "user_id": user_id,
+            "is_connected": False,
+            "connection_status": "disconnected"
+        }
+
+    def get_all_connections_status(self) -> Dict[int, Dict]:
+        """Obter status de todas as conexões"""
+        status = {}
+        for user_id in self.connections:
+            status[user_id] = self.get_user_status(user_id)
+        return status

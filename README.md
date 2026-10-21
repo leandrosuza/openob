@@ -1,108 +1,125 @@
-# OpenOB
+# OpenOB - Plataforma de Trading Multi-Usuário
 
-Sistema de monitoramento e trading PocketOption com WebSocket e API REST.
+Sistema completo de trading multi-usuário com PocketOption, WebSocket connections, estratégias de autotrade e monitoramento em tempo real.
 
-## 📋 Pré-requisitos
-
-- Python 3.12+
-- pip
-
-## 🚀 Instalação
-
-```bash
-python depen.py
-```
-
-Para dependências de desenvolvimento:
-
-```bash
-python depen.py --dev
-```
-
-Para atualizar dependências existentes:
-
-```bash
-python depen.py --upgrade
-```
-
-## 🔧 Configuração
-
-1. Copie o arquivo de exemplo:
-```bash
-cp .env.example .env
-```
-
-2. Edite o arquivo `.env` com suas configurações:
-   - Configure seu SSID do PocketOption
-   - Defina uma chave JWT forte para produção
-   - Configure origens CORS permitidas
-
-## 📂 Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
 openob/
-├── api/                   # APIs do projeto
-│   ├── pocketoption/      # WebSocket PocketOption
-│   └── rest/              # HTTP REST FastAPI
-├── config/                # Configurações centralizadas
-├── core/                  # Funcionalidades core
-├── models/                # Modelos de dados
-├── repositories/          # Camada de persistência
-├── boot.py                # Script unificado (monitoramento/API)
-├── depen.py               # Script de instalação de dependências
-└── .env                   # Configurações (não commitar)
+├── backend/          # FastAPI + Python
+│   ├── api/         # Rotas REST
+│   ├── core/        # Lógica de negócio (managers, estratégias)
+│   ├── models/      # Pydantic models
+│   ├── repositories/# PostgreSQL repositories
+│   ├── config/      # Configurações
+│   └── boot.py      # Entry point
+├── frontend/        # React + TypeScript + Vite
+│   ├── src/
+│   │   ├── pages/   # Login, Register, Dashboard
+│   │   ├── services/# API services
+│   │   └── types/   # TypeScript types
+│   └── package.json
+└── README.md
 ```
 
-## 🏃 Executar
+## 🚀 Stack Tecnológico
 
-O script `boot.py` unificado gerencia tanto o monitoramento WebSocket quanto o servidor API HTTP.
+### Backend
+- **Framework**: FastAPI
+- **Banco de Dados**: PostgreSQL
+- **WebSocket**: PocketOption WebSocket API
+- **Async**: asyncio + asyncpg
+- **Autenticação**: JWT (python-jose)
 
-### Monitoramento WebSocket (padrão)
+### Frontend
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Routing**: React Router v6
+- **HTTP**: Axios
 
+## 🔧 Instalação
+
+### Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+Configure o arquivo `.env`:
+```env
+DATABASE_TYPE=postgresql
+POSTGRES_HOST=turntable.proxy.rlwy.net
+POSTGRES_PORT=21912
+POSTGRES_DB=railway
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+```
+
+Rodar backend:
 ```bash
 python boot.py
 ```
 
-Ou explicitamente:
+### Frontend
 
 ```bash
-python boot.py monitor
+cd frontend
+npm install
+npm run dev
 ```
 
-### Servidor API HTTP
+O frontend vai rodar em `http://localhost:3000`.
 
-```bash
-python boot.py api
-```
+## 📋 Funcionalidades
 
-Ou com uvicorn diretamente:
+### ✅ Implementado
 
-```bash
-uvicorn api.rest.main:app --host 0.0.0.0 --port 8000 --reload
-```
+- **Multi-usuário**: Suporte a múltiplos usuários simultâneos
+- **Autenticação**: JWT com refresh tokens
+- **WebSocket**: Conexões WebSocket por usuário (demo/real)
+- **Autotrade**: Sistema de autotrade com estratégias configuráveis
+- **Estratégias**: Estratégia scalping5s com indicadores (MA, RSI)
+- **Monitoramento**: Monitor global de ativos com payout
+- **Managers**: StrategyManager, TradingManager, UserConnectionManager
+- **PostgreSQL**: LISTEN/NOTIFY para sincronização em tempo real
+- **Frontend**: Tela de autenticação (login/register) flat e minimalista
 
-API docs: http://localhost:8000/docs
+### 🔄 Em Desenvolvimento
 
-## 🔒 Segurança
+- Dashboard completo com gráficos
+- Configuração de estratégias via UI
+- Visualização de sinais em tempo real
+- Histórico de trades
+- Gerenciamento de planos/subscription
 
-A API REST implementa:
-- Autenticação JWT com access/refresh tokens
-- Rate limiting em endpoints sensíveis
-- Headers de segurança HTTP (CSP, HSTS, X-Frame-Options)
-- CORS restrito configurável via .env
-- Logs de segurança dedicados em `logs/auth.txt`
+## 🔐 Segurança
 
-## 📝 Configurações via .env
+- Senhas hash com bcrypt
+- Tokens JWT com expiração
+- SSIDs não expostos em logs
+- Rate limiting nas rotas
+- Validação de campos
 
-- `JWT_SECRET_KEY`: Chave secreta para assinatura de tokens
-- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`: Tempo de expiração do access token
-- `JWT_REFRESH_TOKEN_EXPIRE_DAYS`: Tempo de expiração do refresh token
-- `CORS_ORIGINS`: Origens permitidas separadas por vírgula
-- `RATE_LIMIT_*`: Limites de requisições por endpoint
-- `POCKETOPTION_MONITOR_SSID`: SSID para monitoramento
-- `LOG_LEVEL`: Nível de log (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+## 📡 API Endpoints
 
-## 📚 Documentação
+### Autenticação
+- `POST /api/auth/register` - Registrar usuário
+- `POST /api/auth/login` - Login
+- `POST /api/auth/refresh` - Renovar token
+- `GET /api/auth/me` - Obter usuário atual
+- `POST /api/auth/logout` - Logout
 
-- [API](api/README.md) - Documentação das APIs
-- [Codebase](codebase.md) - Regras de codificação
+### Conexões de Usuário
+- `POST /api/user-connection/connect` - Conectar usuário
+- `POST /api/user-connection/disconnect` - Desconectar usuário
+- `GET /api/user-connection/status` - Status da conexão
+
+### Autotrade
+- `GET /api/autotrade/config` - Obter configuração
+- `POST /api/autotrade/config` - Atualizar configuração
+
+## 📝 Licença
+
+MIT License

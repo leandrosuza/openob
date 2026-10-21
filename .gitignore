@@ -1,4 +1,4 @@
-# Python
+# Python (Backend)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -25,11 +25,17 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
-# Virtual Environment
+# Virtual Environment (Backend)
 venv/
 ENV/
 env/
 .venv/
+
+# Node (Frontend)
+node_modules/
+dist/
+dist-ssr/
+*.local
 
 # IDE
 .vscode/
@@ -46,13 +52,16 @@ Thumbs.db
 # Secrets
 .env
 .env.local
+.env.*.local
 
-# Logs
+# Logs (Backend)
 logs/
 *.log
-logs/auth.txt  # Logs de segurança (autenticação)
 
-# Database
+# Database (Backend)
 data/*.db
 data/*.db-shm
 data/*.db-wal
+
+# Python cache
+*.pyc
