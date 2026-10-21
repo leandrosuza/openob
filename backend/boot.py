@@ -164,8 +164,7 @@ def start_api():
     uvicorn.run(
         "api.rest.main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True
+        port=8000
     )
 
 
@@ -307,10 +306,11 @@ async def init_managers():
     return user_connection_manager, strategy_manager, trading_manager
 
 
-async def main():
+def main():
     """Função principal - inicia servidor API"""
     # Inicializar banco de dados antes de tudo
-    await init_database()
+    import asyncio
+    asyncio.run(init_database())
 
     # Validar configurações
     errors = Settings.validate()
