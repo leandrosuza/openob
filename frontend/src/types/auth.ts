@@ -18,8 +18,6 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
-  ssid_demo: string;
-  ssid_real?: string;
 }
 
 export interface AuthResponse {

@@ -10,8 +10,6 @@ class UserRegister(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=100)
-    ssid_demo: str = Field(..., min_length=10)
-    ssid_real: Optional[str] = Field(None, min_length=10)
 
 
 class UserLogin(BaseModel):

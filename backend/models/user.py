@@ -12,7 +12,7 @@ class User(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: str = Field(..., min_length=5, max_length=100)
     password_hash: str = Field(..., min_length=60)
-    ssid_demo: str = Field(..., min_length=10)
+    ssid_demo: Optional[str] = Field(None, min_length=10)
     ssid_real: Optional[str] = Field(None, min_length=10)
     plan_id: Optional[int] = None
     current_subscription_id: Optional[int] = None

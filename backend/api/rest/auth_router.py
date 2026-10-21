@@ -88,13 +88,13 @@ async def register(
     # Hash da senha
     password_hash = await user_repo.hash_password(user_data.password)
 
-    # Criar usuário com novos campos
+    # Criar usuário com SSID placeholder (será configurado depois)
     user = User(
         username=user_data.username,
         email=user_data.email,
         password_hash=password_hash,
-        ssid_demo=user_data.ssid_demo,
-        ssid_real=user_data.ssid_real,
+        ssid_demo="PLACEHOLDER_SSID",  # Será configurado depois
+        ssid_real=None,
         plan_id=None,
         current_subscription_id=None,
         plan_expires_at=None,

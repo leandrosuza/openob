@@ -8,8 +8,6 @@ export default function Register() {
     username: '',
     email: '',
     password: '',
-    ssid_demo: '',
-    ssid_real: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,35 +87,6 @@ export default function Register() {
               placeholder="Sua senha"
               required
               minLength={6}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="ssid_demo" className="block text-sm font-medium text-dark mb-2">
-              SSID Demo (PocketOption)
-            </label>
-            <input
-              id="ssid_demo"
-              type="text"
-              value={formData.ssid_demo}
-              onChange={(e) => setFormData({ ...formData, ssid_demo: e.target.value })}
-              className="input-field"
-              placeholder="42[\"auth\",{\"session\":\"...\"}]"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="ssid_real" className="block text-sm font-medium text-dark mb-2">
-              SSID Real (opcional)
-            </label>
-            <input
-              id="ssid_real"
-              type="text"
-              value={formData.ssid_real || ''}
-              onChange={(e) => setFormData({ ...formData, ssid_real: e.target.value })}
-              className="input-field"
-              placeholder="42[\"auth\",{\"session\":\"...\"}]"
             />
           </div>
 
