@@ -170,104 +170,6 @@ def start_api():
 
 
 
-async def init_database():
-    """Inicializar banco de dados PostgreSQL e criar tabelas"""
-    from repositories.repository_factory import RepositoryFactory
-
-    config = Settings.to_dict()
-
-    # Inicializar plan repository (cria tabela e planos padrão)
-    plan_repo = RepositoryFactory.create_plan_repository(config)
-    await plan_repo._initialize_db()
-    logger.info("Banco de dados PostgreSQL inicializado com sucesso")
-
-    # Criar tabela autotrade_configs
-    autotrade_repo = RepositoryFactory.create_autotrade_repository(config)
-    await autotrade_repo._initialize_db()
-    logger.info("Tabela autotrade_configs criada")
-
-    # Criar TRIGGERs para LISTEN/NOTIFY
-    await _create_postgresql_triggers()
-
-
-async def _create_postgresql_triggers():
-    """Criar TRIGGERs para LISTEN/NOTIFY no PostgreSQL"""
-    from repositories.repository_factory import RepositoryFactory
-
-    config = Settings.to_dict()
-    from asyncpg import connect
-
-    try:
-        conn = await connect(
-            host=config.get("POSTGRES_HOST", "localhost"),
-            port=config.get("POSTGRES_PORT", 5432),
-            database=config.get("POSTGRES_DB", "openob"),
-            user=config.get("POSTGRES_USER", "openob_user"),
-            password=config.get("POSTGRES_PASSWORD", "")
-        )
-
-        # TRIGGER para users
-        await conn.execute("""
-            CREATE OR REPLACE FUNCTION notify_user_changes()
-            RETURNS TRIGGER AS $$
-            BEGIN
-              PERFORM pg_notify('user_changes', NEW.id::text);
-              RETURN NEW;
-            END;
-            $$ LANGUAGE plpgsql;
-        """)
-
-        try:
-            await conn.execute("DROP TRIGGER IF EXISTS user_is_active_trigger ON users")
-        except:
-            pass
-
-        await conn.execute("""
-            CREATE TRIGGER user_is_active_trigger
-            AFTER UPDATE OF is_active ON users
-            FOR EACH ROW EXECUTE FUNCTION notify_user_changes();
-        """)
-
-        try:
-            await conn.execute("DROP TRIGGER IF EXISTS user_mode_trigger ON users")
-        except:
-            pass
-
-        await conn.execute("""
-            CREATE TRIGGER user_mode_trigger
-            AFTER UPDATE OF mode ON users
-            FOR EACH ROW EXECUTE FUNCTION notify_user_changes();
-        """)
-
-        # TRIGGER para autotrade_configs
-        await conn.execute("""
-            CREATE OR REPLACE FUNCTION notify_autotrade_changes()
-            RETURNS TRIGGER AS $$
-            BEGIN
-              PERFORM pg_notify('autotrade_changes', NEW.user_id::text);
-              RETURN NEW;
-            END;
-            $$ LANGUAGE plpgsql;
-        """)
-
-        try:
-            await conn.execute("DROP TRIGGER IF EXISTS autotrade_config_trigger ON autotrade_configs")
-        except:
-            pass
-
-        await conn.execute("""
-            CREATE TRIGGER autotrade_config_trigger
-            AFTER INSERT OR UPDATE ON autotrade_configs
-            FOR EACH ROW EXECUTE FUNCTION notify_autotrade_changes();
-        """)
-
-        await conn.close()
-        logger.info("TRIGGERs PostgreSQL criados com sucesso")
-
-    except Exception as e:
-        logger.error(f"Erro ao criar TRIGGERs PostgreSQL: {e}")
-
-
 async def init_managers():
     """Inicializar managers de trading"""
     from repositories.repository_factory import RepositoryFactory
@@ -308,10 +210,6 @@ async def init_managers():
 
 def main():
     """Função principal - inicia servidor API"""
-    # Inicializar banco de dados antes de tudo
-    import asyncio
-    asyncio.run(init_database())
-
     # Validar configurações
     errors = Settings.validate()
     if errors:
