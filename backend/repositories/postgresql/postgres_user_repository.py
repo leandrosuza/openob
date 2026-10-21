@@ -196,18 +196,17 @@ class PostgresUserRepository(UserRepositoryInterface):
 
     async def hash_password(self, password: str) -> str:
         """Hash da senha usando bcrypt"""
-        from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        import bcrypt
         # Bcrypt limita a 72 bytes
         password_bytes = password.encode('utf-8')
         if len(password_bytes) > 72:
-            password = password_bytes[:72].decode('utf-8', errors='ignore')
-        return pwd_context.hash(password)
+            password_bytes = password_bytes[:72]
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
     async def verify_password(self, username: str, password: str) -> bool:
         """Verificar senha do usuário"""
-        from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        import bcrypt
 
         user = await self.get_by_username(username)
         if not user:
@@ -215,8 +214,8 @@ class PostgresUserRepository(UserRepositoryInterface):
         # Bcrypt limita a 72 bytes
         password_bytes = password.encode('utf-8')
         if len(password_bytes) > 72:
-            password = password_bytes[:72].decode('utf-8', errors='ignore')
-        return pwd_context.verify(password, user.password_hash)
+            password_bytes = password_bytes[:72]
+        return bcrypt.checkpw(password_bytes, user.password_hash.encode('utf-8'))
 
     async def update_password(self, user_id: int, new_password: str) -> bool:
         """Atualizar senha do usuário"""
