@@ -21,7 +21,7 @@ class User(BaseModel):
     balance: float = 0.0
     mode: str = "demo"  # "demo" ou "real"
     is_connected: bool = False  # status da conexão
-    connection_status: str = "disconnected"  # detalhes do status
+    connection_status: Optional[str] = "disconnected"  # detalhes do status
     disconnect_reason: Optional[str] = None  # motivo da desconexão
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

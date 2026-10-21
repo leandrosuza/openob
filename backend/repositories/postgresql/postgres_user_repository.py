@@ -71,24 +71,28 @@ class PostgresUserRepository(UserRepositoryInterface):
             # Migrar colunas se não existirem
             try:
                 await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS mode VARCHAR(20) DEFAULT 'demo'")
+                await conn.execute("UPDATE users SET mode = 'demo' WHERE mode IS NULL")
                 logger.info("Migração: coluna mode adicionada")
             except Exception:
                 pass
 
             try:
                 await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT FALSE")
+                await conn.execute("UPDATE users SET is_connected = FALSE WHERE is_connected IS NULL")
                 logger.info("Migração: coluna is_connected adicionada")
             except Exception:
                 pass
 
             try:
-                await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS connection_status VARCHAR(50)")
+                await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS connection_status VARCHAR(50) DEFAULT 'disconnected'")
+                # Atualizar registros existentes com NULL para 'disconnected'
+                await conn.execute("UPDATE users SET connection_status = 'disconnected' WHERE connection_status IS NULL")
                 logger.info("Migração: coluna connection_status adicionada")
             except Exception:
                 pass
 
             try:
-                await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS disconnect_reason VARCHAR(255)")
+                await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS disconnect_reason VARCHAR(255) DEFAULT NULL")
                 logger.info("Migração: coluna disconnect_reason adicionada")
             except Exception:
                 pass
@@ -289,7 +293,7 @@ class PostgresUserRepository(UserRepositoryInterface):
             plan_expires_at=row['plan_expires_at'],
             mode=row.get('mode', 'demo'),
             is_connected=row.get('is_connected', False),
-            connection_status=row.get('connection_status'),
+            connection_status=row.get('connection_status') or 'disconnected',
             disconnect_reason=row.get('disconnect_reason')
         )
 
