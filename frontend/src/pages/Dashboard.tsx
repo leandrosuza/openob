@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
 import type { User } from '../types/auth';
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -14,86 +12,89 @@ export default function Dashboard() {
         const userData = await authService.getCurrentUser();
         setUser(userData);
       } catch (err) {
-        navigate('/login');
+        console.error('Erro ao carregar usuário:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    await authService.logout();
-    navigate('/login');
-  };
+  }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-light">
-        <div className="text-secondary">Carregando...</div>
-      </div>
-    );
+    return <div className="p-8">Carregando...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-light">
-      <nav className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-dark">OpenOB</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-secondary">{user?.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-primary hover:underline"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-dark mb-2">Dashboard</h1>
+        <p className="text-secondary">Visão geral da sua conta</p>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="card mb-6">
-          <h2 className="text-2xl font-bold text-dark mb-4">Bem-vindo, {user?.username}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-light p-4 rounded-lg">
-              <p className="text-sm text-secondary mb-1">Saldo</p>
-              <p className="text-2xl font-bold text-dark">${user?.balance.toFixed(2)}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-dark">Saldo</h3>
+            <span className="text-2xl">💰</span>
+          </div>
+          <p className="text-3xl font-bold text-primary">${user?.balance?.toFixed(2) || '0.00'}</p>
+        </div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-dark">Plano</h3>
+            <span className="text-2xl">📦</span>
+          </div>
+          <p className="text-xl font-medium text-secondary">{user?.plan_id || 'Free'}</p>
+        </div>
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-dark">Status</h3>
+            <span className="text-2xl">{user?.is_active ? '✅' : '❌'}</span>
+          </div>
+          <p className={`text-xl font-medium ${user?.is_active ? 'text-green-600' : 'text-red-600'}`}>
+            {user?.is_active ? 'Ativo' : 'Inativo'}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="card">
+          <h2 className="text-xl font-bold text-dark mb-4">Informações da Conta</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-secondary">Usuário</span>
+              <span className="font-medium text-dark">{user?.username}</span>
             </div>
-            <div className="bg-light p-4 rounded-lg">
-              <p className="text-sm text-secondary mb-1">Status</p>
-              <p className="text-2xl font-bold text-dark">
-                {user?.is_active ? 'Ativo' : 'Inativo'}
-              </p>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-secondary">Email</span>
+              <span className="font-medium text-dark">{user?.email}</span>
             </div>
-            <div className="bg-light p-4 rounded-lg">
-              <p className="text-sm text-secondary mb-1">Plano</p>
-              <p className="text-2xl font-bold text-dark">
-                {user?.plan_id ? 'Premium' : 'Free'}
-              </p>
+            <div className="flex justify-between py-2">
+              <span className="text-secondary">Subscription ID</span>
+              <span className="font-medium text-dark">{user?.current_subscription_id || 'N/A'}</span>
             </div>
           </div>
         </div>
 
         <div className="card">
-          <h3 className="text-lg font-semibold text-dark mb-4">Funcionalidades</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="btn-secondary text-left">
-              Gerenciar Conexão
-            </button>
-            <button className="btn-secondary text-left">
+          <h2 className="text-xl font-bold text-dark mb-4">Ações Rápidas</h2>
+          <div className="space-y-3">
+            <button className="w-full btn-primary flex items-center justify-center gap-2">
+              <span>🤖</span>
               Configurar Autotrade
             </button>
-            <button className="btn-secondary text-left">
-              Monitorar Ativos
+            <button className="w-full btn-secondary flex items-center justify-center gap-2">
+              <span>📈</span>
+              Ver Estratégias
             </button>
-            <button className="btn-secondary text-left">
-              Histórico de Trades
+            <button className="w-full btn-secondary flex items-center justify-center gap-2">
+              <span>⚙️</span>
+              Configurações
             </button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
