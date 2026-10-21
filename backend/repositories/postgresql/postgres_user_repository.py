@@ -198,6 +198,10 @@ class PostgresUserRepository(UserRepositoryInterface):
         """Hash da senha usando bcrypt"""
         from passlib.context import CryptContext
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        # Bcrypt limita a 72 bytes
+        password_bytes = password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password = password_bytes[:72].decode('utf-8', errors='ignore')
         return pwd_context.hash(password)
 
     async def verify_password(self, username: str, password: str) -> bool:
@@ -208,6 +212,10 @@ class PostgresUserRepository(UserRepositoryInterface):
         user = await self.get_by_username(username)
         if not user:
             return False
+        # Bcrypt limita a 72 bytes
+        password_bytes = password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password = password_bytes[:72].decode('utf-8', errors='ignore')
         return pwd_context.verify(password, user.password_hash)
 
     async def update_password(self, user_id: int, new_password: str) -> bool:
