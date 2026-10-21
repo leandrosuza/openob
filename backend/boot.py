@@ -152,7 +152,6 @@ def reset_logs():
 def start_api():
     """Iniciar servidor API HTTP"""
     import uvicorn
-    from api.rest.main import app
 
     print("=" * 60)
     print("OpenOB API HTTP Server")
@@ -163,7 +162,7 @@ def start_api():
     print("=" * 60)
 
     uvicorn.run(
-        app,
+        "api.rest.main:app",
         host="0.0.0.0",
         port=8000,
         reload=True
@@ -328,66 +327,8 @@ async def main():
     else:
         print(f"Logs desativados (modo {Settings.LOG_LEVEL.upper()})")
 
-    # Inicializar subscriptions
-    subscription_manager = SubscriptionManager()
-    await subscription_manager.check_expired_on_startup()
-    asyncio.create_task(subscription_manager.expiration_check_loop())
-
-    # Inicializar managers de trading
-    user_connection_manager, strategy_manager, trading_manager = await init_managers()
-
-    monitor = MonitorAPI()
-    strategy_manager.set_monitor_api(monitor)
-
-    # Iniciar monitoramento
-    payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
-    update_interval = Settings.MONITOR_ASSETS_UPDATE_INTERVAL
-    await monitor.start(payout_interval=payout_interval, update_interval=update_interval)
-
-    print("\n" + "="*60)
-    print("OpenOB - API + Monitoramento Iniciados")
-    print("="*60)
-
     # Iniciar servidor API
     start_api()
-
-    try:
-        print("\n" + "="*60)
-        print("Sistema Online - Mantendo conexão")
-        print("Pressione Ctrl+C para encerrar")
-        print("="*60)
-
-        await asyncio.sleep(3)
-
-        while True:
-            await asyncio.sleep(10)
-
-    except KeyboardInterrupt:
-        print("\n\nInterrompido pelo usuário")
-
-    finally:
-        # Desconectar todos os usuários ao encerrar
-        if user_connection_manager:
-            try:
-                await user_connection_manager.stop_monitoring()
-            except Exception as e:
-                logger.error(f"Erro ao parar user connection manager: {e}")
-
-        if subscription_manager:
-            try:
-                await subscription_manager.stop()
-            except Exception as e:
-                logger.error(f"Erro ao parar subscription manager: {e}")
-
-        if monitor:
-            try:
-                await monitor.stop()
-                await asyncio.sleep(0.5)
-            except asyncio.CancelledError:
-                pass
-            except Exception as e:
-                logger.error(f"Erro ao parar monitor: {e}")
-            print("Sistema parado")
 
 
 if __name__ == "__main__":
