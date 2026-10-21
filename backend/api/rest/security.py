@@ -3,9 +3,11 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from config.settings import Settings
+from repositories.repository_factory import RepositoryFactory
+from models.user import User
 
 
 SECRET_KEY = Settings.JWT_SECRET_KEY
@@ -53,3 +55,41 @@ def verify_token(token: str, token_type: str = "access") -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido ou expirado"
         )
+
+
+def get_user_repository():
+    """Dependency para obter repositório de usuários"""
+    config = Settings.to_dict()
+    return RepositoryFactory.create_user_repository(config)
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    user_repo = Depends(get_user_repository)
+) -> User:
+    """Obter usuário atual a partir do token JWT"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Não foi possível validar as credenciais",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = verify_token(token, "access")
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except HTTPException:
+        raise credentials_exception
+    
+    user = await user_repo.get_by_username(username)
+    if user is None:
+        raise credentials_exception
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuário inativo"
+        )
+    
+    return user

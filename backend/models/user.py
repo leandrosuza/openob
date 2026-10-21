@@ -25,6 +25,3 @@ class User(BaseModel):
     disconnect_reason: Optional[str] = None  # motivo da desconexão
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        frozen = True

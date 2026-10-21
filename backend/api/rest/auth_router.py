@@ -13,7 +13,8 @@ from api.rest.security import (
     create_refresh_token,
     verify_token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
-    oauth2_scheme
+    oauth2_scheme,
+    get_current_user
 )
 from api.rest.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
 from core.logger import get_logger
@@ -23,44 +24,6 @@ from core.logger import LoggerConfig
 logger = get_logger(__name__)
 subscription_logger = LoggerConfig.get_subscription_logger()
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
-
-
-def get_user_repository():
-    """Dependency para obter repositório de usuários"""
-    config = Settings.to_dict()
-    return RepositoryFactory.create_user_repository(config)
-
-
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    user_repo = Depends(get_user_repository)
-) -> User:
-    """Obter usuário atual a partir do token JWT"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não foi possível validar as credenciais",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    try:
-        payload = verify_token(token, "access")
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-    except HTTPException:
-        raise credentials_exception
-    
-    user = await user_repo.get_by_username(username)
-    if user is None:
-        raise credentials_exception
-    
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Usuário inativo"
-        )
-    
-    return user
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
