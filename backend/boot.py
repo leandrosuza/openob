@@ -270,24 +270,6 @@ async def _create_postgresql_triggers():
         logger.error(f"Erro ao criar TRIGGERs PostgreSQL: {e}")
 
 
-async def sync_all_users(user_connection_manager):
-    """Conectar todos os usuários com is_active=True no startup"""
-    from repositories.repository_factory import RepositoryFactory
-
-    config = Settings.to_dict()
-    user_repo = RepositoryFactory.create_user_repository(config)
-
-    active_users = await user_repo.get_active_users()
-    logger.info(f"Conectando {len(active_users)} usuários ativos...")
-
-    for user in active_users:
-        try:
-            await user_connection_manager.connect_user(user.id)
-            logger.info(f"Usuário {user.id} conectado")
-        except Exception as e:
-            logger.error(f"Erro ao conectar usuário {user.id}: {e}")
-
-
 async def init_managers():
     """Inicializar managers de trading"""
     from repositories.repository_factory import RepositoryFactory
@@ -327,25 +309,9 @@ async def init_managers():
 
 
 async def main():
-    """Função principal - decide entre monitoramento ou API"""
+    """Função principal - inicia servidor API"""
     # Inicializar banco de dados antes de tudo
     await init_database()
-
-    # Verificar argumentos
-    mode = sys.argv[1] if len(sys.argv) > 1 else "monitor"
-
-    if mode == "api":
-        # Modo API - inicializar subscriptions
-        subscription_manager = SubscriptionManager()
-        await subscription_manager.check_expired_on_startup()
-        asyncio.create_task(subscription_manager.expiration_check_loop())
-        start_api()
-        return
-
-    # Modo monitoramento (padrão) - inicializar subscriptions também
-    print("="*60)
-    print("OpenOB - Iniciando Monitoramento")
-    print("="*60)
 
     # Validar configurações
     errors = Settings.validate()
@@ -362,31 +328,30 @@ async def main():
     else:
         print(f"Logs desativados (modo {Settings.LOG_LEVEL.upper()})")
 
-    monitor = None
-    subscription_manager = None
-    user_connection_manager = None
+    # Inicializar subscriptions
+    subscription_manager = SubscriptionManager()
+    await subscription_manager.check_expired_on_startup()
+    asyncio.create_task(subscription_manager.expiration_check_loop())
+
+    # Inicializar managers de trading
+    user_connection_manager, strategy_manager, trading_manager = await init_managers()
+
+    monitor = MonitorAPI()
+    strategy_manager.set_monitor_api(monitor)
+
+    # Iniciar monitoramento
+    payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
+    update_interval = Settings.MONITOR_ASSETS_UPDATE_INTERVAL
+    await monitor.start(payout_interval=payout_interval, update_interval=update_interval)
+
+    print("\n" + "="*60)
+    print("OpenOB - API + Monitoramento Iniciados")
+    print("="*60)
+
+    # Iniciar servidor API
+    start_api()
 
     try:
-        # Verificar subscriptions expiradas no startup
-        subscription_manager = SubscriptionManager()
-        await subscription_manager.check_expired_on_startup()
-
-        # Iniciar task de verificação periódica
-        subscription_task = asyncio.create_task(subscription_manager.expiration_check_loop())
-
-        # Inicializar managers de trading
-        user_connection_manager, strategy_manager, trading_manager = await init_managers()
-
-        # Conectar usuários ativos no startup
-        await sync_all_users(user_connection_manager)
-
-        monitor = MonitorAPI()
-        strategy_manager.set_monitor_api(monitor)
-
-        payout_interval = Settings.MONITOR_PAYOUT_INTERVAL
-        update_interval = Settings.MONITOR_ASSETS_UPDATE_INTERVAL
-        await monitor.start(payout_interval=payout_interval, update_interval=update_interval)
-
         print("\n" + "="*60)
         print("Sistema Online - Mantendo conexão")
         print("Pressione Ctrl+C para encerrar")
