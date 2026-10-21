@@ -5,7 +5,7 @@ from typing import List
 from models.user import User
 from models.autotrade import AutotradeConfig
 from repositories.repository_factory import RepositoryFactory
-from api.rest.dependencies import get_current_user
+from api.rest.security import get_current_user
 from config.settings import Settings
 
 router = APIRouter(prefix="/autotrade", tags=["Autotrade"])
