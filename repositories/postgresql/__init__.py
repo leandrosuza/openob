@@ -1,1 +1,0 @@
-"""Implementação PostgreSQL dos repositórios"""
