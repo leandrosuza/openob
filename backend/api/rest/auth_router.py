@@ -14,7 +14,8 @@ from api.rest.security import (
     verify_token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     oauth2_scheme,
-    get_current_user
+    get_current_user,
+    get_user_repository
 )
 from api.rest.schemas import UserRegister, UserLogin, Token, UserResponse, ChangePassword
 from core.logger import get_logger
@@ -39,7 +40,7 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Nome de usuário já existe"
         )
-    
+
     # Verificar se email já existe
     existing_email = await user_repo.get_by_email(user_data.email)
     if existing_email:
@@ -47,7 +48,7 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email já cadastrado"
         )
-    
+
     # Hash da senha
     password_hash = await user_repo.hash_password(user_data.password)
 
@@ -68,24 +69,24 @@ async def register(
         connection_status="disconnected",
         disconnect_reason=None
     )
-    
+
     created_user = await user_repo.create(user)
     logger.info(f"Usuário registrado: {created_user.username}")
-    
+
     # Criar subscription free automaticamente
     config = Settings.to_dict()
     subscription_repo = RepositoryFactory.create_subscription_repository(config)
     plan_repo = RepositoryFactory.create_plan_repository(config)
-    
+
     # Obter plano free
     free_plan = await plan_repo.get_by_type("free")
     await plan_repo.close()
-    
+
     if free_plan:
         # Criar subscription free
         start_date = datetime.now(timezone.utc)
         end_date = None  # Free não expira
-        
+
         subscription = await subscription_repo.create_for_user(
             user_id=created_user.id,
             plan_id=free_plan.id,
@@ -95,16 +96,16 @@ async def register(
             payment_id=None,
             auto_renew=False
         )
-        
+
         # Atualizar user com subscription_id
         created_user.current_subscription_id = subscription.id
         created_user.plan_expires_at = None
         await user_repo.update(created_user)
-        
+
         subscription_logger.info(f"Subscription free criada para user {created_user.id}, subscription_id={subscription.id}")
-    
+
     await subscription_repo.close()
-    
+
     return UserResponse(
         id=created_user.id,
         username=created_user.username,
@@ -131,7 +132,7 @@ async def login(
             detail="Credenciais inválidas",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Verificar senha
     is_valid = await user_repo.verify_password(form_data.username, form_data.password)
     if not is_valid:
@@ -140,13 +141,13 @@ async def login(
             detail="Credenciais inválidas",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuário inativo"
         )
-    
+
     # Criar tokens
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -156,9 +157,9 @@ async def login(
     refresh_token = create_refresh_token(
         data={"sub": user.username, "user_id": user.id}
     )
-    
+
     logger.info(f"Usuário logado: {user.username}")
-    
+
     return Token(
         access_token=access_token,
         refresh_token=refresh_token
@@ -184,23 +185,23 @@ async def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token inválido ou expirado"
         )
-    
+
     user = await user_repo.get_by_username(username)
     if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário inválido ou inativo"
         )
-    
+
     # Criar novo access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username, "user_id": user.id},
         expires_delta=access_token_expires
     )
-    
+
     logger.info(f"Token renovado para: {user.username}")
-    
+
     return Token(
         access_token=access_token,
         refresh_token=refresh_token
@@ -236,11 +237,11 @@ async def change_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Senha atual incorreta"
         )
-    
+
     # Atualizar senha
     await user_repo.update_password(current_user.id, password_data.new_password)
     logger.info(f"Senha alterada para usuário: {current_user.username}")
-    
+
     return {"message": "Senha alterada com sucesso"}
 
 
