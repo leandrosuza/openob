@@ -16,12 +16,13 @@ logger = get_logger(__name__)
 class UserConnectionManager:
     """Gerenciador de múltiplas conexões WebSocket por usuário"""
 
-    def __init__(self, user_repository, strategy_manager, trading_manager):
+    def __init__(self, user_repository, strategy_manager, trading_manager, autotrade_repository=None):
         self.connections: Dict[int, WebSocketManager] = {}  # conexões por user_id
         self.trading_apis: Dict[int, TradingAPI] = {}  # TradingAPI por usuário
         self.user_repository = user_repository
         self.strategy_manager = strategy_manager
         self.trading_manager = trading_manager
+        self.autotrade_repository = autotrade_repository
         self._running = False
         self._listen_task = None
         self._polling_task = None
@@ -70,14 +71,9 @@ class UserConnectionManager:
         self.trading_manager.set_user_connection_manager(self)
         self.trading_manager.set_strategy_manager(self.strategy_manager)
 
-        # Tentar configurar LISTEN/NOTIFY
-        try:
-            await self.setup_database_notifications()
-            logger.info("LISTEN/NOTIFY configurado com sucesso")
-        except Exception as e:
-            logger.error(f"Falha ao configurar LISTEN/NOTIFY: {e}, usando polling")
-            # Fallback para polling
-            self._polling_task = asyncio.create_task(self.monitor_loop_polling())
+        # Usar polling diretamente (LISTEN/NOTIFY requer configuração complexa)
+        logger.info("Usando polling para monitoramento de usuários")
+        self._polling_task = asyncio.create_task(self.monitor_loop_polling())
 
         logger.info("UserConnectionManager iniciado")
 
@@ -107,18 +103,31 @@ class UserConnectionManager:
         """Fallback: polling a cada 1s"""
         while self._running:
             try:
+                # Verificar usuários com autotrade ativo
+                active_autotrade_users = set()
+                if self.autotrade_repository:
+                    try:
+                        all_configs = await self.autotrade_repository.get_all_configs()
+                        active_autotrade_users = {config.user_id for config in all_configs if config.is_active}
+                    except Exception as e:
+                        logger.error(f"Erro ao obter configs de autotrade: {e}")
+
                 # Verificar usuários ativos
                 active_users = await self.user_repository.get_active_users()
 
                 for user in active_users:
-                    if user.is_active and user.id not in self.connections:
+                    should_connect = user.is_active and user.id in active_autotrade_users
+
+                    if should_connect and user.id not in self.connections:
                         await self.connect_user(user.id)
-                    elif not user.is_active and user.id in self.connections:
-                        await self.disconnect_user(user.id, reason="deactivated")
+                    elif not should_connect and user.id in self.connections:
+                        await self.disconnect_user(user.id, reason="autotrade_deactivated")
 
                 await asyncio.sleep(1)
             except Exception as e:
                 logger.error(f"Erro no polling: {e}")
+                import traceback
+                traceback.print_exc()
                 await asyncio.sleep(1)
 
     async def connect_user(self, user_id: int):
@@ -242,15 +251,28 @@ class UserConnectionManager:
         """Configurar handlers de eventos do WebSocket"""
         # Handler para balance update
         async def on_balance(data):
+            self._log_user_event(user_id, "balance_update", f"Data: {data}")
             await self.trading_manager.on_balance_update(user_id, data)
 
         # Handler para trade result
         async def on_trade_result(data):
+            self._log_user_event(user_id, "trade_result", f"Data: {data}")
             await self.trading_manager.on_trade_result(user_id, data)
 
-        # Adicionar handlers (implementação simplificada)
+        # Handler para todos os eventos (logging detalhado)
+        async def on_all_events(event: str, data):
+            self._log_user_event(user_id, f"ws_event_{event}", f"Data: {data}")
+
+        # Adicionar handlers
         trading_api.ws_manager.add_event_handler("balance", on_balance)
         trading_api.ws_manager.add_event_handler("json_data", on_trade_result)
+
+        # Interceptador global para logging
+        original_emit = trading_api.ws_manager._emit_event
+        async def patched_emit(event: str, data):
+            await on_all_events(event, data)
+            return await original_emit(event, data)
+        trading_api.ws_manager._emit_event = patched_emit
 
     def send_order(self, user_id: int, order):
         """Enviar ordem via TradingAPI do usuário"""

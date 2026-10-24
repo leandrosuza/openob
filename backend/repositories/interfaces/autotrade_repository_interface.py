@@ -29,6 +29,11 @@ class AutotradeRepositoryInterface(ABC):
         pass
 
     @abstractmethod
+    async def get_all_configs(self) -> List[AutotradeConfig]:
+        """Obter todas as configs (ativas e inativas)"""
+        pass
+
+    @abstractmethod
     async def get_active_strategies(self) -> List[AutotradeConfig]:
         """Obter todas as configs ativas"""
         pass

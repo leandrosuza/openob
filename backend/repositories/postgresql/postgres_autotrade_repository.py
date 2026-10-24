@@ -122,17 +122,38 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
             )
             return [self._config_from_row(row) for row in rows]
 
+    async def get_all_configs(self) -> List[AutotradeConfig]:
+        """Obter todas as configs (ativas e inativas)"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch("SELECT * FROM autotrade_configs")
+            return [self._config_from_row(row) for row in rows]
+
     def _config_from_row(self, row) -> AutotradeConfig:
         """Converter row do banco para objeto AutotradeConfig"""
         if not row:
             return None
+
+        # parameters já vem como dict do PostgreSQL JSONB
+        parameters = row['parameters']
+        if isinstance(parameters, str):
+            parameters = json.loads(parameters)
+        elif not isinstance(parameters, dict):
+            parameters = dict(parameters) if parameters else {}
+
+        # is_active pode ser None para registros antigos
+        is_active = row.get('is_active', True)
+        if is_active is None:
+            is_active = True
+
         return AutotradeConfig(
             id=row['id'],
             user_id=row['user_id'],
             strategy_name=row['strategy_name'],
-            parameters=dict(row['parameters']),
+            parameters=parameters,
             amount=float(row['amount']),
-            is_active=row['is_active'],
+            is_active=is_active,
             created_at=row['created_at'],
             updated_at=row['updated_at']
         )
