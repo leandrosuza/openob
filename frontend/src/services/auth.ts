@@ -17,6 +17,11 @@ export const authService = {
     localStorage.setItem('access_token', response.data.access_token);
     localStorage.setItem('refresh_token', response.data.refresh_token);
 
+    // Salvar user_id se disponível
+    if (response.data.user_id) {
+      localStorage.setItem('user_id', response.data.user_id.toString());
+    }
+
     return response.data;
   },
 
@@ -29,6 +34,7 @@ export const authService = {
     await api.post('/auth/logout');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_id');
   },
 
   async getCurrentUser(): Promise<User> {

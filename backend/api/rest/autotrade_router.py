@@ -76,6 +76,35 @@ async def delete_autotrade_config(user_id: int, current_user: User = Depends(get
     return {"message": "Config deletada", "user_id": user_id}
 
 
+@router.patch("/configs/{user_id}/toggle")
+async def toggle_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
+    """Alternar status is_active da config (iniciar/parar autotrade)"""
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+
+    config_dict = Settings.to_dict()
+    autotrade_repo = RepositoryFactory.create_autotrade_repository(config_dict)
+
+    config = await autotrade_repo.get_by_user(user_id)
+    if not config:
+        raise HTTPException(status_code=404, detail="Config não encontrada")
+
+    # Alternar is_active
+    updated_config = AutotradeConfig(
+        id=config.id,
+        user_id=config.user_id,
+        strategy_name=config.strategy_name,
+        parameters=config.parameters,
+        amount=config.amount,
+        is_active=not config.is_active,
+        created_at=config.created_at,
+        updated_at=config.updated_at
+    )
+
+    updated = await autotrade_repo.update(updated_config)
+    return updated
+
+
 @router.get("/strategies")
 async def list_strategies():
     """Listar estratégias disponíveis"""

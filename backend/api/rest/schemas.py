@@ -22,6 +22,7 @@ class Token(BaseModel):
     """Modelo para resposta de token"""
     access_token: str
     refresh_token: str
+    user_id: Optional[int] = None
     token_type: str = "bearer"
 
 
