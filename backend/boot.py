@@ -393,12 +393,30 @@ def reset_logs():
                 with open(log_file, "w", encoding="utf-8") as f:
                     pass  # Limpar arquivo
 
+            # Limpar pasta users/ (logs por usuário)
+            if os.path.exists(users_dir):
+                for user_folder in os.listdir(users_dir):
+                    user_path = os.path.join(users_dir, user_folder)
+                    if os.path.isdir(user_path):
+                        # Limpar todos os arquivos dentro da pasta do usuário
+                        for file in os.listdir(user_path):
+                            file_path = os.path.join(user_path, file)
+                            if os.path.isfile(file_path):
+                                with open(file_path, "w", encoding="utf-8") as f:
+                                    pass  # Limpar arquivo
+
             logger.info("Arquivos de log criados (modo DEBUG)")
         else:
             # Em outros níveis, manter apenas auth.txt, subscriptions.txt, payments.txt, security.txt
             for log_file in log_files:
                 if os.path.exists(log_file):
                     os.remove(log_file)
+
+            # Remover pasta users/ completamente
+            if os.path.exists(users_dir):
+                shutil.rmtree(users_dir)
+                os.makedirs(users_dir, exist_ok=True)
+
             logger.info(f"Logs detalhados desativados (modo {Settings.LOG_LEVEL.upper()})")
 
     except Exception as e:
