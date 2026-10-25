@@ -1,4 +1,4 @@
-"""Router para gerenciar configs de autotrade"""
+cl"""Router para gerenciar configs de autotrade"""
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
@@ -31,6 +31,10 @@ async def create_autotrade_config(config: AutotradeConfig, current_user: User = 
 @router.get("/configs/{user_id}")
 async def get_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Obter config do usuário"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
+
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Sem permissão")
 
@@ -38,6 +42,7 @@ async def get_autotrade_config(user_id: int, current_user: User = Depends(get_cu
     autotrade_repo = RepositoryFactory.create_autotrade_repository(config_dict)
 
     config = await autotrade_repo.get_by_user(user_id)
+    logger.info(f"get_by_user returned: {config}")
     if not config:
         raise HTTPException(status_code=404, detail="Config não encontrada")
 
