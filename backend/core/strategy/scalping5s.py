@@ -1,7 +1,11 @@
 """Estratégia Scalping 5s"""
 
+import logging
 from typing import List, Dict, Any
 from core.strategy import BaseStrategy
+from config.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class Scalping5sStrategy(BaseStrategy):
@@ -17,7 +21,12 @@ class Scalping5sStrategy(BaseStrategy):
 
     async def analyze(self, ticks: List[Dict], parameters: Dict[str, Any]) -> Dict:
         """Analisar ticks e retornar sinal"""
+        if Settings.LOG_LEVEL.upper() == "DEBUG":
+            logger.info(f"[STRATEGY] scalping5s - Analisando {len(ticks)} ticks")
+
         if len(ticks) < parameters.get("lookback_period", 50):
+            if Settings.LOG_LEVEL.upper() == "DEBUG":
+                logger.info(f"[STRATEGY] Ticks insuficientes: {len(ticks)} < {parameters.get('lookback_period', 50)}")
             return {
                 "signal": "none",
                 "duration": 5,
@@ -29,6 +38,8 @@ class Scalping5sStrategy(BaseStrategy):
         prices = [float(tick.get("price", 0)) for tick in ticks if tick.get("price")]
 
         if len(prices) < parameters.get("lookback_period", 50):
+            if Settings.LOG_LEVEL.upper() == "DEBUG":
+                logger.info(f"[STRATEGY] Preços insuficientes: {len(prices)} < {parameters.get('lookback_period', 50)}")
             return {
                 "signal": "none",
                 "duration": 5,
@@ -51,10 +62,23 @@ class Scalping5sStrategy(BaseStrategy):
         # Direção dos últimos ticks
         last_tick_direction = self._get_tick_direction(prices[-5:])
 
+        if Settings.LOG_LEVEL.upper() == "DEBUG":
+            logger.info(f"[STRATEGY] Indicadores calculados:")
+            logger.info(f"[STRATEGY]   - Preço atual: {prices[-1]:.5f}")
+            logger.info(f"[STRATEGY]   - MA({ma_period}): {ma:.5f}")
+            logger.info(f"[STRATEGY]   - RSI({rsi_period}): {rsi:.2f}")
+            logger.info(f"[STRATEGY]   - Direção últimos 5 ticks: {last_tick_direction}")
+            logger.info(f"[STRATEGY]   - RSI oversold threshold: {rsi_oversold}")
+            logger.info(f"[STRATEGY]   - RSI overbought threshold: {rsi_overbought}")
+
         # Confluência de indicadores
         signal, confidence, reason = self._determine_signal(
             ma, rsi, last_tick_direction, rsi_oversold, rsi_overbought
         )
+
+        if Settings.LOG_LEVEL.upper() == "DEBUG":
+            logger.info(f"[STRATEGY] Sinal gerado: {signal.upper()} (confiança: {confidence:.2f})")
+            logger.info(f"[STRATEGY] Motivo: {reason}")
 
         return {
             "signal": signal,
