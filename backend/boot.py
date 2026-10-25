@@ -273,6 +273,15 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+# Include routers
+app.include_router(auth_router.router)
+app.include_router(plan_router.router)
+app.include_router(subscription_router.router)
+app.include_router(transaction_router.router)
+app.include_router(user_connection_router.router)
+app.include_router(autotrade_router.router)
+
+
 # CORS - Configurado via .env
 app.add_middleware(
     CORSMiddleware,
@@ -312,15 +321,6 @@ async def log_security_requests(request: Request, call_next):
     )
     
     return response
-
-
-# Include routers
-app.include_router(auth_router.router)
-app.include_router(plan_router.router)
-app.include_router(subscription_router.router)
-app.include_router(transaction_router.router)
-app.include_router(user_connection_router.router)
-app.include_router(autotrade_router.router)
 
 
 @app.get("/")
