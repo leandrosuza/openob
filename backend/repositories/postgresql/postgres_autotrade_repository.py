@@ -86,7 +86,7 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
             database_logger.info(f"AutotradeConfig criado: id={row['id']}, user_id={user_id}, is_active={is_active}")
             return self._config_from_row(row)
 
-    async def get_by_user(self, user_id: int) -> Optional[AutottradeConfig]:
+    async def get_by_user(self, user_id: int) -> Optional[AutotradeConfig]:
         """Obter config por user_id"""
         await self._initialize_db()
         pool = await self._get_pool()
