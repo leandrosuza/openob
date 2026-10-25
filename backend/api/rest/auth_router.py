@@ -77,6 +77,7 @@ async def register(
     config = Settings.to_dict()
     subscription_repo = RepositoryFactory.create_subscription_repository(config)
     plan_repo = RepositoryFactory.create_plan_repository(config)
+    autotrade_repo = RepositoryFactory.create_autotrade_repository(config)
 
     # Obter plano free
     free_plan = await plan_repo.get_by_type("free")
@@ -104,6 +105,16 @@ async def register(
         await user_repo.update(created_user)
 
         subscription_logger.info(f"Subscription free criada para user {created_user.id}, subscription_id={subscription.id}")
+
+    # Criar config de autotrade padrão (OFF) para o novo usuário
+    await autotrade_repo.create_config(
+        user_id=created_user.id,
+        strategy_name="scalping5s",
+        parameters='{"lookback_period": 50, "ma_period": 20, "rsi_period": 14, "rsi_oversold": 30, "rsi_overbought": 70}',
+        amount=5.0,
+        is_active=False  # OFF por padrão
+    )
+    logger.info(f"Config de autotrade padrão criada para user {created_user.id} (is_active=False)")
 
     return UserResponse(
         id=created_user.id,

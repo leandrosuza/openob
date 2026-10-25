@@ -78,6 +78,20 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
             database_logger.info(f"AutotradeConfig criado: id={row['id']}, user_id={config.user_id}")
             return self._config_from_row(row)
 
+    async def create_config(self, user_id: int, strategy_name: str, parameters: str, amount: float, is_active: bool) -> AutotradeConfig:
+        """Criar config com parâmetros individuais"""
+        await self._initialize_db()
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """INSERT INTO autotrade_configs (user_id, strategy_name, parameters, amount, is_active)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *""",
+                user_id, strategy_name, parameters, amount, is_active
+            )
+            database_logger.info(f"AutotradeConfig criado: id={row['id']}, user_id={user_id}, is_active={is_active}")
+            return self._config_from_row(row)
+
     async def get_by_user(self, user_id: int) -> Optional[AutotradeConfig]:
         """Obter config por user_id"""
         await self._initialize_db()

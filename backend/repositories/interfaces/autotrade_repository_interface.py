@@ -14,6 +14,11 @@ class AutotradeRepositoryInterface(ABC):
         pass
 
     @abstractmethod
+    async def create_config(self, user_id: int, strategy_name: str, parameters: str, amount: float, is_active: bool) -> AutotradeConfig:
+        """Criar config com parâmetros individuais"""
+        pass
+
+    @abstractmethod
     async def get_by_user(self, user_id: int) -> Optional[AutotradeConfig]:
         """Obter config por user_id"""
         pass
