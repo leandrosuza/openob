@@ -6,16 +6,17 @@ from core.strategy import BaseStrategy
 from config.settings import Settings
 from pathlib import Path
 
-# Configurar logger específico para estratégia com arquivo
-strategy_logger = logging.getLogger("strategy")
+# Configurar logger específico para esta estratégia com arquivo dedicado
+strategy_name = "scalping5s"
+strategy_logger = logging.getLogger(f"strategy.{strategy_name}")
 strategy_logger.setLevel(logging.DEBUG)
 
-# Handler para arquivo em logs/strategy/
+# Handler para arquivo em logs/strategy/{strategy_name}.log
 strategy_log_dir = Path("logs/strategy")
 strategy_log_dir.mkdir(parents=True, exist_ok=True)
-strategy_file_handler = logging.FileHandler(strategy_log_dir / "strategy.log")
+strategy_file_handler = logging.FileHandler(strategy_log_dir / f"{strategy_name}.log")
 strategy_file_handler.setLevel(logging.DEBUG)
-strategy_file_handler.setFormatter(logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s'))
+strategy_file_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
 strategy_logger.addHandler(strategy_file_handler)
 
 logger = logging.getLogger(__name__)
