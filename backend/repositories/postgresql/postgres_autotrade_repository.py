@@ -23,7 +23,6 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
         self.user = user
         self.password = password
         self.pool = None
-        self._initialized = False
 
     async def _get_pool(self):
         """Obter pool de conexões"""
@@ -41,9 +40,6 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
 
     async def _initialize_db(self):
         """Setup inicial do banco"""
-        if self._initialized:
-            return
-
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             await conn.execute("""
@@ -58,10 +54,8 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            logger.info("Tabela autotrade_configs criada com sucesso")
+            logger.info("Tabela autotrade_configs verificada/criada com sucesso")
             database_logger.info("Tabela autotrade_configs criada")
-
-        self._initialized = True
 
     async def create(self, config: AutotradeConfig) -> AutotradeConfig:
         """Criar config"""
