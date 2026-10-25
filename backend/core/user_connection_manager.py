@@ -139,7 +139,7 @@ class UserConnectionManager:
         """Fallback: polling a cada 1s"""
         while self._running:
             try:
-                # Verificar usuários com autotrade ativo
+                # Verificar usuários com autotrade ativo (is_active=True na config)
                 active_autotrade_users = set()
                 if self.autotrade_repository:
                     try:
@@ -148,11 +148,12 @@ class UserConnectionManager:
                     except Exception as e:
                         logger.error(f"Erro ao obter configs de autotrade: {e}")
 
-                # Verificar usuários ativos
+                # Verificar usuários ativos no sistema
                 active_users = await self.user_repository.get_active_users()
 
                 for user in active_users:
-                    should_connect = user.is_active and user.id in active_autotrade_users
+                    # Conectar apenas se autotrade config is_active=True
+                    should_connect = user.id in active_autotrade_users
 
                     if should_connect and user.id not in self.connections:
                         await self.connect_user(user.id)
