@@ -4,6 +4,19 @@ import logging
 from typing import List, Dict, Any
 from core.strategy import BaseStrategy
 from config.settings import Settings
+from pathlib import Path
+
+# Configurar logger específico para estratégia com arquivo
+strategy_logger = logging.getLogger("strategy")
+strategy_logger.setLevel(logging.DEBUG)
+
+# Handler para arquivo em logs/strategy/
+strategy_log_dir = Path("logs/strategy")
+strategy_log_dir.mkdir(parents=True, exist_ok=True)
+strategy_file_handler = logging.FileHandler(strategy_log_dir / "strategy.log")
+strategy_file_handler.setLevel(logging.DEBUG)
+strategy_file_handler.setFormatter(logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s'))
+strategy_logger.addHandler(strategy_file_handler)
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +35,11 @@ class Scalping5sStrategy(BaseStrategy):
     async def analyze(self, ticks: List[Dict], parameters: Dict[str, Any]) -> Dict:
         """Analisar ticks e retornar sinal"""
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            logger.info(f"[STRATEGY] scalping5s - Analisando {len(ticks)} ticks")
+            strategy_logger.info(f"[STRATEGY] scalping5s - Analisando {len(ticks)} ticks")
 
         if len(ticks) < parameters.get("lookback_period", 50):
             if Settings.LOG_LEVEL.upper() == "DEBUG":
-                logger.info(f"[STRATEGY] Ticks insuficientes: {len(ticks)} < {parameters.get('lookback_period', 50)}")
+                strategy_logger.info(f"[STRATEGY] Ticks insuficientes: {len(ticks)} < {parameters.get('lookback_period', 50)}")
             return {
                 "signal": "none",
                 "duration": 5,
@@ -39,7 +52,7 @@ class Scalping5sStrategy(BaseStrategy):
 
         if len(prices) < parameters.get("lookback_period", 50):
             if Settings.LOG_LEVEL.upper() == "DEBUG":
-                logger.info(f"[STRATEGY] Preços insuficientes: {len(prices)} < {parameters.get('lookback_period', 50)}")
+                strategy_logger.info(f"[STRATEGY] Preços insuficientes: {len(prices)} < {parameters.get('lookback_period', 50)}")
             return {
                 "signal": "none",
                 "duration": 5,
@@ -63,13 +76,13 @@ class Scalping5sStrategy(BaseStrategy):
         last_tick_direction = self._get_tick_direction(prices[-5:])
 
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            logger.info(f"[STRATEGY] Indicadores calculados:")
-            logger.info(f"[STRATEGY]   - Preço atual: {prices[-1]:.5f}")
-            logger.info(f"[STRATEGY]   - MA({ma_period}): {ma:.5f}")
-            logger.info(f"[STRATEGY]   - RSI({rsi_period}): {rsi:.2f}")
-            logger.info(f"[STRATEGY]   - Direção últimos 5 ticks: {last_tick_direction}")
-            logger.info(f"[STRATEGY]   - RSI oversold threshold: {rsi_oversold}")
-            logger.info(f"[STRATEGY]   - RSI overbought threshold: {rsi_overbought}")
+            strategy_logger.info(f"[STRATEGY] Indicadores calculados:")
+            strategy_logger.info(f"[STRATEGY]   - Preço atual: {prices[-1]:.5f}")
+            strategy_logger.info(f"[STRATEGY]   - MA({ma_period}): {ma:.5f}")
+            strategy_logger.info(f"[STRATEGY]   - RSI({rsi_period}): {rsi:.2f}")
+            strategy_logger.info(f"[STRATEGY]   - Direção últimos 5 ticks: {last_tick_direction}")
+            strategy_logger.info(f"[STRATEGY]   - RSI oversold threshold: {rsi_oversold}")
+            strategy_logger.info(f"[STRATEGY]   - RSI overbought threshold: {rsi_overbought}")
 
         # Confluência de indicadores
         signal, confidence, reason = self._determine_signal(
@@ -77,8 +90,8 @@ class Scalping5sStrategy(BaseStrategy):
         )
 
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            logger.info(f"[STRATEGY] Sinal gerado: {signal.upper()} (confiança: {confidence:.2f})")
-            logger.info(f"[STRATEGY] Motivo: {reason}")
+            strategy_logger.info(f"[STRATEGY] Sinal gerado: {signal.upper()} (confiança: {confidence:.2f})")
+            strategy_logger.info(f"[STRATEGY] Motivo: {reason}")
 
         return {
             "signal": signal,
