@@ -1,5 +1,6 @@
 """Router para gerenciar configs de autotrade"""
 
+import logging
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from models.user import User
@@ -7,6 +8,8 @@ from models.autotrade import AutotradeConfig
 from repositories.repository_factory import RepositoryFactory
 from api.rest.security import get_current_user
 from config.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/autotrade", tags=["Autotrade"])
 
@@ -31,8 +34,6 @@ async def create_autotrade_config(config: AutotradeConfig, current_user: User = 
 @router.get("/configs/{user_id}")
 async def get_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Obter config do usuário"""
-    import logging
-    logger = logging.getLogger(__name__)
     logger.info(f"get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
 
     if current_user.id != user_id:
