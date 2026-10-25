@@ -88,13 +88,10 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
 
     async def get_by_user(self, user_id: int) -> Optional[AutotradeConfig]:
         """Obter config por user_id"""
-        print(f"[DEBUG REPO] get_by_user called with user_id={user_id}")
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow("SELECT * FROM autotrade_configs WHERE user_id = $1", user_id)
-            print(f"[DEBUG REPO] Query result: row={row}")
-            logger.info(f"get_by_user({user_id}): row={row}")
             return self._config_from_row(row) if row else None
 
     async def update(self, config: AutotradeConfig) -> AutotradeConfig:

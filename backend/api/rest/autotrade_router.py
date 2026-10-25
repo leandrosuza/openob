@@ -11,10 +11,10 @@ from config.settings import Settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/autotrade", tags=["Autotrade"])
+router = APIRouter(tags=["Autotrade"])
 
 
-@router.post("/configs")
+@router.post("/api/autotrade/configs")
 async def create_autotrade_config(config: AutotradeConfig, current_user: User = Depends(get_current_user)):
     """Criar config de trading"""
     config.user_id = current_user.id
@@ -31,12 +31,9 @@ async def create_autotrade_config(config: AutotradeConfig, current_user: User = 
     return created
 
 
-@router.get("/configs/{user_id}")
+@router.get("/api/autotrade/configs/{user_id}")
 async def get_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Obter config do usuário"""
-    print(f"[DEBUG] get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
-    logger.info(f"get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
-
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Sem permissão")
 
@@ -44,15 +41,13 @@ async def get_autotrade_config(user_id: int, current_user: User = Depends(get_cu
     autotrade_repo = RepositoryFactory.create_autotrade_repository(config_dict)
 
     config = await autotrade_repo.get_by_user(user_id)
-    print(f"[DEBUG] get_by_user returned: {config}")
-    logger.info(f"get_by_user returned: {config}")
     if not config:
         raise HTTPException(status_code=404, detail="Config não encontrada")
 
     return config
 
 
-@router.put("/configs/{user_id}")
+@router.put("/api/autotrade/configs/{user_id}")
 async def update_autotrade_config(user_id: int, config: AutotradeConfig, current_user: User = Depends(get_current_user)):
     """Atualizar config (auto-aplicado em tempo real)"""
     if current_user.id != user_id:
@@ -68,7 +63,7 @@ async def update_autotrade_config(user_id: int, config: AutotradeConfig, current
     return updated
 
 
-@router.delete("/configs/{user_id}")
+@router.delete("/api/autotrade/configs/{user_id}")
 async def delete_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Deletar config"""
     if current_user.id != user_id:
@@ -84,7 +79,7 @@ async def delete_autotrade_config(user_id: int, current_user: User = Depends(get
     return {"message": "Config deletada", "user_id": user_id}
 
 
-@router.patch("/configs/{user_id}/toggle")
+@router.patch("/api/autotrade/configs/{user_id}/toggle")
 async def toggle_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Alternar status is_active da config (iniciar/parar autotrade)"""
     if current_user.id != user_id:
@@ -113,7 +108,7 @@ async def toggle_autotrade_config(user_id: int, current_user: User = Depends(get
     return updated
 
 
-@router.get("/strategies")
+@router.get("/api/autotrade/strategies")
 async def list_strategies():
     """Listar estratégias disponíveis"""
     strategies = [
@@ -126,7 +121,7 @@ async def list_strategies():
     return strategies
 
 
-@router.get("/strategies/{name}/parameters")
+@router.get("/api/autotrade/strategies/{name}/parameters")
 async def get_strategy_parameters(name: str):
     """Obter parâmetros necessários de uma estratégia"""
     from core.strategy.scalping5s import Scalping5sStrategy

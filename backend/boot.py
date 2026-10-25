@@ -275,10 +275,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Include routers
 app.include_router(auth_router.router)
-app.include_router(plan_router.router)
-app.include_router(subscription_router.router)
-app.include_router(transaction_router.router)
-app.include_router(user_connection_router.router)
+app.include_router(plan_router.router, prefix="/api")
+app.include_router(subscription_router.router, prefix="/api")
+app.include_router(transaction_router.router, prefix="/api")
+app.include_router(user_connection_router.router, prefix="/api")
 app.include_router(autotrade_router.router)
 
 
