@@ -1,4 +1,4 @@
-cl"""Router para gerenciar configs de autotrade"""
+"""Router para gerenciar configs de autotrade"""
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
