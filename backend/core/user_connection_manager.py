@@ -26,6 +26,7 @@ class UserConnectionManager:
         self._running = False
         self._listen_task = None
         self._polling_task = None
+        self.connection_times: Dict[int, datetime] = {}  # timestamps de conexão
 
     def _log_user_event(self, user_id: int, event: str, details: str = ""):
         """Registrar evento específico do usuário em logs/users/{email}/user.txt"""
@@ -58,6 +59,44 @@ class UserConnectionManager:
 
         except Exception as e:
             logger.error(f"Erro ao escrever log de usuário: {e}")
+
+    async def _log_connection_event(self, user_id: int, event_type: str, reason: str = "", error: str = ""):
+        """Registrar evento de conexão/desconexão com formato estruturado"""
+        try:
+            user = await self.user_repository.get_by_id(user_id)
+            if not user:
+                return
+
+            # Sanitizar email para usar como nome de arquivo
+            safe_email = user.email.replace("@", "_at_").replace(".", "_dot_")
+            user_log_file = f"logs/users/{safe_email}.txt"
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            if event_type == "CONNECT":
+                # Conexão iniciada
+                self.connection_times[user_id] = datetime.now()
+                log_entry = f"[{timestamp}] CONEXÃO INICIADA | Usuário: {user.username} | Endpoint: DEMO\n"
+            elif event_type == "CONNECTED":
+                # Conexão estabelecida com sucesso
+                log_entry = f"[{timestamp}] CONEXÃO ESTABELECIDA | Usuário: {user.username} | Status: Connected\n"
+            elif event_type == "DISCONNECT":
+                # Desconexão
+                connection_time = ""
+                if user_id in self.connection_times:
+                    duration = datetime.now() - self.connection_times[user_id]
+                    connection_time = f"Tempo conectado: {duration.total_seconds():.2f}s"
+                    del self.connection_times[user_id]
+
+                log_entry = f"[{timestamp}] DESCONECTADO | Usuário: {user.username} | Motivo: {reason} | {connection_time}\n"
+                if error:
+                    log_entry = log_entry.rstrip() + f" | Erro: {error}\n"
+
+            with open(user_log_file, "a", encoding="utf-8") as f:
+                f.write(log_entry)
+
+        except Exception as e:
+            logger.error(f"Erro ao escrever log de conexão: {e}")
 
     async def start_monitoring(self):
         """Iniciar monitoramento em tempo real"""
@@ -132,11 +171,15 @@ class UserConnectionManager:
         max_attempts = 3
         retry_delay = 5  # segundos
 
+        # Log de início de conexão
+        await self._log_connection_event(user_id, "CONNECT")
+
         for attempt in range(1, max_attempts + 1):
             try:
                 user = await self.user_repository.get_by_id(user_id)
                 if not user:
                     logger.error(f"Usuário {user_id} não encontrado")
+                    await self._log_connection_event(user_id, "DISCONNECT", reason="user_not_found")
                     return
 
                 # Verificar SSID
@@ -154,6 +197,7 @@ class UserConnectionManager:
                     user.connection_status = "disconnected"
                     user.disconnect_reason = "missing_ssid"
                     await self.user_repository.update(user)
+                    await self._log_connection_event(user_id, "DISCONNECT", reason="missing_ssid")
                     return
 
                 # Criar conexão WebSocket
@@ -179,6 +223,7 @@ class UserConnectionManager:
                 masked_ssid = ssid[:20] + "..." if len(ssid) > 20 else ssid
                 logger.info(f"Usuário {user_id} conectado com sucesso (SSID: {masked_ssid}, Região: {region})")
                 self._log_user_event(user_id, "connect", f"SSID: {masked_ssid}, Endpoint: {region}, Status: connected")
+                await self._log_connection_event(user_id, "CONNECTED")
                 return  # Sucesso, sair do loop
 
             except Exception as e:
@@ -191,6 +236,7 @@ class UserConnectionManager:
                 else:
                     # Falhou todas as tentativas
                     logger.error(f"Não foi possível conectar usuário {user_id} após {max_attempts} tentativas")
+                    await self._log_connection_event(user_id, "DISCONNECT", reason="max_attempts_reached", error=str(e))
                     user = await self.user_repository.get_by_id(user_id)
                     if user:
                         user.is_connected = False
@@ -219,6 +265,7 @@ class UserConnectionManager:
                 await self.user_repository.update(user)
 
             logger.info(f"Usuário {user_id} desconectado: {reason}")
+            await self._log_connection_event(user_id, "DISCONNECT", reason=reason)
             self._log_user_event(user_id, "disconnect", f"Reason: {reason}, Status: disconnected")
 
         except Exception as e:
