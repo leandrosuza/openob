@@ -34,6 +34,7 @@ async def create_autotrade_config(config: AutotradeConfig, current_user: User = 
 @router.get("/configs/{user_id}")
 async def get_autotrade_config(user_id: int, current_user: User = Depends(get_current_user)):
     """Obter config do usuário"""
+    print(f"[DEBUG] get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
     logger.info(f"get_autotrade_config called: user_id={user_id}, current_user.id={current_user.id}")
 
     if current_user.id != user_id:
@@ -43,6 +44,7 @@ async def get_autotrade_config(user_id: int, current_user: User = Depends(get_cu
     autotrade_repo = RepositoryFactory.create_autotrade_repository(config_dict)
 
     config = await autotrade_repo.get_by_user(user_id)
+    print(f"[DEBUG] get_by_user returned: {config}")
     logger.info(f"get_by_user returned: {config}")
     if not config:
         raise HTTPException(status_code=404, detail="Config não encontrada")
