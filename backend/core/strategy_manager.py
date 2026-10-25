@@ -80,10 +80,10 @@ class StrategyManager:
         # Atualizar cache de ticks
         self._update_tick_cache(asset, tick)
 
-        # Analisar ativo para todos os usuários com estratégias ativas
+        # Analisar ativo para todos os usuários com estratégias
         for user_id, strategy in self.strategies.items():
             config = self.user_configs.get(user_id)
-            if not config or not config.is_active:
+            if not config:
                 continue
 
             # Verificar se o ativo está sendo monitorado
@@ -91,10 +91,13 @@ class StrategyManager:
             if asset not in monitored_assets:
                 continue
 
-            # Analisar ativo
+            # Analisar ativo (sempre analisa, mesmo se is_active=False)
             signal = await self.analyze_asset(asset, user_id)
-            if signal and signal.get("signal") != "none":
-                # Adicionar sinal à fila
+
+            # Se autotrade ativo, adicionar sinal à fila
+            if config.is_active and signal and signal.get("signal") != "none":
+                if user_id not in self.signal_queue:
+                    self.signal_queue[user_id] = []
                 self.signal_queue[user_id].append(signal)
                 # Manter apenas últimos 10 sinais
                 if len(self.signal_queue[user_id]) > 10:

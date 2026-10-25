@@ -155,6 +155,7 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Iniciando monitoramento WebSocket...")
         monitor_api = MonitorAPI()
+        monitor_api.set_strategy_manager(strategy_manager)
         await monitor_api.start(
             payout_interval=Settings.MONITOR_PAYOUT_INTERVAL,
             update_interval=Settings.MONITOR_ASSETS_UPDATE_INTERVAL

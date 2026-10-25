@@ -50,7 +50,13 @@ class MonitorAPI:
         self.tick_repo = RepositoryFactory.create_tick_repository(config)
         logger.info(f"MonitorAPI inicializado com repositório: {config['DATABASE_TYPE']}")
 
+        self.strategy_manager = None  # será injetado
+
         self._setup_handlers()
+
+    def set_strategy_manager(self, strategy_manager):
+        """Injetar referência ao StrategyManager"""
+        self.strategy_manager = strategy_manager
 
 
     def _setup_handlers(self):
@@ -133,6 +139,11 @@ class MonitorAPI:
                         payout = self.payout_data.get(asset, {}).get("payout")
                         self._log_to_file("monitoring_actives.txt", f"Salvando tick no repositório: {asset} @ {price}")
                         asyncio.create_task(self.tick_repo.save(asset, price, payout))
+
+                        # Notificar StrategyManager
+                        if self.strategy_manager:
+                            tick_data = {"asset": asset, "price": price, "payout": payout}
+                            asyncio.create_task(self.strategy_manager.on_tick(tick_data))
                     else:
                         self._log_to_file("monitoring_actives.txt", f"Ativo não monitorado: {asset}")
 
