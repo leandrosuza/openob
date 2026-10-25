@@ -44,20 +44,20 @@ Ao final de cada task, gerar o FEAT com o seguinte formato:
 ---
 ## 📋 FEAT: Implementação de Camada de Repositório
 
-**Título:** feat(repositories): adicionar camada de persistência de dados com interface e SQLite
+**Título:** feat(repositories): adicionar camada de persistência de dados com interface e PostgreSQL
 
-**Descrição:** Implementou arquitetura de repositórios para persistência de ticks de mercado seguindo princípios SOLID. Criou interface TickRepositoryInterface, RepositoryFactory e SQLiteTickRepository com banco embutido otimizado.
+**Descrição:** Implementou arquitetura de repositórios para persistência de dados seguindo princípios SOLID. Criou interfaces para todos os repositórios, RepositoryFactory e implementações PostgreSQL com banco de dados cloud.
 
 **Arquivos:**
 - config/settings.py
 - repositories/repository_factory.py
-- repositories/interfaces/tick_repository_interface.py
-- repositories/sqlite/sqlite_tick_repository.py
+- repositories/interfaces/*_repository_interface.py
+- repositories/postgresql/postgres_*_repository.py
 - core/monitor.py (modificado)
 
 **Benefícios:**
 - Código desacoplado e testável
 - Fácil extensão para outros bancos (Redis, InfluxDB)
 - Configurações centralizadas via .env
-- Persistência automática de ticks monitorados
+- Persistência automática de dados em PostgreSQL cloud
 ---

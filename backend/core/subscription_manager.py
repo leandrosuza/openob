@@ -3,7 +3,6 @@
 import asyncio
 from datetime import datetime, timezone, timedelta
 from repositories.repository_factory import RepositoryFactory
-from repositories.sqlite.sqlite_user_repository import SQLiteUserRepository
 from config.settings import Settings
 from core.logger import LoggerConfig, get_logger
 

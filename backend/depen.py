@@ -31,7 +31,6 @@ def install_from_pyproject(dev: bool = False, upgrade: bool = False):
         "email-validator>=2.0.0",
         "slowapi>=0.1.9",
         "pydantic-settings>=2.0.0",
-        "aiosqlite>=0.19.0",
         "asyncpg>=0.29.0",  # PostgreSQL async driver
         "psycopg2-binary>=2.9.0",  # PostgreSQL sync driver
         "anyio>=3.7.0",  # Async framework

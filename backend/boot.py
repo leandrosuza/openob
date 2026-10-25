@@ -26,7 +26,6 @@ def check_dependencies():
         "jose": "python-jose",
         "slowapi": "slowapi",
         "passlib": "passlib",
-        "aiosqlite": "aiosqlite",
     }
 
     missing = []
