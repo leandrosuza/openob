@@ -183,6 +183,14 @@ class UserConnectionManager:
                     await self._log_connection_event(user_id, "DISCONNECT", reason="user_not_found")
                     return
 
+                # Obter config de autotrade
+                config = None
+                if self.autotrade_repository:
+                    try:
+                        config = await self.autotrade_repository.get_by_user(user_id)
+                    except Exception as e:
+                        logger.error(f"Erro ao obter config de autotrade: {e}")
+
                 # Verificar SSID
                 if user.mode == "demo":
                     ssid = user.ssid_demo
@@ -286,11 +294,6 @@ class UserConnectionManager:
                 continue
 
         return "api-eu"  # Default
-
-    async def apply_autotrade_config(self, user_id: int, config):
-        """Aplicar config via StrategyManager"""
-        await self.strategy_manager.apply_config(user_id, config)
-        logger.info(f"Config aplicada para usuário {user_id}: {config.strategy_name}")
 
     def _setup_event_handlers(self, trading_api: TradingAPI, user_id: int):
         """Configurar handlers de eventos do WebSocket"""
