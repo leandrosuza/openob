@@ -3,6 +3,7 @@
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
+from pathlib import Path
 from models.user import User
 from models.autotrade import AutotradeConfig
 from repositories.repository_factory import RepositoryFactory
@@ -110,27 +111,74 @@ async def toggle_autotrade_config(user_id: int, current_user: User = Depends(get
 
 @router.get("/api/autotrade/strategies")
 async def list_strategies():
-    """Listar estratégias disponíveis"""
-    strategies = [
-        {
-            "name": "scalping5s",
-            "description": "Estratégia de scalping de 5 segundos",
-            "required_parameters": ["lookback_period", "ma_period", "rsi_period", "rsi_oversold", "rsi_overbought"]
-        }
-    ]
+    """Listar estratégias disponíveis automaticamente"""
+    import os
+    import importlib
+    from pathlib import Path
+
+    strategies = []
+    strategy_dir = Path(__file__).parent.parent.parent / "core" / "strategy"
+
+    # Descobrir todas as estratégias no diretório
+    for file_path in strategy_dir.glob("*.py"):
+        if file_path.name.startswith("_") or file_path.name == "__init__.py":
+            continue
+
+        module_name = file_path.stem
+        try:
+            # Importar módulo da estratégia
+            module = importlib.import_module(f"core.strategy.{module_name}")
+
+            # Encontrar classes que herdam de BaseStrategy
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                if isinstance(attr, type) and attr_name.endswith("Strategy"):
+                    try:
+                        strategy_instance = attr()
+                        if hasattr(strategy_instance, 'get_name') and hasattr(strategy_instance, 'get_required_parameters'):
+                            strategies.append({
+                                "name": strategy_instance.get_name(),
+                                "class_name": attr_name,
+                                "description": getattr(strategy_instance, '__doc__', f"Estratégia {module_name}").strip(),
+                                "required_parameters": strategy_instance.get_required_parameters()
+                            })
+                    except Exception as e:
+                        logger.warning(f"Erro ao instanciar estratégia {attr_name}: {e}")
+        except Exception as e:
+            logger.warning(f"Erro ao importar módulo {module_name}: {e}")
+
     return strategies
 
 
 @router.get("/api/autotrade/strategies/{name}/parameters")
 async def get_strategy_parameters(name: str):
     """Obter parâmetros necessários de uma estratégia"""
-    from core.strategy.scalping5s import Scalping5sStrategy
+    import importlib
 
-    if name == "scalping5s":
-        strategy = Scalping5sStrategy()
-        return {
-            "name": name,
-            "required_parameters": strategy.get_required_parameters()
-        }
-    else:
-        raise HTTPException(status_code=404, detail="Estratégia não encontrada")
+    # Buscar o módulo correspondente ao nome da estratégia
+    strategy_dir = Path(__file__).parent.parent.parent / "core" / "strategy"
+
+    for file_path in strategy_dir.glob("*.py"):
+        if file_path.name.startswith("_") or file_path.name == "__init__.py":
+            continue
+
+        module_name = file_path.stem
+        try:
+            module = importlib.import_module(f"core.strategy.{module_name}")
+
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                if isinstance(attr, type) and attr_name.endswith("Strategy"):
+                    try:
+                        strategy_instance = attr()
+                        if strategy_instance.get_name() == name:
+                            return {
+                                "name": name,
+                                "required_parameters": strategy_instance.get_required_parameters()
+                            }
+                    except Exception:
+                        continue
+        except Exception:
+            continue
+
+    raise HTTPException(status_code=404, detail="Estratégia não encontrada")
