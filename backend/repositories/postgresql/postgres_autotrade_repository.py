@@ -22,21 +22,19 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
         self.database = database
         self.user = user
         self.password = password
-        self.pool = None
 
     async def _get_pool(self):
-        """Obter pool de conexões"""
-        if self.pool is None:
-            self.pool = await asyncpg.create_pool(
-                host=self.host,
-                port=self.port,
-                database=self.database,
-                user=self.user,
-                password=self.password,
-                min_size=2,
-                max_size=10
-            )
-        return self.pool
+        """Obter pool de conexões (sem cache para evitar problemas de estado)"""
+        pool = await asyncpg.create_pool(
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            user=self.user,
+            password=self.password,
+            min_size=2,
+            max_size=10
+        )
+        return pool
 
     async def _initialize_db(self):
         """Setup inicial do banco"""
