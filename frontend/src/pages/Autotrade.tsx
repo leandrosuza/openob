@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { authService } from '../services/auth';
+import { Play, Square, TrendingUp, DollarSign, Activity, Target } from 'lucide-react';
 
 interface AutotradeConfig {
   id?: number;
@@ -133,43 +134,43 @@ export default function Autotrade() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dark mb-2">Autotrade</h1>
-        <p className="text-secondary">Configure o trading automatizado</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Autotrade</h1>
+        <p className="text-gray-600 dark:text-gray-400">Configure o trading automatizado</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h2 className="text-xl font-bold text-dark mb-4">Configuração Atual</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Configuração Atual</h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <span className="text-secondary">Status</span>
+            <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-gray-600 dark:text-gray-400">Status</span>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 config.is_active
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-secondary'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
               }`}>
                 {config.is_active ? 'Ativo' : 'Inativo'}
               </span>
             </div>
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <span className="text-secondary">Estratégia</span>
-              <span className="font-medium text-dark capitalize">
+            <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-gray-600 dark:text-gray-400">Estratégia</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">
                 {config.strategy_name.replace(/([A-Z])/g, ' $1').trim()}
               </span>
             </div>
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <span className="text-secondary">Amount</span>
-              <span className="font-medium text-dark">${config.amount.toFixed(2)}</span>
+            <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-gray-600 dark:text-gray-400">Amount</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">${config.amount.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between py-3">
-              <span className="text-secondary">Ativos</span>
-              <span className="font-medium text-dark">Automático</span>
+              <span className="text-gray-600 dark:text-gray-400">Ativos</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Automático</span>
             </div>
           </div>
         </div>
 
         <div className="card">
-          <h2 className="text-xl font-bold text-dark mb-4">Controles</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Controles</h2>
           <div className="space-y-4">
             <button
               onClick={toggleAutotrade}
@@ -180,10 +181,10 @@ export default function Autotrade() {
                   : 'bg-green-500 hover:bg-green-600 text-white'
               } ${toggling ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <span>{config.is_active ? '⏹️' : '▶️'}</span>
+              {config.is_active ? <Square className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               {toggling ? 'Processando...' : config.is_active ? 'Parar Autotrade' : 'Iniciar Autotrade'}
             </button>
-            <p className="text-sm text-secondary text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
               {config.is_active
                 ? 'Ao parar, a conexão com a corretora será encerrada'
                 : 'Ao iniciar, o sistema conectará automaticamente à corretora'}
@@ -193,15 +194,15 @@ export default function Autotrade() {
       </div>
 
       <div className="card mt-6">
-        <h2 className="text-xl font-bold text-dark mb-4">Selecionar Estratégia</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Selecionar Estratégia</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-secondary mb-2">Estratégia</label>
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Estratégia</label>
             <select
               value={selectedStrategy}
               onChange={(e) => setSelectedStrategy(e.target.value)}
               disabled={config.is_active}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             >
               {strategies.map((strategy) => (
                 <option key={strategy.name} value={strategy.name}>
@@ -212,7 +213,7 @@ export default function Autotrade() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-secondary mb-2">Amount ($)</label>
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Amount ($)</label>
             <input
               type="number"
               step="0.01"
@@ -220,7 +221,7 @@ export default function Autotrade() {
               value={selectedAmount}
               onChange={(e) => setSelectedAmount(parseFloat(e.target.value))}
               disabled={config.is_active}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -233,7 +234,7 @@ export default function Autotrade() {
           </button>
 
           {config.is_active && (
-            <p className="text-sm text-orange-600 text-center">
+            <p className="text-sm text-orange-600 dark:text-orange-400 text-center">
               Pare o autotrade antes de alterar a configuração
             </p>
           )}
@@ -241,23 +242,35 @@ export default function Autotrade() {
       </div>
 
       <div className="card mt-6">
-        <h2 className="text-xl font-bold text-dark mb-4">Estatísticas</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Estatísticas</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-light p-4 rounded-lg">
-            <p className="text-sm text-secondary mb-1">Trades Hoje</p>
-            <p className="text-2xl font-bold text-dark">0</p>
+          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Trades Hoje</p>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">0</p>
           </div>
-          <div className="bg-light p-4 rounded-lg">
-            <p className="text-sm text-secondary mb-1">Lucro Hoje</p>
-            <p className="text-2xl font-bold text-green-600">$0.00</p>
+          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Lucro Hoje</p>
+            </div>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">$0.00</p>
           </div>
-          <div className="bg-light p-4 rounded-lg">
-            <p className="text-sm text-secondary mb-1">Win Rate</p>
-            <p className="text-2xl font-bold text-dark">0%</p>
+          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Target className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Win Rate</p>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">0%</p>
           </div>
-          <div className="bg-light p-4 rounded-lg">
-            <p className="text-sm text-secondary mb-1">Trades Totais</p>
-            <p className="text-2xl font-bold text-dark">0</p>
+          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Trades Totais</p>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">0</p>
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Autotrade from './pages/Autotrade';
-import Strategies from './pages/Strategies';
 import Settings from './pages/Settings';
 import MainLayout from './components/MainLayout';
 
@@ -17,7 +16,6 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="autotrade" element={<Autotrade />} />
-          <Route path="strategies" element={<Strategies />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
