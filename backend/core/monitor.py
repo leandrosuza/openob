@@ -98,16 +98,16 @@ class MonitorAPI:
     async def _capture_payout_event(self, event: str, data: Any):
         """Capturar eventos de payout do WebSocket"""
         try:
-            self._log_to_file("monitoring_payout.txt", f"Evento recebido: {event} | Tipo: {type(data)}")
+            self._log_to_file("monitoring_payout.log", f"Evento recebido: {event} | Tipo: {type(data)}")
 
             if event == "json_data" and isinstance(data, dict):
                 if "balance" in data:
                     self.balance_data = data
-                    self._log_to_file("monitoring_payout.txt", f"Saldo: {data}")
+                    self._log_to_file("monitoring_payout.log", f"Saldo: {data}")
 
             if "updateAssets" in event and isinstance(data, dict):
                 if data.get("_placeholder") and "num" in data:
-                    self._log_to_file("monitoring_payout.txt", "Dados binários de ativos recebidos")
+                    self._log_to_file("monitoring_payout.log", "Dados binários de ativos recebidos")
 
             if "updateAssets" in event and "_data" in event and isinstance(data, list):
                 self._process_assets_data(data)
@@ -120,11 +120,11 @@ class MonitorAPI:
         """Capturar eventos de ativos do WebSocket"""
         try:
             log_entry = f"Evento: {event} | Dados: {data}"
-            self._log_to_file("monitoring_actives.txt", log_entry)
+            self._log_to_file("monitoring_actives.log", log_entry)
 
             if "updateStream" in event and isinstance(data, dict):
                 if data.get("_placeholder") and "num" in data:
-                    self._log_to_file("monitoring_actives.txt", "Dados binários de stream recebidos")
+                    self._log_to_file("monitoring_actives.log", "Dados binários de stream recebidos")
 
             if "updateStream" in event and "_data" in event and isinstance(data, list):
                 self._process_stream_data(data)
@@ -133,19 +133,20 @@ class MonitorAPI:
                 asset = data.get("asset", data.get("name", data.get("symbol", None)))
                 price = data.get("price", data.get("value", data.get("close", data.get("bid", None))))
                 if asset and price:
-                    self._log_to_file("monitoring_actives.txt", f"Tick: {asset} = {price}")
+                    logger.info(f"Tick recebido: {asset} = {price}")
 
                     if asset in self.monitored_assets:
                         payout = self.payout_data.get(asset, {}).get("payout")
-                        self._log_to_file("monitoring_actives.txt", f"Salvando tick no repositório: {asset} @ {price}")
+                        logger.info(f"Salvando tick no repositório: {asset} @ {price}")
                         asyncio.create_task(self.tick_repo.save(asset, price, payout))
 
                         # Notificar StrategyManager
                         if self.strategy_manager:
                             tick_data = {"asset": asset, "price": price, "payout": payout}
+                            logger.info(f"Notificando StrategyManager: {tick_data}")
                             asyncio.create_task(self.strategy_manager.on_tick(tick_data))
                     else:
-                        self._log_to_file("monitoring_actives.txt", f"Ativo não monitorado: {asset}")
+                        logger.debug(f"Ativo não monitorado: {asset}")
 
         except Exception as e:
             logger.error(f"Erro ao capturar evento de ativos: {e}")
@@ -174,7 +175,7 @@ class MonitorAPI:
                 "payout": payout
             }
 
-            self._log_to_file("monitoring_payout.txt", f"Payout {symbol}: {payout}%")
+            self._log_to_file("monitoring_payout.log", f"Payout {symbol}: {payout}%")
 
 
     def _process_stream_data(self, data: List):
@@ -190,13 +191,19 @@ class MonitorAPI:
             timestamp_unix = item[1]
             price = item[2]
 
-            self._log_to_file("monitoring_actives.txt", f"Stream: {asset} = {price} @ {timestamp_unix}")
+            self._log_to_file("monitoring_actives.log", f"Stream: {asset} = {price} @ {timestamp_unix}")
 
             if asset in self.monitored_assets:
                 payout = self.payout_data.get(asset, {}).get("payout")
                 timestamp = datetime.fromtimestamp(timestamp_unix)
-                self._log_to_file("monitoring_actives.txt", f"Salvando tick stream no repositório: {asset} @ {price}")
+                self._log_to_file("monitoring_actives.log", f"Salvando tick stream no repositório: {asset} @ {price}")
                 asyncio.create_task(self.tick_repo.save(asset, price, payout, timestamp))
+
+                # Notificar StrategyManager
+                if self.strategy_manager:
+                    tick_data = {"asset": asset, "price": price, "payout": payout}
+                    logger.info(f"Notificando StrategyManager do stream: {tick_data}")
+                    asyncio.create_task(self.strategy_manager.on_tick(tick_data))
 
 
     def get_top_assets_by_payout(self, limit: int = None) -> List[Dict[str, Any]]:
@@ -254,7 +261,7 @@ class MonitorAPI:
             logger.info(f"Removendo ativos do monitoramento: {to_remove}")
             for symbol in to_remove:
                 self.monitored_assets.discard(symbol)
-                self._log_to_file("monitoring_actives.txt", f"Ativo removido do monitoramento: {symbol}")
+                self._log_to_file("monitoring_actives.log", f"Ativo removido do monitoramento: {symbol}")
 
         if not to_add and not to_remove:
             logger.debug("Nenhuma alteração necessária nos ativos monitorados")
@@ -264,15 +271,15 @@ class MonitorAPI:
         """Inscrever em um ativo específico e iniciar stream"""
         try:
             await self.actives_ws.send_message(f'42["changeSymbol", {{"asset": "{symbol}", "period": {period}}}]')
-            self._log_to_file("monitoring_actives.txt", f"Inscrição changeSymbol: {symbol}")
+            self._log_to_file("monitoring_actives.log", f"Inscrição changeSymbol: {symbol}")
             await asyncio.sleep(0.5)
 
             await self.actives_ws.send_message(f'42["subfor", "{symbol}"]')
-            self._log_to_file("monitoring_actives.txt", f"Inscrição subfor: {symbol}")
+            self._log_to_file("monitoring_actives.log", f"Inscrição subfor: {symbol}")
             await asyncio.sleep(0.5)
 
             await self.actives_ws.send_message('42["ps"]')
-            self._log_to_file("monitoring_actives.txt", f"Stream iniciado: {symbol}")
+            self._log_to_file("monitoring_actives.log", f"Stream iniciado: {symbol}")
             logger.info(f"Stream iniciado para {symbol}")
 
         except Exception as e:
@@ -297,16 +304,16 @@ class MonitorAPI:
             try:
                 logger.info("Payout monitoring: desconectando para reconectar...")
                 await self.payout_ws.disconnect()
-                self._log_to_file("connection.txt", "Payout: Desconectado")
+                self._log_to_file("connection.log", "Payout: Desconectado")
 
                 logger.info("Payout monitoring: reconectando...")
                 connected = await self.payout_ws.connect(ssid=self.ssid, auto_reconnect=False)
                 if connected:
-                    self._log_to_file("connection.txt", "Payout: Reconectado com sucesso")
+                    self._log_to_file("connection.log", "Payout: Reconectado com sucesso")
                     logger.info("Payout monitoring: conectado com sucesso")
                     # O servidor envia dados de payout automaticamente na conexão
                 else:
-                    self._log_to_file("connection.txt", "Payout: Falha ao reconectar")
+                    self._log_to_file("connection.log", "Payout: Falha ao reconectar")
                     logger.error("MONITOR DE PAYOUT | FALHA AO RECONECTAR")
                     await asyncio.sleep(5)
                     continue
@@ -316,7 +323,7 @@ class MonitorAPI:
 
             except Exception as e:
                 logger.error(f"MONITOR DE PAYOUT | ERRO: {e}")
-                self._log_to_file("connection.txt", f"Payout: Erro - {e}")
+                self._log_to_file("connection.log", f"Payout: Erro - {e}")
                 await asyncio.sleep(payout_interval)
 
 
@@ -337,11 +344,11 @@ class MonitorAPI:
                 if not self.actives_ws.is_connected:
                     connected = await self.actives_ws.connect(ssid=self.ssid, auto_reconnect=True)
                     if connected:
-                        self._log_to_file("connection.txt", "Ativos: Conectado com sucesso")
+                        self._log_to_file("connection.log", "Ativos: Conectado com sucesso")
                         logger.info("Resetando tabela ticks ao reconectar WebSocket de ativos")
                         await self.tick_repo.reset_all()
                     else:
-                        self._log_to_file("connection.txt", "Ativos: Falha ao conectar")
+                        self._log_to_file("connection.log", "Ativos: Falha ao conectar")
                         logger.error("MONITOR DE ATIVOS | FALHA AO CONECTAR")
                         await asyncio.sleep(5)
                         continue
@@ -356,7 +363,7 @@ class MonitorAPI:
 
             except Exception as e:
                 logger.error(f"MONITOR DE ATIVOS | ERRO: {e}")
-                self._log_to_file("connection.txt", f"Ativos: Erro - {e}")
+                self._log_to_file("connection.log", f"Ativos: Erro - {e}")
                 await asyncio.sleep(5)
 
 

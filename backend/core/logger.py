@@ -14,6 +14,7 @@ class LoggerConfig:
     _payment_logger = None
     _security_logger = None
     _database_logger = None
+    _strategy_logger = None
 
 
     @classmethod
@@ -59,7 +60,7 @@ class LoggerConfig:
         cls._configured = True
 
     @classmethod
-    def setup_subscription_logger(cls, log_file: str = "logs/plans/subscriptions.txt"):
+    def setup_subscription_logger(cls, log_file: str = "logs/plans/subscriptions.log"):
         """Configurar logger específico para subscriptions"""
         if cls._subscription_logger:
             return cls._subscription_logger
@@ -76,7 +77,7 @@ class LoggerConfig:
         return cls._subscription_logger
 
     @classmethod
-    def setup_payment_logger(cls, log_file: str = "logs/plans/payments.txt"):
+    def setup_payment_logger(cls, log_file: str = "logs/plans/payments.log"):
         """Configurar logger específico para pagamentos"""
         if cls._payment_logger:
             return cls._payment_logger
@@ -93,7 +94,7 @@ class LoggerConfig:
         return cls._payment_logger
 
     @classmethod
-    def setup_security_logger(cls, log_file: str = "logs/security.txt"):
+    def setup_security_logger(cls, log_file: str = "logs/security.log"):
         """Configurar logger específico para segurança"""
         if cls._security_logger:
             return cls._security_logger
@@ -131,7 +132,7 @@ class LoggerConfig:
         return cls._security_logger
 
     @classmethod
-    def setup_database_logger(cls, log_file: str = "logs/database.txt"):
+    def setup_database_logger(cls, log_file: str = "logs/database.log"):
         """Configurar logger específico para database"""
         if cls._database_logger:
             return cls._database_logger
@@ -153,6 +154,31 @@ class LoggerConfig:
         if not cls._database_logger:
             cls.setup_database_logger()
         return cls._database_logger
+
+    @classmethod
+    def setup_strategy_logger(cls, log_file: str = "logs/strategy/strategy.log"):
+        """Configurar logger específico para sinais finais de estratégia"""
+        if cls._strategy_logger:
+            return cls._strategy_logger
+
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        cls._strategy_logger = logging.getLogger("strategy.signals")
+        cls._strategy_logger.setLevel(logging.INFO)
+        cls._strategy_logger.propagate = False  # Evitar propagação para logger raiz
+        strategy_handler = logging.FileHandler(log_file)
+        strategy_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        cls._strategy_logger.addHandler(strategy_handler)
+
+        return cls._strategy_logger
+
+    @classmethod
+    def get_strategy_logger(cls) -> logging.Logger:
+        """Obter logger de estratégia"""
+        if not cls._strategy_logger:
+            cls.setup_strategy_logger()
+        return cls._strategy_logger
 
 
 

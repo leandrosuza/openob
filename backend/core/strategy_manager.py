@@ -24,6 +24,9 @@ class StrategyManager:
         self.monitor_api = None  # será injetado
         self.user_connection_manager = None  # será injetado
         self._running = False
+        self.monitored_assets: Set[str] = set()  # ativos sendo monitorados atualmente
+        from core.logger import LoggerConfig
+        self.signal_logger = LoggerConfig.get_strategy_logger()  # logger para sinais finais
 
     def set_monitor_api(self, monitor_api):
         """Injetar referência ao MonitorAPI"""
@@ -54,15 +57,21 @@ class StrategyManager:
         if not asset:
             return
 
+        # Atualizar rastreamento de ativos monitorados
+        current_monitored = self.get_monitored_assets()
+        if current_monitored != self.monitored_assets:
+            logger.info(f"Ativos monitorados alterados: {self.monitored_assets} -> {current_monitored}")
+            # Limpar cache de ativos que não estão mais sendo monitorados
+            for old_asset in self.monitored_assets - current_monitored:
+                if old_asset in self.tick_cache:
+                    del self.tick_cache[old_asset]
+                    logger.info(f"Cache limpo para ativo removido: {old_asset}")
+            self.monitored_assets = current_monitored
+
         # Atualizar cache de ticks
         self._update_tick_cache(asset, tick)
 
-        # Verificar se o ativo está sendo monitorado
-        monitored_assets = self.get_monitored_assets()
-        if asset not in monitored_assets:
-            return
-
-        # Analisar ativo globalmente
+        # Analisar ativo globalmente (sempre analisa todos os ativos monitorados)
         signal = await self.analyze_asset(asset)
         if signal and signal.get("signal") != "none":
             # Adicionar sinal à fila global
@@ -71,7 +80,14 @@ class StrategyManager:
             if len(self.signal_queue) > 50:
                 self.signal_queue.pop(0)
 
-            logger.debug(f"Sinal global gerado: {signal.get('signal')} para {asset}")
+            # Logar sinal final no strategy.log
+            self.signal_logger.info(
+                f"SINAL FINAL | Estratégia: {self.global_strategy.get_name()} | "
+                f"Ativo: {asset} | Direção: {signal.get('signal').upper()} | "
+                f"Confiança: {signal.get('confidence', 0):.2f} | "
+                f"Timestamp: {signal.get('timestamp')} | "
+                f"Parâmetros: {signal.get('parameters', {})}"
+            )
 
     def _update_tick_cache(self, asset: str, tick: Dict):
         """Atualizar cache de ticks para um ativo"""
@@ -95,25 +111,36 @@ class StrategyManager:
         }
 
         # Obter ticks do cache ou repository
-        ticks = self.get_cached_ticks(asset, parameters.get("lookback_period", 50))
+        ticks = await self.get_cached_ticks(asset, parameters.get("lookback_period", 50))
 
         if not ticks or len(ticks) < parameters.get("lookback_period", 50):
+            logger.info(f"Ticks insuficientes para {asset}: {len(ticks) if ticks else 0} < {parameters.get('lookback_period', 50)}")
             return None
+
+        logger.info(f"Analisando {asset} com {len(ticks)} ticks")
 
         # Analisar com a estratégia
         signal = await self.global_strategy.analyze(ticks, parameters)
 
+        # Adicionar metadados ao sinal
+        if signal:
+            signal["asset"] = asset
+            # Usar timestamp do último tick ou timestamp atual
+            from datetime import datetime
+            signal["timestamp"] = ticks[-1].get("timestamp") if ticks else datetime.now().isoformat()
+            signal["parameters"] = parameters
+            signal["strategy_name"] = self.global_strategy.get_name()
+
         return signal
 
-    def get_cached_ticks(self, asset: str, limit: int) -> List[Dict]:
+    async def get_cached_ticks(self, asset: str, limit: int) -> List[Dict]:
         """Obter ticks do cache ou repository"""
         if asset in self.tick_cache and len(self.tick_cache[asset]) >= limit:
             return list(self.tick_cache[asset])[-limit:]
         else:
             # Fallback para repository
-            import asyncio
             try:
-                ticks = asyncio.run(self.tick_repository.get_recent(asset, limit))
+                ticks = await self.tick_repository.get_recent(asset, limit)
                 return ticks
             except Exception as e:
                 logger.error(f"Erro ao obter ticks do repository: {e}")
@@ -128,78 +155,6 @@ class StrategyManager:
     def get_signals(self) -> List[Dict]:
         """Obter sinais globais"""
         return self.signal_queue.copy()
-
-    def calculate_asset_score(self, asset: str) -> float:
-        """Calcular pontuação do ativo baseada em amplitude de preço"""
-        if asset not in self.tick_cache or len(self.tick_cache[asset]) < 50:
-            return 0.0
-
-        ticks = list(self.tick_cache[asset])[-50:]
-        prices = [float(tick.get("price", 0)) for tick in ticks if tick.get("price")]
-
-        if len(prices) < 2:
-            return 0.0
-
-        # Calcular amplitude (max - min)
-        amplitude = max(prices) - min(prices)
-
-        return amplitude
-
-    def _update_tick_cache(self, asset: str, tick: Dict):
-        """Atualizar cache de ticks para um ativo"""
-        if asset not in self.tick_cache:
-            self.tick_cache[asset] = deque(maxlen=self.tick_cache_size)
-
-        self.tick_cache[asset].append(tick)
-
-    async def analyze_asset(self, asset: str, user_id: int) -> Optional[Dict]:
-        """Analisar ativo específico para um usuário"""
-        strategy = self.strategies.get(user_id)
-        config = self.user_configs.get(user_id)
-
-        if not strategy or not config:
-            return None
-
-        # Obter ticks do cache ou repository
-        ticks = self.get_cached_ticks(asset, config.parameters.get("lookback_period", 50))
-
-        if not ticks or len(ticks) < config.parameters.get("lookback_period", 50):
-            return None
-
-        # Analisar com a estratégia
-        signal = await strategy.analyze(ticks, config.parameters)
-
-        logger.debug(f"Sinal gerado para usuário {user_id}, ativo {asset}: {signal}")
-        return signal
-
-    def get_cached_ticks(self, asset: str, limit: int) -> List[Dict]:
-        """Obter ticks do cache ou repository"""
-        if asset in self.tick_cache and len(self.tick_cache[asset]) >= limit:
-            return list(self.tick_cache[asset])[-limit:]
-        else:
-            # Fallback para repository
-            import asyncio
-            try:
-                ticks = asyncio.run(self.tick_repository.get_recent(asset, limit))
-                return ticks
-            except Exception as e:
-                logger.error(f"Erro ao obter ticks do repository: {e}")
-                return []
-
-    def get_monitored_assets(self) -> Set[str]:
-        """Obter ativos monitorados do MonitorAPI"""
-        if self.monitor_api:
-            return self.monitor_api.monitored_assets
-        return set()
-
-    def get_signals_for_user(self, user_id: int) -> List[Dict]:
-        """Obter sinais priorizados por confiança para usuário"""
-        signals = self.signal_queue.get(user_id, [])
-
-        # Ordenar por confiança (decrescente)
-        signals_sorted = sorted(signals, key=lambda x: x.get("confidence", 0), reverse=True)
-
-        return signals_sorted
 
     def calculate_asset_score(self, asset: str) -> float:
         """Calcular pontuação do ativo baseada em amplitude de preço"""

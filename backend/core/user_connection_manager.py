@@ -29,7 +29,7 @@ class UserConnectionManager:
         self.connection_times: Dict[int, datetime] = {}  # timestamps de conexão
 
     def _log_user_event(self, user_id: int, event: str, details: str = ""):
-        """Registrar evento específico do usuário em logs/users/{email}/user.txt"""
+        """Registrar evento específico do usuário em logs/users/{email}/user.log"""
         from config.settings import Settings
 
         if Settings.LOG_LEVEL.upper() != "DEBUG":
@@ -49,7 +49,7 @@ class UserConnectionManager:
 
             # Sanitizar email para usar como nome de arquivo
             safe_email = user.email.replace("@", "_at_").replace(".", "_dot_")
-            user_log_file = f"logs/users/{safe_email}.txt"
+            user_log_file = f"logs/users/{safe_email}.log"
 
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_entry = f"[{timestamp}] Event: {event} | {details}\n"
@@ -69,7 +69,7 @@ class UserConnectionManager:
 
             # Sanitizar email para usar como nome de arquivo
             safe_email = user.email.replace("@", "_at_").replace(".", "_dot_")
-            user_log_file = f"logs/users/{safe_email}.txt"
+            user_log_file = f"logs/users/{safe_email}.log"
 
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

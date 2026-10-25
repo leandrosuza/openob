@@ -359,13 +359,13 @@ def reset_logs():
     os.makedirs(users_dir, exist_ok=True)
 
     # Criar arquivo de segurança sempre (independente de LOG_LEVEL)
-    auth_log = os.path.join(logs_dir, "auth.txt")
+    auth_log = os.path.join(logs_dir, "auth.log")
     if not os.path.exists(auth_log):
         with open(auth_log, 'w') as f:
             f.write("")  # Criar arquivo vazio
 
     # Criar arquivo de database sempre
-    database_log = os.path.join(logs_dir, "database.txt")
+    database_log = os.path.join(logs_dir, "database.log")
     if not os.path.exists(database_log):
         with open(database_log, 'w') as f:
             f.write("")  # Criar arquivo vazio
@@ -374,28 +374,28 @@ def reset_logs():
     plans_dir = os.path.join(logs_dir, "plans")
     os.makedirs(plans_dir, exist_ok=True)
 
-    # Lista de todos os arquivos .txt em todas as pastas
-    all_txt_files = []
+    # Lista de todos os arquivos .log em todas as pastas
+    all_log_files = []
     for root, dirs, files in os.walk(logs_dir):
         for file in files:
-            if file.endswith('.txt'):
-                all_txt_files.append(os.path.join(root, file))
+            if file.endswith('.log'):
+                all_log_files.append(os.path.join(root, file))
 
     try:
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            # Em modo DEBUG, limpar todos os arquivos .txt
-            for txt_file in all_txt_files:
-                with open(txt_file, "w", encoding="utf-8") as f:
+            # Em modo DEBUG, limpar todos os arquivos .log
+            for log_file in all_log_files:
+                with open(log_file, "w", encoding="utf-8") as f:
                     pass  # Limpar arquivo
 
-            logger.info("Todos os arquivos .txt limpos (modo DEBUG)")
+            logger.info("Todos os arquivos .log limpos (modo DEBUG)")
         else:
-            # Em outros níveis, remover todos os arquivos .txt
-            for txt_file in all_txt_files:
-                if os.path.exists(txt_file):
-                    os.remove(txt_file)
+            # Em outros níveis, remover todos os arquivos .log
+            for log_file in all_log_files:
+                if os.path.exists(log_file):
+                    os.remove(log_file)
 
-            logger.info(f"Todos os arquivos .txt removidos (modo {Settings.LOG_LEVEL.upper()})")
+            logger.info(f"Todos os arquivos .log removidos (modo {Settings.LOG_LEVEL.upper()})")
 
     except Exception as e:
         logger.error(f"Erro ao configurar logs: {e}")
