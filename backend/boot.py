@@ -374,50 +374,28 @@ def reset_logs():
     plans_dir = os.path.join(logs_dir, "plans")
     os.makedirs(plans_dir, exist_ok=True)
 
-    log_files = [
-        os.path.join(logs_dir, "error.txt"),
-        os.path.join(logs_dir, "info.txt"),
-        os.path.join(logs_dir, "debug.txt"),
-        os.path.join(ws_dir, "connection.txt"),
-        os.path.join(ws_dir, "monitoring_payout.txt"),
-        os.path.join(ws_dir, "monitoring_actives.txt"),
-        os.path.join(plans_dir, "subscriptions.txt"),
-        os.path.join(plans_dir, "payments.txt"),
-        os.path.join(logs_dir, "security.txt"),
-    ]
+    # Lista de todos os arquivos .txt em todas as pastas
+    all_txt_files = []
+    for root, dirs, files in os.walk(logs_dir):
+        for file in files:
+            if file.endswith('.txt'):
+                all_txt_files.append(os.path.join(root, file))
 
     try:
         if Settings.LOG_LEVEL.upper() == "DEBUG":
-            # Em modo DEBUG, criar/limpar arquivos de log
-            for log_file in log_files:
-                with open(log_file, "w", encoding="utf-8") as f:
+            # Em modo DEBUG, limpar todos os arquivos .txt
+            for txt_file in all_txt_files:
+                with open(txt_file, "w", encoding="utf-8") as f:
                     pass  # Limpar arquivo
 
-            # Limpar pasta users/ (logs por usuário)
-            if os.path.exists(users_dir):
-                for user_folder in os.listdir(users_dir):
-                    user_path = os.path.join(users_dir, user_folder)
-                    if os.path.isdir(user_path):
-                        # Limpar todos os arquivos dentro da pasta do usuário
-                        for file in os.listdir(user_path):
-                            file_path = os.path.join(user_path, file)
-                            if os.path.isfile(file_path):
-                                with open(file_path, "w", encoding="utf-8") as f:
-                                    pass  # Limpar arquivo
-
-            logger.info("Arquivos de log criados (modo DEBUG)")
+            logger.info("Todos os arquivos .txt limpos (modo DEBUG)")
         else:
-            # Em outros níveis, manter apenas auth.txt, subscriptions.txt, payments.txt, security.txt
-            for log_file in log_files:
-                if os.path.exists(log_file):
-                    os.remove(log_file)
+            # Em outros níveis, remover todos os arquivos .txt
+            for txt_file in all_txt_files:
+                if os.path.exists(txt_file):
+                    os.remove(txt_file)
 
-            # Remover pasta users/ completamente
-            if os.path.exists(users_dir):
-                shutil.rmtree(users_dir)
-                os.makedirs(users_dir, exist_ok=True)
-
-            logger.info(f"Logs detalhados desativados (modo {Settings.LOG_LEVEL.upper()})")
+            logger.info(f"Todos os arquivos .txt removidos (modo {Settings.LOG_LEVEL.upper()})")
 
     except Exception as e:
         logger.error(f"Erro ao configurar logs: {e}")

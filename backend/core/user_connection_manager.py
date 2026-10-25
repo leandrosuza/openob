@@ -46,12 +46,9 @@ class UserConnectionManager:
             if not user:
                 return
 
-            # Sanitizar email para usar como nome de diretório
+            # Sanitizar email para usar como nome de arquivo
             safe_email = user.email.replace("@", "_at_").replace(".", "_dot_")
-            user_log_dir = f"logs/users/{safe_email}"
-            os.makedirs(user_log_dir, exist_ok=True)
-
-            user_log_file = os.path.join(user_log_dir, "user.txt")
+            user_log_file = f"logs/users/{safe_email}.txt"
 
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_entry = f"[{timestamp}] Event: {event} | {details}\n"
