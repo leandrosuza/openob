@@ -188,6 +188,12 @@ class WebSocketManager:
     async def _process_message(self, message):
         """Processar mensagem recebida"""
         try:
+            # Log completo da mensagem recebida
+            if isinstance(message, bytes):
+                logger.info(f"[WS IN] {self.name} | Recebido (binary): {message[:200]}...")
+            else:
+                logger.info(f"[WS IN] {self.name} | Recebido: {message[:200]}...")
+            
             if isinstance(message, bytes):
                 if self._binary_event:
                     self._handle_binary_data(message)
@@ -215,10 +221,17 @@ class WebSocketManager:
         if "]" not in parts[1]:
             return
 
-        event_part = parts[1].split("]", 1)[0]
-        event = event_part.strip('"')
-        self._binary_event = event
-        asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
+        # O formato é: 451-["eventName",{"_placeholder":true,"num":0}]
+        # Precisamos extrair apenas o nome do evento (primeiro elemento do array)
+        json_part = parts[1].split("]", 1)[0]
+        try:
+            parsed = json.loads(f"[{json_part}]")
+            event = parsed[0] if parsed else None
+            if event:
+                self._binary_event = event
+                asyncio.create_task(self._emit_event(event, {"_placeholder": True, "num": 0}))
+        except Exception as e:
+            pass  # Silenciar erros de parsing de eventos não críticos
 
 
     def _handle_binary_data(self, data: bytes):
@@ -228,9 +241,14 @@ class WebSocketManager:
             if not self._binary_event:
                 return
 
-            if decoded.startswith("["):
+            # Processar tanto arrays quanto objetos JSON
+            if decoded.startswith("[") or decoded.startswith("{"):
                 parsed = json.loads(decoded)
-                asyncio.create_task(self._emit_event(f"{self._binary_event}_data", parsed))
+                event_name = f"{self._binary_event}_data"
+                # Log apenas para eventos importantes (closeOrder, balance)
+                if self._binary_event in ["successcloseOrder", "successupdateBalance"]:
+                    logger.info(f"[WS IN] {self.name} | Evento binário: {event_name}")
+                asyncio.create_task(self._emit_event(event_name, parsed))
                 self._binary_event = None
         except Exception as e:
             logger.debug(f"Erro ao processar dados binários: {e}")
@@ -292,6 +310,10 @@ class WebSocketManager:
         """Enviar mensagem"""
         if not self.websocket:
             raise ConnectionError("WebSocket não está conectado")
+        
+        # Log completo da mensagem enviada
+        logger.info(f"[WS OUT] {self.name} | Enviando: {message}")
+        
         await self.websocket.send(message)
         logger.debug(f"Mensagem enviada: {message[:100]}...")
 

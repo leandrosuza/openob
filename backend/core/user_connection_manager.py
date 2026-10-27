@@ -315,12 +315,13 @@ class UserConnectionManager:
         trading_api.ws_manager.add_event_handler("balance", on_balance)
         trading_api.ws_manager.add_event_handler("json_data", on_trade_result)
 
-        # Interceptador global para logging
-        original_emit = trading_api.ws_manager._emit_event
-        async def patched_emit(event: str, data):
-            await on_all_events(event, data)
-            return await original_emit(event, data)
-        trading_api.ws_manager._emit_event = patched_emit
+        # Interceptador global para logging (desativado temporariamente para testar handlers da TradingAPI)
+        # original_emit = trading_api.ws_manager._emit_event
+        # async def patched_emit(event: str, data):
+        #     await on_all_events(event, data)
+        #     logger.debug(f"[USER CONNECTION MANAGER] Evento emitido: {event} para usuário {user_id}")
+        #     return await original_emit(event, data)
+        # trading_api.ws_manager._emit_event = patched_emit
 
     def send_order(self, user_id: int, order):
         """Enviar ordem via TradingAPI do usuário"""

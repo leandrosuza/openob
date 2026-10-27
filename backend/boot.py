@@ -114,6 +114,7 @@ async def lifespan(app: FastAPI):
     from core.strategy_manager import StrategyManager
     from core.trading_manager import TradingManager
     from core.user_connection_manager import UserConnectionManager
+    from core.trade_executor import TradeExecutor
     config = Settings.to_dict()
 
     # Inicializar plan repository (cria tabela e planos padrão)
@@ -142,6 +143,12 @@ async def lifespan(app: FastAPI):
     trading_manager = TradingManager()
     await trading_manager.start()
 
+    # Inicializar TradeExecutor
+    trade_executor = TradeExecutor(
+        user_connection_manager=None,  # Será injetado depois
+        strategy_manager=strategy_manager
+    )
+
     user_connection_manager = UserConnectionManager(
         user_repository=user_repo,
         strategy_manager=strategy_manager,
@@ -150,6 +157,12 @@ async def lifespan(app: FastAPI):
     )
     await user_connection_manager.start_monitoring()
     logger.info("UserConnectionManager iniciado com sucesso")
+
+    # Injetar dependências no TradeExecutor
+    trade_executor.user_connection_manager = user_connection_manager
+    
+    # Injetar TradeExecutor no StrategyManager
+    strategy_manager.set_trade_executor(trade_executor)
 
     # Iniciar monitoramento WebSocket
     try:

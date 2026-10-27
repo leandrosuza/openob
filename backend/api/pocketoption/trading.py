@@ -34,10 +34,13 @@ class TradingAPI:
             "successopenOrder": self._on_success_open_order,
             "closeOrder": self._on_order,
             "successcloseOrder": self._on_success_close_order,
+            "successcloseOrder_data": self._on_success_close_order_data,  # Adicionado para capturar dados binários
             "json_data": self._on_json_data,
             "order_opened": self._on_order,
             "order_closed": self._on_order,
             "stream_update": self._on_stream_update,
+            "updateClosedDeals": self._on_update_closed_deals,
+            "updateClosedDeals_data": self._on_update_closed_deals,
         }
         for event, handler in handlers.items():
             self.ws_manager.add_event_handler(event, handler)
@@ -66,7 +69,6 @@ class TradingAPI:
                 profit=profit,
                 message=message
             )
-            logger.info(f"Ordem {order_id}: {status.value} ({message})")
 
 
     async def _on_order(self, data):
@@ -114,8 +116,6 @@ class TradingAPI:
         deal_profit = deal.get("profit", profit)
         status = self._determine_order_status(deal_profit)
 
-        logger.info(f"Resultado: {status.value} | Profit: ${deal_profit}")
-
         return OrderResult(
             order_id=deal_id,
             status=status,
@@ -132,6 +132,54 @@ class TradingAPI:
         result = self._parse_order_result(data)
         if result:
             self._order_results[result.order_id] = result
+
+
+    async def _on_success_close_order_data(self, data):
+        """Handler para successcloseOrder_data - contém dados do trade fechado"""
+        if not isinstance(data, dict):
+            return
+
+        deals = data.get("deals", [])
+        if not isinstance(deals, list):
+            return
+
+        for deal in deals:
+            if not isinstance(deal, dict):
+                continue
+
+            # Usar requestId para match com a ordem enviada
+            request_id = deal.get("requestId")
+            deal_id = deal.get("id")
+            profit = deal.get("profit", 0)
+            
+            # Tentar match por requestId primeiro, depois por deal_id
+            order_id = request_id if request_id else deal_id
+            
+            if order_id:
+                status = self._determine_order_status(profit)
+                self._update_order_status(order_id, status, profit, f"Trade fechado: {status.value} (profit: ${profit})")
+
+
+    async def _on_update_closed_deals(self, data):
+        """Handler para updateClosedDeals - contém lista de trades fechados"""
+        logger.info(f"[TRADING API] Evento updateClosedDeals recebido: {type(data)}")
+        if not isinstance(data, list):
+            logger.warning(f"[TRADING API] updateClosedDeals data não é lista: {type(data)}")
+            return
+
+        logger.info(f"[TRADING API] updateClosedDeals contém {len(data)} trades")
+
+        # data é uma lista de trades fechados
+        for deal in data:
+            if not isinstance(deal, dict):
+                continue
+
+            order_id = deal.get("id")
+            profit = deal.get("profit", 0)
+            
+            if order_id:
+                status = self._determine_order_status(profit)
+                self._update_order_status(order_id, status, profit, f"Trade fechado: {status.value} (profit: ${profit})")
 
 
     async def _on_json_data(self, data):
@@ -200,7 +248,8 @@ class TradingAPI:
 
     def _validate_order_parameters(self, asset: str, amount: float, direction: OrderDirection, duration: int):
         """Validar parâmetros da ordem"""
-        if asset not in ASSETS:
+        # Aceitar ativos com prefixo # (ações) ou ativos forex da lista ASSETS
+        if not asset.startswith("#") and asset not in ASSETS:
             raise ValidationError(f"Ativo inválido: {asset}")
 
         if amount < API_LIMITS["min_order_amount"] or amount > API_LIMITS["max_order_amount"]:

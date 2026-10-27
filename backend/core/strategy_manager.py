@@ -23,6 +23,7 @@ class StrategyManager:
         self.signal_queue: List[Dict] = []  # sinais globais
         self.monitor_api = None  # será injetado
         self.user_connection_manager = None  # será injetado
+        self.trade_executor = None  # será injetado
         self._running = False
         self.monitored_assets: Set[str] = set()  # ativos sendo monitorados atualmente
         from core.logger import LoggerConfig
@@ -35,6 +36,10 @@ class StrategyManager:
     def set_user_connection_manager(self, user_connection_manager):
         """Injetar referência ao UserConnectionManager"""
         self.user_connection_manager = user_connection_manager
+
+    def set_trade_executor(self, trade_executor):
+        """Injetar referência ao TradeExecutor"""
+        self.trade_executor = trade_executor
 
     async def start(self):
         """Iniciar monitoramento de ticks"""
@@ -57,6 +62,9 @@ class StrategyManager:
         if not asset:
             return
 
+        # Obter payout do tick
+        payout = tick.get("payout", 0)
+
         # Atualizar rastreamento de ativos monitorados
         current_monitored = self.get_monitored_assets()
         if current_monitored != self.monitored_assets:
@@ -74,6 +82,9 @@ class StrategyManager:
         # Analisar ativo globalmente (sempre analisa todos os ativos monitorados)
         signal = await self.analyze_asset(asset)
         if signal and signal.get("signal") != "none":
+            # Adicionar payout ao sinal
+            signal["payout"] = payout
+            
             # Adicionar sinal à fila global
             self.signal_queue.append(signal)
             # Manter apenas últimos 50 sinais
@@ -88,6 +99,10 @@ class StrategyManager:
                 f"Timestamp: {signal.get('timestamp')} | "
                 f"Parâmetros: {signal.get('parameters', {})}"
             )
+
+            # Notificar TradeExecutor para processar o sinal
+            if self.trade_executor:
+                asyncio.create_task(self.trade_executor.process_signal(signal))
 
     def _update_tick_cache(self, asset: str, tick: Dict):
         """Atualizar cache de ticks para um ativo"""
