@@ -18,12 +18,11 @@ export default function MainLayout() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+    <div className="min-h-screen flex bg-light-50 dark:bg-dark-900">
+      <aside className="w-64 bg-white dark:bg-dark-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">OpenOB</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Trading Algorítmico</p>
+          <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">OpenOB</h1>
+          <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">Trading Algorítmico</p>
         </div>
 
         <nav className="flex-1 p-4">
@@ -37,12 +36,12 @@ export default function MainLayout() {
                     to={item.path}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
-                        ? 'bg-blue-600 text-white dark:bg-blue-700'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-primary-600 text-white dark:bg-primary-700'
+                        : 'text-secondary-600 dark:text-secondary-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium text-sm">{item.label}</span>
                   </Link>
                 </li>
               );
@@ -53,7 +52,7 @@ export default function MainLayout() {
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-secondary-600 dark:text-secondary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Sair</span>
@@ -61,7 +60,6 @@ export default function MainLayout() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>

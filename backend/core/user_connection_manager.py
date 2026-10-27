@@ -16,12 +16,11 @@ logger = get_logger(__name__)
 class UserConnectionManager:
     """Gerenciador de múltiplas conexões WebSocket por usuário"""
 
-    def __init__(self, user_repository, strategy_manager, trading_manager, autotrade_repository=None):
+    def __init__(self, user_repository, strategy_manager, autotrade_repository=None):
         self.connections: Dict[int, WebSocketManager] = {}  # conexões por user_id
         self.trading_apis: Dict[int, TradingAPI] = {}  # TradingAPI por usuário
         self.user_repository = user_repository
         self.strategy_manager = strategy_manager
-        self.trading_manager = trading_manager
         self.autotrade_repository = autotrade_repository
         self._running = False
         self._listen_task = None
@@ -104,8 +103,6 @@ class UserConnectionManager:
 
         # Configurar injeções de dependências
         self.strategy_manager.set_user_connection_manager(self)
-        self.trading_manager.set_user_connection_manager(self)
-        self.trading_manager.set_strategy_manager(self.strategy_manager)
 
         # Usar polling diretamente (LISTEN/NOTIFY requer configuração complexa)
         logger.info("Usando polling para monitoramento de usuários")
@@ -302,18 +299,12 @@ class UserConnectionManager:
             self._log_user_event(user_id, "balance_update", f"Data: {data}")
             await self.trading_manager.on_balance_update(user_id, data)
 
-        # Handler para trade result
-        async def on_trade_result(data):
-            self._log_user_event(user_id, "trade_result", f"Data: {data}")
-            await self.trading_manager.on_trade_result(user_id, data)
-
         # Handler para todos os eventos (logging detalhado)
         async def on_all_events(event: str, data):
             self._log_user_event(user_id, f"ws_event_{event}", f"Data: {data}")
 
         # Adicionar handlers
         trading_api.ws_manager.add_event_handler("balance", on_balance)
-        trading_api.ws_manager.add_event_handler("json_data", on_trade_result)
 
         # Interceptador global para logging (desativado temporariamente para testar handlers da TradingAPI)
         # original_emit = trading_api.ws_manager._emit_event
@@ -323,27 +314,7 @@ class UserConnectionManager:
         #     return await original_emit(event, data)
         # trading_api.ws_manager._emit_event = patched_emit
 
-    def send_order(self, user_id: int, order):
-        """Enviar ordem via TradingAPI do usuário"""
-        trading_api = self.trading_apis.get(user_id)
-        if not trading_api:
-            logger.warning(f"TradingAPI não encontrada para usuário {user_id}")
-            return
 
-        return trading_api.place_order(
-            asset=order.asset,
-            amount=order.amount,
-            direction=order.direction,
-            duration=order.duration
-        )
-
-    def on_trade_result(self, user_id: int, result: Dict):
-        """Encaminhar resultado de trade para TradingManager"""
-        asyncio.create_task(self.trading_manager.on_trade_result(user_id, result))
-
-    def on_balance_update(self, user_id: int, balance: Dict):
-        """Encaminhar atualização de saldo para TradingManager"""
-        asyncio.create_task(self.trading_manager.on_balance_update(user_id, balance))
 
     def get_user_status(self, user_id: int) -> Optional[Dict]:
         """Obter status da conexão do usuário"""

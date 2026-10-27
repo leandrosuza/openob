@@ -29,16 +29,16 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado Esquerdo - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary items-center justify-center p-12">
+      {/* Left - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-600 items-center justify-center p-12">
         <div className="max-w-md text-white">
           <div className="mb-8">
-            <h1 className="text-5xl font-bold mb-4">OpenOB</h1>
-            <p className="text-xl text-blue-100">Plataforma de Trading Algorítmico</p>
+            <h1 className="text-4xl font-bold mb-4">OpenOB</h1>
+            <p className="text-xl text-white/80">Plataforma de Trading Algorítmico</p>
           </div>
-          <div className="space-y-6 text-blue-100">
+          <div className="space-y-6 text-white/80">
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -49,7 +49,7 @@ export default function Login() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -60,7 +60,7 @@ export default function Login() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
@@ -74,8 +74,8 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Lado Direito - Formulário */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-light">
+      {/* Right - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-light-50 dark:bg-dark-900">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-dark mb-2">Bem-vindo de volta</h2>
@@ -83,7 +83,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm fade-in">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function Login() {
             <p className="text-sm text-secondary">
               Não tem uma conta?{' '}
               <a href="/register" className="text-primary hover:underline font-medium">
-              Cadastre-se
+                Cadastre-se
               </a>
             </p>
           </div>

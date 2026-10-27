@@ -30,16 +30,16 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado Esquerdo - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary items-center justify-center p-12">
+      {/* Left - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-600 items-center justify-center p-12">
         <div className="max-w-md text-white">
           <div className="mb-8">
-            <h1 className="text-5xl font-bold mb-4">OpenOB</h1>
-            <p className="text-xl text-blue-100">Comece sua jornada de trading</p>
+            <h1 className="text-4xl font-bold mb-4">OpenOB</h1>
+            <p className="text-xl text-white/80">Comece sua jornada de trading</p>
           </div>
-          <div className="space-y-6 text-blue-100">
+          <div className="space-y-6 text-white/80">
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -50,7 +50,7 @@ export default function Register() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
@@ -61,7 +61,7 @@ export default function Register() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
@@ -75,8 +75,8 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Lado Direito - Formulário */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-light">
+      {/* Right - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-light-50 dark:bg-dark-900">
         <div className="w-full max-w-md">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-dark mb-2">Crie sua conta</h2>
@@ -84,7 +84,7 @@ export default function Register() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm fade-in">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
           )}
