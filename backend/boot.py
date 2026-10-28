@@ -187,7 +187,6 @@ async def lifespan(app: FastAPI):
 
     # Parar managers
     await strategy_manager.stop()
-    await trading_manager.stop()
 
     logger.info("API HTTP encerrada...")
 

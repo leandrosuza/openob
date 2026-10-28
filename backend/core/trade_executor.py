@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import math
 import time
 from typing import Dict, Any, Optional
 from datetime import datetime
@@ -236,21 +237,19 @@ class TradeExecutor:
             asset = signal.get("asset")
             direction = signal.get("signal").upper()
             amount = config.get("amount")
-            duration = signal.get("duration", 5)
             
-            # Calcular expiração
-            expiration = await self._calculate_expiration(duration)
+            # Calcular duração alinhada para expiração em múltiplos de 300s
+            duration = await self._calculate_duration_to_aligned_expiration(min_duration=5)
             
             if Settings.LOG_LEVEL.upper() == "DEBUG":
                 logger.info(f"[TRADE EXECUTOR] Executando trade para usuário {user_id}:")
                 logger.info(f"[TRADE EXECUTOR]   - Ativo: {asset}")
                 logger.info(f"[TRADE EXECUTOR]   - Direção: {direction}")
                 logger.info(f"[TRADE EXECUTOR]   - Amount: ${amount}")
-                logger.info(f"[TRADE EXECUTOR]   - Duração: {duration}s")
-                logger.info(f"[TRADE EXECUTOR]   - Expiração: {expiration}")
+                logger.info(f"[TRADE EXECUTOR]   - Duração calculada: {duration}s (alinhada)")
 
             # Enviar ordem via WebSocket
-            order_result = await self._send_order(user_id, asset, direction, amount, expiration)
+            order_result = await self._send_order(user_id, asset, direction, amount, duration)
             
             if not order_result.get("success"):
                 logger.error(f"[TRADE EXECUTOR] Falha ao enviar ordem: {order_result.get('error')}")
@@ -266,7 +265,6 @@ class TradeExecutor:
                 "direction": direction,
                 "amount": amount,
                 "duration": duration,
-                "expiration": expiration,
                 "order_id": order_id,
                 "start_time": time.time(),
                 "status": "pending"
@@ -280,13 +278,28 @@ class TradeExecutor:
             if user_id in self.active_trades:
                 del self.active_trades[user_id]
 
-    async def _calculate_expiration(self, duration: int) -> int:
-        """Calcula timestamp de expiração"""
-        current_time = int(time.time())
-        expiration = current_time + duration
-        return expiration
+    async def _calculate_duration_to_aligned_expiration(self, min_duration: int = 5) -> int:
+        """Calcula a duração necessária para que a expiração caia no próximo múltiplo de 300 segundos
 
-    async def _send_order(self, user_id: int, asset: str, direction: str, amount: float, expiration: int) -> Dict[str, Any]:
+        A PocketOption exige expirações em tempos alinhados (:00, :05, :10, :15, :20 do relógio)
+        Este método calcula quantos segundos faltam até o próximo alinhamento de 300s
+        """
+        current_time = int(time.time())
+        
+        # Calcular o próximo múltiplo de 300 segundos (5 minutos)
+        next_aligned = math.ceil(current_time / 300) * 300
+        
+        # Calcular a duração necessária para chegar até esse alinhamento
+        duration = next_aligned - current_time
+        
+        # Garantir duração mínima (se já passou do alinhamento, ir para o próximo)
+        if duration < min_duration:
+            next_aligned = math.ceil((current_time + min_duration) / 300) * 300
+            duration = next_aligned - current_time
+        
+        return duration
+
+    async def _send_order(self, user_id: int, asset: str, direction: str, amount: float, duration: int) -> Dict[str, Any]:
         """Envia ordem via WebSocket"""
         try:
             if not self.user_connection_manager:
@@ -307,12 +320,12 @@ class TradeExecutor:
             # Converter direction string para enum
             direction_enum = OrderDirection.CALL if direction.upper() == "CALL" else OrderDirection.PUT
 
-            # Enviar ordem usando TradingAPI.place_order
+            # Enviar ordem usando TradingAPI.place_order com duração alinhada
             result = await trading_api.place_order(
                 asset=asset,
                 amount=amount,
                 direction=direction_enum,
-                duration=5  # 5 segundos
+                duration=duration  # Duração alinhada para expiração em múltiplos de 300s
             )
 
             if result and result.status:
