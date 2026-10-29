@@ -31,13 +31,16 @@ class TradeExecutor:
     def __init__(self, user_connection_manager, strategy_manager):
         self.user_connection_manager = user_connection_manager
         self.strategy_manager = strategy_manager
-        
+
         # Lock por usuário para evitar trades simultâneos
         self.user_locks: Dict[int, asyncio.Lock] = {}
-        
+
         # Estado de trades ativos por usuário
         self.active_trades: Dict[int, Dict[str, Any]] = {}
-        
+
+        # Estado Soros por usuário
+        self.soros_state: Dict[int, Dict[str, Any]] = {}
+
         # Timeout para ordens (1.5x o duration da estratégia)
         self.trade_timeout_multiplier = 1.5
 
@@ -94,6 +97,8 @@ class TradeExecutor:
                         "parameters": config.parameters,
                         "amount": config.amount,
                         "is_active": config.is_active,
+                        "soros_enabled": config.soros_enabled,
+                        "soros_target_amount": config.soros_target_amount,
                         "ssid_demo": ssid_demo,
                         "ssid_real": ssid_real
                     }
@@ -167,6 +172,12 @@ class TradeExecutor:
                 logger.warning(f"[TRADE EXECUTOR] Usuário {user_id} tem amount inválido: {amount}")
                 return False
 
+            # Verificar se Soros foi desabilitado - resetar estado
+            soros_enabled = config.get("soros_enabled", False)
+            if not soros_enabled and user_id in self.soros_state:
+                logger.info(f"[SOROS] Usuário {user_id} - Soros desabilitado, resetando estado")
+                del self.soros_state[user_id]
+
             if Settings.LOG_LEVEL.upper() == "DEBUG":
                 logger.info(f"[TRADE EXECUTOR] Configuração do usuário {user_id} validada")
 
@@ -236,21 +247,52 @@ class TradeExecutor:
         try:
             asset = signal.get("asset")
             direction = signal.get("signal").upper()
-            amount = config.get("amount")
-            
-            # Calcular duração alinhada para expiração em múltiplos de 300s
-            duration = await self._calculate_duration_to_aligned_expiration(min_duration=5)
-            
+            base_amount = config.get("amount")
+            soros_enabled = config.get("soros_enabled", False)
+            soros_target_amount = config.get("soros_target_amount", 0.0)
+
+            # Lógica Soros
+            amount = base_amount
+            if soros_enabled:
+                if user_id not in self.soros_state:
+                    # Inicializar estado Soros
+                    self.soros_state[user_id] = {
+                        "original_amount": base_amount,
+                        "current_amount": base_amount,
+                        "profit": 0.0,
+                        "active": True
+                    }
+                else:
+                    amount = self.soros_state[user_id]["current_amount"]
+                    logger.info(f"[SOROS] Usuário {user_id} - Amount ajustado: ${amount} (original: ${base_amount})")
+
+            # Usar duração do sinal se disponível, senão calcular
+            signal_duration = signal.get("duration")
+            if signal_duration and signal_duration > 0:
+                duration = signal_duration
+                logger.info(f"[TRADE EXECUTOR] Usando duração do sinal: {duration}s")
+            else:
+                # Calcular duração alinhada baseada na estratégia
+                strategy_name = config.get("strategy_name", "")
+                if strategy_name == "scalping5s":
+                    duration = await self._calculate_duration_to_aligned_expiration(min_duration=5, alignment_seconds=5)
+                else:
+                    duration = await self._calculate_duration_to_aligned_expiration(min_duration=5, alignment_seconds=300)
+
             if Settings.LOG_LEVEL.upper() == "DEBUG":
                 logger.info(f"[TRADE EXECUTOR] Executando trade para usuário {user_id}:")
                 logger.info(f"[TRADE EXECUTOR]   - Ativo: {asset}")
                 logger.info(f"[TRADE EXECUTOR]   - Direção: {direction}")
                 logger.info(f"[TRADE EXECUTOR]   - Amount: ${amount}")
                 logger.info(f"[TRADE EXECUTOR]   - Duração calculada: {duration}s (alinhada)")
+                if soros_enabled:
+                    logger.info(f"[SOROS]   - Soros enabled: True")
+                    logger.info(f"[SOROS]   - Target amount: ${soros_target_amount}")
+                    logger.info(f"[SOROS]   - Current profit: ${self.soros_state.get(user_id, {}).get('profit', 0)}")
 
             # Enviar ordem via WebSocket
             order_result = await self._send_order(user_id, asset, direction, amount, duration)
-            
+
             if not order_result.get("success"):
                 logger.error(f"[TRADE EXECUTOR] Falha ao enviar ordem: {order_result.get('error')}")
                 if user_id in self.active_trades:
@@ -267,7 +309,9 @@ class TradeExecutor:
                 "duration": duration,
                 "order_id": order_id,
                 "start_time": time.time(),
-                "status": "pending"
+                "status": "pending",
+                "soros_enabled": soros_enabled,
+                "soros_target_amount": soros_target_amount
             }
 
             # Iniciar monitoramento do trade
@@ -278,25 +322,30 @@ class TradeExecutor:
             if user_id in self.active_trades:
                 del self.active_trades[user_id]
 
-    async def _calculate_duration_to_aligned_expiration(self, min_duration: int = 5) -> int:
-        """Calcula a duração necessária para que a expiração caia no próximo múltiplo de 300 segundos
+    async def _calculate_duration_to_aligned_expiration(self, min_duration: int = 5, alignment_seconds: int = 300) -> int:
+        """Calcula a duração necessária para que a expiração caia no próximo múltiplo de alignment_seconds
 
-        A PocketOption exige expirações em tempos alinhados (:00, :05, :10, :15, :20 do relógio)
-        Este método calcula quantos segundos faltam até o próximo alinhamento de 300s
+        A PocketOption exige expirações em tempos alinhados
+        - Para scalping5s: alinhamento de 5 segundos (:00, :05, :10, :15, etc.)
+        - Para outras estratégias: alinhamento de 300 segundos (5 minutos)
+        Este método calcula quantos segundos faltam até o próximo alinhamento
         """
         current_time = int(time.time())
-        
-        # Calcular o próximo múltiplo de 300 segundos (5 minutos)
-        next_aligned = math.ceil(current_time / 300) * 300
-        
+
+        # Calcular o próximo múltiplo de alignment_seconds
+        next_aligned = math.ceil(current_time / alignment_seconds) * alignment_seconds
+
         # Calcular a duração necessária para chegar até esse alinhamento
         duration = next_aligned - current_time
-        
+
         # Garantir duração mínima (se já passou do alinhamento, ir para o próximo)
         if duration < min_duration:
-            next_aligned = math.ceil((current_time + min_duration) / 300) * 300
+            next_aligned = math.ceil((current_time + min_duration) / alignment_seconds) * alignment_seconds
             duration = next_aligned - current_time
-        
+
+        if Settings.LOG_LEVEL.upper() == "DEBUG":
+            logger.info(f"[TRADE EXECUTOR] Alinhamento: {alignment_seconds}s | Duração calculada: {duration}s")
+
         return duration
 
     async def _send_order(self, user_id: int, asset: str, direction: str, amount: float, duration: int) -> Dict[str, Any]:
@@ -403,22 +452,53 @@ class TradeExecutor:
                 del self.active_trades[user_id]
 
     async def _log_trade_result(self, user_id: int, result: str, profit: Optional[float]):
-        """Loga resultado do trade"""
+        """Loga resultado do trade e processa lógica Soros"""
         try:
             # Não logar status "pending" - aguardar resultado real
             if result == "pending":
                 return
 
             timestamp = datetime.now().isoformat()
-            
+
+            # Obter informações do trade ativo
+            soros_enabled = False
+            soros_target_amount = 0.0
+            if user_id in self.active_trades:
+                soros_enabled = self.active_trades[user_id].get("soros_enabled", False)
+                soros_target_amount = self.active_trades[user_id].get("soros_target_amount", 0.0)
+
             # Log no trading_manager.log
             logger.info(f"[TRADE RESULT] Usuário: {user_id} | Resultado: {result} | Profit: {profit} | Timestamp: {timestamp}")
+
+            # Processar lógica Soros
+            if soros_enabled and user_id in self.soros_state:
+                soros_state = self.soros_state[user_id]
+
+                if result.lower() == "win" and profit is not None:
+                    # WIN: Adicionar lucro ao acumulador e aumentar amount
+                    soros_state["profit"] += profit
+                    soros_state["current_amount"] += profit
+
+                    logger.info(f"[SOROS] Usuário {user_id} - WIN! Profit acumulado: ${soros_state['profit']:.2f}")
+                    logger.info(f"[SOROS] Usuário {user_id} - Novo amount: ${soros_state['current_amount']:.2f}")
+
+                    # Verificar se atingiu o target
+                    if soros_target_amount > 0 and soros_state["profit"] >= soros_target_amount:
+                        logger.info(f"[SOROS] Usuário {user_id} - Target atingido! Voltando ao amount original")
+                        soros_state["current_amount"] = soros_state["original_amount"]
+                        soros_state["profit"] = 0.0
+
+                elif result.lower() == "loss":
+                    # LOSS: Voltar ao amount original e resetar acumulador
+                    logger.info(f"[SOROS] Usuário {user_id} - LOSS! Voltando ao amount original")
+                    soros_state["current_amount"] = soros_state["original_amount"]
+                    soros_state["profit"] = 0.0
 
             # Log no arquivo específico do usuário (em logs/trading/)
             # TODO: Obter email do usuário
             user_email = f"user_{user_id}"
             user_log_path = Path("logs/trading") / f"{user_email}.log"
-            
+
             with open(user_log_path, "a", encoding="utf-8") as f:
                 f.write(f"{timestamp} | Resultado: {result} | Profit: {profit}\n")
 

@@ -112,7 +112,9 @@ async def register(
         strategy_name="scalping5s",
         parameters='{"lookback_period": 50, "ma_period": 20, "rsi_period": 14, "rsi_oversold": 30, "rsi_overbought": 70}',
         amount=5.0,
-        is_active=False  # OFF por padrão
+        is_active=False,  # OFF por padrão
+        soros_enabled=False,
+        soros_target_amount=0.0
     )
     logger.info(f"Config de autotrade padrão criada para user {created_user.id} (is_active=False)")
 
@@ -230,7 +232,12 @@ async def get_me(current_user: User = Depends(get_current_user)):
         current_subscription_id=current_user.current_subscription_id,
         plan_expires_at=current_user.plan_expires_at,
         is_active=current_user.is_active,
-        balance=current_user.balance
+        balance=current_user.balance,
+        ssid_demo=current_user.ssid_demo,
+        ssid_real=current_user.ssid_real,
+        mode=current_user.mode,
+        is_connected=current_user.is_connected,
+        connection_status=current_user.connection_status
     )
 
 

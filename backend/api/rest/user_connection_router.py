@@ -1,13 +1,20 @@
 """Router para gerenciar conexões de usuários"""
 
-from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from fastapi import APIRouter, HTTPException, Depends, Body
+from typing import List, Optional
 from models.user import User
 from repositories.repository_factory import RepositoryFactory
 from api.rest.security import get_current_user
 from config.settings import Settings
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/users", tags=["User Connections"])
+
+
+class SSIDUpdateRequest(BaseModel):
+    """Modelo para atualização de SSID"""
+    ssid_demo: Optional[str] = None
+    ssid_real: Optional[str] = None
 
 
 @router.post("/{user_id}/connect")
@@ -78,6 +85,33 @@ async def update_user_mode(user_id: int, mode: str, current_user: User = Depends
     await user_repo.update(user)
 
     return {"message": "Modo atualizado", "user_id": user_id, "mode": mode}
+
+
+@router.put("/{user_id}/ssid")
+async def update_user_ssid(
+    user_id: int,
+    request: SSIDUpdateRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Atualizar SSID (demo e/ou real)"""
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+
+    config = Settings.to_dict()
+    user_repo = RepositoryFactory.create_user_repository(config)
+    user = await user_repo.get_by_id(user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    if request.ssid_demo is not None:
+        user.ssid_demo = request.ssid_demo if request.ssid_demo else None
+    if request.ssid_real is not None:
+        user.ssid_real = request.ssid_real if request.ssid_real else None
+
+    await user_repo.update(user)
+
+    return {"message": "SSID atualizado", "user_id": user_id}
 
 
 @router.put("/{user_id}/activate")

@@ -50,10 +50,18 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
                     parameters JSONB NOT NULL,
                     amount DECIMAL(10, 2) DEFAULT 5.0,
                     is_active BOOLEAN DEFAULT TRUE,
+                    soros_enabled BOOLEAN DEFAULT FALSE,
+                    soros_target_amount DECIMAL(10, 2) DEFAULT 0.0,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+            # Adicionar colunas se não existirem (para compatibilidade com banco existente)
+            try:
+                await conn.execute("ALTER TABLE autotrade_configs ADD COLUMN IF NOT EXISTS soros_enabled BOOLEAN DEFAULT FALSE")
+                await conn.execute("ALTER TABLE autotrade_configs ADD COLUMN IF NOT EXISTS soros_target_amount DECIMAL(10, 2) DEFAULT 0.0")
+            except Exception as e:
+                logger.info(f"Colunas Soros já existem ou erro ao adicionar: {e}")
             logger.info("Tabela autotrade_configs verificada/criada com sucesso")
             database_logger.info("Tabela autotrade_configs criada")
 
@@ -63,25 +71,25 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
-                """INSERT INTO autotrade_configs (user_id, strategy_name, parameters, amount, is_active)
-                VALUES ($1, $2, $3, $4, $5)
+                """INSERT INTO autotrade_configs (user_id, strategy_name, parameters, amount, is_active, soros_enabled, soros_target_amount)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *""",
                 config.user_id, config.strategy_name, json.dumps(config.parameters),
-                config.amount, config.is_active
+                config.amount, config.is_active, config.soros_enabled, config.soros_target_amount
             )
             database_logger.info(f"AutotradeConfig criado: id={row['id']}, user_id={config.user_id}")
             return self._config_from_row(row)
 
-    async def create_config(self, user_id: int, strategy_name: str, parameters: str, amount: float, is_active: bool) -> AutotradeConfig:
+    async def create_config(self, user_id: int, strategy_name: str, parameters: str, amount: float, is_active: bool, soros_enabled: bool = False, soros_target_amount: float = 0.0) -> AutotradeConfig:
         """Criar config com parâmetros individuais"""
         await self._initialize_db()
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
-                """INSERT INTO autotrade_configs (user_id, strategy_name, parameters, amount, is_active)
-                VALUES ($1, $2, $3, $4, $5)
+                """INSERT INTO autotrade_configs (user_id, strategy_name, parameters, amount, is_active, soros_enabled, soros_target_amount)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *""",
-                user_id, strategy_name, parameters, amount, is_active
+                user_id, strategy_name, parameters, amount, is_active, soros_enabled, soros_target_amount
             )
             database_logger.info(f"AutotradeConfig criado: id={row['id']}, user_id={user_id}, is_active={is_active}")
             return self._config_from_row(row)
@@ -101,10 +109,10 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
                 """UPDATE autotrade_configs SET strategy_name = $1, parameters = $2,
-                amount = $3, is_active = $4, updated_at = NOW()
-                WHERE id = $5 RETURNING *""",
+                amount = $3, is_active = $4, soros_enabled = $5, soros_target_amount = $6, updated_at = NOW()
+                WHERE id = $7 RETURNING *""",
                 config.strategy_name, json.dumps(config.parameters),
-                config.amount, config.is_active, config.id
+                config.amount, config.is_active, config.soros_enabled, config.soros_target_amount, config.id
             )
             database_logger.info(f"AutotradeConfig atualizado: id={config.id}")
             return self._config_from_row(row)
@@ -155,6 +163,15 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
         if is_active is None:
             is_active = True
 
+        # soros_enabled e soros_target_amount podem ser None para registros antigos
+        soros_enabled = row.get('soros_enabled', False)
+        if soros_enabled is None:
+            soros_enabled = False
+
+        soros_target_amount = row.get('soros_target_amount', 0.0)
+        if soros_target_amount is None:
+            soros_target_amount = 0.0
+
         return AutotradeConfig(
             id=row['id'],
             user_id=row['user_id'],
@@ -162,6 +179,8 @@ class PostgresAutotradeRepository(AutotradeRepositoryInterface):
             parameters=parameters,
             amount=float(row['amount']),
             is_active=is_active,
+            soros_enabled=soros_enabled,
+            soros_target_amount=float(soros_target_amount),
             created_at=row['created_at'],
             updated_at=row['updated_at']
         )

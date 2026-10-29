@@ -101,6 +101,8 @@ async def toggle_autotrade_config(user_id: int, current_user: User = Depends(get
         parameters=config.parameters,
         amount=config.amount,
         is_active=not config.is_active,
+        soros_enabled=config.soros_enabled,
+        soros_target_amount=config.soros_target_amount,
         created_at=config.created_at,
         updated_at=config.updated_at
     )

@@ -19,7 +19,7 @@ export default function Login() {
 
     try {
       await authService.login(formData);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao fazer login');
     } finally {
@@ -28,17 +28,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-50">
       {/* Left - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary-600 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
         <div className="max-w-md text-white">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-4">OpenOB</h1>
-            <p className="text-xl text-white/80">Plataforma de Trading Algorítmico</p>
+            <p className="text-xl text-blue-100">Plataforma de Trading Algorítmico</p>
           </div>
-          <div className="space-y-6 text-white/80">
+          <div className="space-y-6 text-blue-100">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -49,7 +49,7 @@ export default function Login() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -60,7 +60,7 @@ export default function Login() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
@@ -75,11 +75,11 @@ export default function Login() {
       </div>
 
       {/* Right - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-light-50 dark:bg-dark-900">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-dark mb-2">Bem-vindo de volta</h2>
-            <p className="text-secondary">Faça login para acessar sua conta</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Bem-vindo de volta</h2>
+            <p className="text-gray-600">Faça login para acessar sua conta</p>
           </div>
 
           {error && (
@@ -90,7 +90,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-dark mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                 Usuário
               </label>
               <input
@@ -106,7 +106,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-dark mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Senha
               </label>
               <input
@@ -131,9 +131,9 @@ export default function Login() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <a href="/register" className="text-primary hover:underline font-medium">
+              <a href="/register" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">
                 Cadastre-se
               </a>
             </p>

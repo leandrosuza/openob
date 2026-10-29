@@ -7,6 +7,11 @@ export interface User {
   plan_expires_at: string | null;
   is_active: boolean;
   balance: number;
+  ssid_demo: string | null;
+  ssid_real: string | null;
+  mode: 'demo' | 'real';
+  is_connected: boolean;
+  connection_status: string | null;
 }
 
 export interface LoginRequest {
@@ -28,4 +33,17 @@ export interface AuthResponse {
 
 export interface ErrorResponse {
   detail: string;
+}
+
+export interface AutotradeConfig {
+  id?: number;
+  user_id: number;
+  strategy_name: string;
+  parameters: Record<string, any>;
+  amount: number;
+  is_active: boolean;
+  soros_enabled: boolean;
+  soros_target_amount: number;
+  created_at?: string;
+  updated_at?: string;
 }

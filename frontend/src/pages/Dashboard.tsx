@@ -1,111 +1,298 @@
 import { useEffect, useState } from 'react';
 import { authService } from '../services/auth';
+import { autotradeService } from '../services/autotrade';
+import { userService } from '../services/user';
 import type { User } from '../types/auth';
+import type { AutotradeConfig } from '../types/auth';
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [autotradeConfig, setAutotradeConfig] = useState<AutotradeConfig | null>(null);
+  const [strategies, setStrategies] = useState<any[]>([]);
+  const [showSSID, setShowSSID] = useState(false);
+
+  // Form states
+  const [ssidDemo, setSsidDemo] = useState('');
+  const [ssidReal, setSsidReal] = useState('');
+  const [mode, setMode] = useState<'demo' | 'real'>('demo');
+  const [strategyName, setStrategyName] = useState('');
+  const [amount, setAmount] = useState(5);
+  const [autotradeActive, setAutotradeActive] = useState(false);
+  const [sorosEnabled, setSorosEnabled] = useState(false);
+  const [sorosTargetAmount, setSorosTargetAmount] = useState(0);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
         const userData = await authService.getCurrentUser();
         setUser(userData);
+
+        // Preencher campos SSID e modo
+        setSsidDemo(userData.ssid_demo || '');
+        setSsidReal(userData.ssid_real || '');
+        setMode(userData.mode || 'demo');
+
+        // Carregar estratégias
+        const strategiesData = await autotradeService.getStrategies();
+        setStrategies(strategiesData);
+
+        // Carregar config de autotrade se existir
+        try {
+          const config = await autotradeService.getConfig(userData.id);
+          setAutotradeConfig(config);
+          setStrategyName(config.strategy_name);
+          setAmount(config.amount);
+          setAutotradeActive(config.is_active);
+          setSorosEnabled(config.soros_enabled);
+          setSorosTargetAmount(config.soros_target_amount);
+        } catch (err) {
+          // Config não existe ainda - usar valores padrão
+          setStrategyName('');
+          setAmount(5);
+          setAutotradeActive(false);
+          setSorosEnabled(false);
+          setSorosTargetAmount(0);
+        }
       } catch (err) {
-        console.error('Erro ao carregar usuário:', err);
+        console.error('Erro ao carregar dados:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchData();
   }, []);
 
+  const handleSaveSSID = async () => {
+    try {
+      await userService.updateSSID(user!.id, ssidDemo || null, ssidReal || null);
+      await userService.updateMode(user!.id, mode);
+
+      // Recarregar dados do usuário
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+      setSsidDemo(userData.ssid_demo || '');
+      setSsidReal(userData.ssid_real || '');
+      setMode(userData.mode || 'demo');
+
+      alert('SSID atualizado com sucesso!');
+    } catch (err: any) {
+      alert('Erro ao atualizar SSID: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  const handleSaveAutotrade = async () => {
+    try {
+      if (autotradeConfig) {
+        await autotradeService.updateConfig(user!.id, {
+          ...autotradeConfig,
+          strategy_name: strategyName,
+          amount,
+          is_active: autotradeActive,
+          soros_enabled: sorosEnabled,
+          soros_target_amount: sorosTargetAmount
+        });
+      } else {
+        await autotradeService.createConfig({
+          user_id: user!.id,
+          strategy_name: strategyName,
+          parameters: {},
+          amount,
+          is_active: autotradeActive,
+          soros_enabled: sorosEnabled,
+          soros_target_amount: sorosTargetAmount
+        });
+      }
+      alert('Configuração de autotrade salva!');
+    } catch (err: any) {
+      alert('Erro ao salvar autotrade: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  const handleToggleAutotrade = async () => {
+    try {
+      const updated = await autotradeService.toggleConfig(user!.id);
+      setAutotradeConfig(updated);
+      setAutotradeActive(updated.is_active);
+    } catch (err: any) {
+      alert('Erro ao alternar autotrade: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
   if (loading) {
-    return <div className="p-8">Carregando...</div>;
+    return <div className="text-gray-600">Carregando...</div>;
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dark mb-2">Dashboard</h1>
-        <p className="text-secondary">Visão geral da sua conta</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-dark">Saldo</h3>
-            <span className="text-xl">$</span>
-          </div>
-          <p className="text-3xl font-bold text-primary">${user?.balance?.toFixed(2) || '0.00'}</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-dark">Plano</h3>
-          </div>
-          <p className="text-xl font-medium text-secondary">{user?.plan_id || 'Free'}</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-dark">Status</h3>
-          </div>
-          <span className={`badge ${user?.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-            {user?.is_active ? 'Ativo' : 'Inativo'}
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="text-xl font-bold text-dark mb-4">Informações da Conta</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-secondary">Usuário</span>
-              <span className="font-medium text-dark">{user?.username}</span>
+    <div className="space-y-8">
+      {/* Seção de Informações do Usuário */}
+      <section>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Minha Conta</h2>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="divide-y divide-gray-200">
+            <div className="flex justify-between items-center px-6 py-4">
+              <span className="text-sm text-gray-600">Usuário</span>
+              <span className="text-sm font-medium text-gray-900">{user?.username}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-secondary">Email</span>
-              <span className="font-medium text-dark">{user?.email}</span>
+            <div className="flex justify-between items-center px-6 py-4">
+              <span className="text-sm text-gray-600">Email</span>
+              <span className="text-sm font-medium text-gray-900">{user?.email}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-secondary">Plano</span>
-              <span className="font-medium text-dark">{user?.plan_id || 'Free'}</span>
+            <div className="flex justify-between items-center px-6 py-4">
+              <span className="text-sm text-gray-600">Plano</span>
+              <span className="text-sm font-medium text-gray-900">{user?.plan_id || 'Free'}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-secondary">Status</span>
-              <span className={`badge ${user?.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            <div className="flex justify-between items-center px-6 py-4">
+              <span className="text-sm text-gray-600">Status</span>
+              <span className={`text-sm font-medium ${user?.is_active ? 'text-green-600' : 'text-red-600'}`}>
                 {user?.is_active ? 'Ativo' : 'Inativo'}
               </span>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="card">
-          <h2 className="text-xl font-bold text-dark mb-4">Ações Rápidas</h2>
-          <div className="space-y-3">
-            <button className="btn-primary w-full flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Configurar Autotrade
-            </button>
-            <button className="btn-secondary w-full flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              Ver Estratégias
-            </button>
-            <button className="btn-secondary w-full flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c0 .37-.032.74-.103 1.105a1.724 1.724 0 001.066 2.573c1.465-1.543 2.37-2.37 2.37-2.37a1.724 1.724 0 002.573-1.066c.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.572c0-.37.032-.74.103-1.105a1.724 1.724 0 00-1.065-2.573c-1.465 1.543-2.37 2.37-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.065z" />
-              </svg>
-              Configurações
+      {/* Seção de SSID */}
+      <section>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Configuração de Trading</h2>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">SSID Demo</label>
+              <input
+                type={showSSID ? 'text' : 'password'}
+                value={ssidDemo}
+                onChange={(e) => setSsidDemo(e.target.value)}
+                className="input-field"
+                placeholder="SSID da conta demo"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">SSID Real</label>
+              <input
+                type={showSSID ? 'text' : 'password'}
+                value={ssidReal}
+                onChange={(e) => setSsidReal(e.target.value)}
+                className="input-field"
+                placeholder="SSID da conta real"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showSSID"
+                checked={showSSID}
+                onChange={(e) => setShowSSID(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="showSSID" className="text-sm text-gray-600">Mostrar SSID</label>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">Modo de Trading</label>
+              <select
+                value={mode}
+                onChange={(e) => setMode(e.target.value as 'demo' | 'real')}
+                className="input-field"
+              >
+                <option value="demo">Demo</option>
+                <option value="real">Real</option>
+              </select>
+            </div>
+            <button
+              onClick={handleSaveSSID}
+              className="btn-primary"
+            >
+              Salvar Configuração
             </button>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Seção de Autotrade */}
+      <section>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Autotrade</h2>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">Estratégia</label>
+              <select
+                value={strategyName}
+                onChange={(e) => setStrategyName(e.target.value)}
+                className="input-field"
+              >
+                <option value="">Selecione uma estratégia</option>
+                {strategies.map((strategy: any) => (
+                  <option key={strategy.name} value={strategy.name}>{strategy.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">Valor por Trade ($)</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
+                className="input-field"
+                min="1"
+                step="0.5"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="sorosEnabled"
+                checked={sorosEnabled}
+                onChange={(e) => setSorosEnabled(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="sorosEnabled" className="text-sm text-gray-600">Habilitar Soros</label>
+            </div>
+            {sorosEnabled && (
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">Valor Alvo Soros ($)</label>
+                <input
+                  type="number"
+                  value={sorosTargetAmount}
+                  onChange={(e) => setSorosTargetAmount(parseFloat(e.target.value))}
+                  className="input-field"
+                  min="0"
+                  step="0.5"
+                  placeholder="0 = lucro contínuo"
+                />
+                <p className="text-xs text-gray-500 mt-1">Ao atingir este valor, volta ao valor original</p>
+              </div>
+            )}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleSaveAutotrade}
+                className="btn-primary"
+              >
+                Salvar Configuração
+              </button>
+              {autotradeConfig && (
+                <button
+                  onClick={handleToggleAutotrade}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    autotradeActive
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {autotradeActive ? 'Parar Autotrade' : 'Iniciar Autotrade'}
+                </button>
+              )}
+            </div>
+            {autotradeConfig && (
+              <div className="text-sm text-gray-600">
+                Status: <span className={autotradeActive ? 'text-green-600' : 'text-red-600'}>
+                  {autotradeActive ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

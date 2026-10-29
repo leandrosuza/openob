@@ -42,6 +42,11 @@ class UserResponse(BaseModel):
     plan_expires_at: Optional[datetime] = None
     is_active: bool
     balance: float
+    ssid_demo: Optional[str] = None
+    ssid_real: Optional[str] = None
+    mode: str = "demo"
+    is_connected: bool = False
+    connection_status: Optional[str] = None
 
     class Config:
         from_attributes = True
